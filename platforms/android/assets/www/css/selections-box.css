@@ -1,0 +1,79 @@
+.selections-box {
+
+}
+
+.selections-box .tiles-container{
+  /*background-color: rgba(50,50,50,0.2);*/
+  display: flex;
+  flex-direction: row;
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+  padding: 10px;
+  padding-left: 30px;
+  padding-right: 30px;
+  overflow: hidden;
+}
+
+.selections-box .tiles-container .tile {
+  flex: 1;
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+  background-color: rgba(110,50,50,1);
+  margin: 2px;
+  border: 2px solid rgba(0,0,0,1);
+  display: flex;
+  justify-content: center; /* align horizontal */
+  align-items: center; /* align vertical */
+  font-size: 5.9vw;
+  cursor: default;
+}
+.selections-box .tiles-container .tile.odd {
+  margin-bottom: 20px;
+}
+.selections-box .tiles-container .tile.even {
+  margin-top: 20px;
+}
+
+
+.selections-box .options-container{
+  display: flex;
+  flex-direction: row;
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+  padding: 10px;
+  padding-left: 30px;
+  padding-right: 30px;
+  overflow: hidden;
+}
+.selections-box .options-container .remove-btn{
+  flex: 1;
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+  background-color: rgba(110,50,50,1);
+  margin: 2px;
+  border: 2px solid rgba(0,0,0,1);
+  display: flex;
+  justify-content: center; /* align horizontal */
+  align-items: center; /* align vertical */
+  font-size: 5.9vw;
+  cursor: default;
+}
+.selections-box .options-container .spacer{
+  flex: 9;
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+  background-color: rgba(110,50,50,0);
+  margin: 2px;
+  border: 2px solid rgba(0,0,0,0);
+  color: rgba(0,0,0,0);
+  display: flex;
+  justify-content: center; /* align horizontal */
+  align-items: center; /* align vertical */
+  font-size: 5.9vw;
+  cursor: default;
+}

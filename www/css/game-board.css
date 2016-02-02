@@ -1,0 +1,67 @@
+.game-board {
+  /*background-color: rgba(50,50,50,0.2);*/
+  display: flex;
+  flex-direction: column;
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+  padding: 10px;
+  overflow: hidden;
+}
+.game-board .board-row {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: row;
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+}
+.game-board .board-row .block {
+  background-color: rgba(110,50,50,1);
+  /*flex-grow: 1;*/
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+  border: 2px solid rgba(0,0,0,1);
+  padding: 2px;
+}
+.game-board .board-row .block .block-row {
+  /*flex-grow: 1;*/
+  flex: 1;
+  background-color: rgba(110,50,50,1);
+  display: flex;
+  flex-direction: row;
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+}
+.game-board .board-row .block .block-row .tile {
+  /*flex-grow: 1;*/
+  flex: 1;
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+  margin: 2px;
+  border: 2px solid rgba(0,0,0,1);
+  display: flex;
+  justify-content: center; /* align horizontal */
+  align-items: center; /* align vertical */
+  font-size: 7vw;
+  cursor: default;
+}
+
+.game-board .board-row .block .block-row .tile.selected {
+  border: 2px solid rgba(0,255,0,1);
+}
+
+.game-board .board-row .block .block-row .tile.empty-value    {color: rgba(0,0,0,0);}
+.game-board .board-row .block .block-row .tile.original-value {color: rgba(0,0,80,1);}
+.game-board .board-row .block .block-row .tile.regular-value  {color: rgba(0,0,0,1);}
+
+.game-board .board-row .block .block-row .tile.style-state-basic             {}
+.game-board .board-row .block .block-row .tile.style-state-same-value        {border: 2px solid rgba(0,255,200,1);}
+.game-board .board-row .block .block-row .tile.style-state-conflicting-value {border: 2px solid rgba(255,0,0,1);}
+.game-board .board-row .block .block-row .tile.style-state-conflicting-value.selected {border: 2px solid rgba(255,150,150,1);}
