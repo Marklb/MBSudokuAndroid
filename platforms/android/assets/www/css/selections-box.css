@@ -35,7 +35,9 @@
 .selections-box .tiles-container .tile.even {
   margin-top: 20px;
 }
-
+.selections-box .tiles-container .tile.done {
+  opacity: 0;
+}
 
 .selections-box .options-container{
   display: flex;

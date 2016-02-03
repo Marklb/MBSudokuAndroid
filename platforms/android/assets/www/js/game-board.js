@@ -4,6 +4,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+var QQWING = require('./libs/qqwing-1.3.4/qqwing-1.3.4.js');
 var GameBoardTile = require('./game-board-tile.js');
 
 module.exports = function () {
@@ -13,6 +14,13 @@ module.exports = function () {
     _classCallCheck(this, GameBoard);
 
     console.log("Creating GameBoard");
+
+    this.qqwing = new QQWING();
+    // this.qqwing.generatePuzzle();
+    // this.qqwing.setPrintStyle(QQWING.PrintStyle.ONE_LINE);
+    // this.qqwing.printSolution();
+    // let t = this.qqwing.getSolutionString();
+    // console.log(t);
 
     this.containerElem = document.createElement('div');
     this.containerElem.classList.add('game-board');
@@ -361,8 +369,8 @@ module.exports = function () {
       var storedGameBoard = JSON.parse(window.localStorage.getItem("gameboard"));
       if (storedGameBoard) {
         for (var i = 0; i < storedGameBoard.length; i++) {
-          console.log("Setting:");
-          console.log(storedGameBoard[i]);
+          // console.log("Setting:");
+          // console.log(storedGameBoard[i]);
           this.tiles[storedGameBoard[i].x][storedGameBoard[i].y].setValue(storedGameBoard[i].value, storedGameBoard[i].isOriginal);
         }
       } else {
@@ -379,32 +387,6 @@ module.exports = function () {
   }, {
     key: 'resetGameTiles',
     value: function resetGameTiles() {
-      // this.tiles[0][3].setValue(7, true);
-      // this.tiles[0][6].setValue(8, true);
-      // this.tiles[0][7].setValue(4, true);
-      // this.tiles[2][2].setValue(8, true);
-      // this.tiles[2][4].setValue(5, true);
-      // this.tiles[3][1].setValue(2, true);
-      // this.tiles[3][2].setValue(6, true);
-      // this.tiles[3][4].setValue(4, true);
-      // this.tiles[3][8].setValue(8, true);
-      // this.tiles[4][1].setValue(3, true);
-      // this.tiles[4][2].setValue(5, true);
-      // this.tiles[4][7].setValue(1, true);
-      // this.tiles[5][1].setValue(4, true);
-      // this.tiles[5][4].setValue(3, true);
-      // this.tiles[5][5].setValue(1, true);
-      // this.tiles[5][6].setValue(6, true);
-      // this.tiles[6][2].setValue(4, true);
-      // this.tiles[7][3].setValue(6, true);
-      // this.tiles[7][5].setValue(2, true);
-      // this.tiles[7][6].setValue(4, true);
-      // this.tiles[8][1].setValue(7, true);
-      // this.tiles[8][3].setValue(8, true);
-      // this.tiles[8][6].setValue(9, true);
-      // this.tiles[8][7].setValue(2, true);
-      // this.tiles[8][8].setValue(6, true);
-
       // let layout = [
       //   //0   1   2   3   4   5   6   7   8
       //   [N, N, N, N, N, N, N, N, N], // 0
@@ -418,71 +400,100 @@ module.exports = function () {
       //   [N, N, N, N, N, N, N, N, N]  // 8
       // ];
 
-      var N = -1;
-      var layout0 = [
-      //0   1   2   3   4   5   6   7   8
-      [N, N, N, 7, N, N, 8, 4, N], // 0
-      [N, N, N, N, N, N, N, N, N], // 1
-      [N, N, 8, N, 5, N, N, N, N], // 2
-      [N, 2, 6, N, 4, N, N, N, 8], // 3
-      [N, 3, 5, N, N, N, N, 1, N], // 4
-      [N, 4, N, N, 3, 1, 6, N, N], // 5
-      [N, N, 4, N, N, N, N, N, N], // 6
-      [N, N, N, 6, N, 2, 4, N, N], // 7
-      [N, 7, N, 8, N, N, 9, 2, 6] // 8
-      ];
+      // let N = -1;
+      // let layout0 = [
+      //   //0   1   2   3   4   5   6   7   8
+      //   [N, N, N, 7, N, N, 8, 4, N], // 0
+      //   [N, N, N, N, N, N, N, N, N], // 1
+      //   [N, N, 8, N, 5, N, N, N, N], // 2
+      //   [N, 2, 6, N, 4, N, N, N, 8], // 3
+      //   [N, 3, 5, N, N, N, N, 1, N], // 4
+      //   [N, 4, N, N, 3, 1, 6, N, N], // 5
+      //   [N, N, 4, N, N, N, N, N, N], // 6
+      //   [N, N, N, 6, N, 2, 4, N, N], // 7
+      //   [N, 7, N, 8, N, N, 9, 2, 6]  // 8
+      // ];
+      //
+      // let layout1 = [
+      //   //0   1   2   3   4   5   6   7   8
+      //   [N, N, 3, 1, N, N, 2, N, N], // 0
+      //   [N, N, N, 3, N, 4, 9, N, N], // 1
+      //   [N, N, N, N, N, N, N, N, N], // 2
+      //   [N, N, 9, N, N, 8, 6, 2, 4], // 3
+      //   [N, N, N, N, 3, N, 5, N, N], // 4
+      //   [N, 1, N, N, N, 6, N, N, 8], // 5
+      //   [9, N, N, 7, 4, N, N, 1, N], // 6
+      //   [7, 5, N, N, N, N, N, N, N], // 7
+      //   [1, 2, N, N, N, N, 4, N, 5]  // 8
+      // ];
+      //
+      // let layout2 = [
+      //   //0  1  2  3  4  5  6  7  8
+      //    [N, N, N, 2, N, N, 5, N, N], // 0
+      //    [N, 6, N, N, 5, N, 4, 9, N], // 1
+      //    [N, 4, 5, N, N, 1, N, N, 7], // 2
+      //    [N, N, 7, N, N, N, N, 6, N], // 3
+      //    [N, 3, N, N, N, 4, N, N, 9], // 4
+      //    [1, N, N, N, N, N, 2, N, N], // 5
+      //    [N, N, N, 9, N, 5, 8, N, N], // 6
+      //    [N, N, N, 7, N, N, 6, 2, N], // 7
+      //    [7, N, N, N, N, N, N, N, N]  // 8
+      // ];
+      //
+      // let layout3 = [
+      //   // 0  1  2  3  4  5  6  7  8
+      //     [N, N, N, N, N, 5, 1, N, N], // 0
+      //     [N, 8, N, N, N, N, N, N, 4], // 1
+      //     [6, N, 2, 8, N, N, N, N, N], // 2
+      //     [N, N, N, N, N, N, N, N, 6], // 3
+      //     [3, N, N, 6, N, N, N, N, 9], // 4
+      //     [5, N, N, N, 3, 7, N, 4, N], // 5
+      //     [N, 3, N, 2, 6, N, 8, N, 5], // 6
+      //     [N, N, N, N, 7, N, N, N, N], // 7
+      //     [1, 7, N, 5, N, N, N, N, N]  // 8
+      // ];
+      //
+      // let layouts = [layout0, layout1, layout2, layout3];
 
-      var layout1 = [
-      //0   1   2   3   4   5   6   7   8
-      [N, N, 3, 1, N, N, 2, N, N], // 0
-      [N, N, N, 3, N, 4, 9, N, N], // 1
-      [N, N, N, N, N, N, N, N, N], // 2
-      [N, N, 9, N, N, 8, 6, 2, 4], // 3
-      [N, N, N, N, 3, N, 5, N, N], // 4
-      [N, 1, N, N, N, 6, N, N, 8], // 5
-      [9, N, N, 7, 4, N, N, 1, N], // 6
-      [7, 5, N, N, N, N, N, N, N], // 7
-      [1, 2, N, N, N, N, 4, N, 5] // 8
-      ];
+      // let ind = Math.floor((Math.random() * 4));
+      // console.log("Ind: " + ind);
+      // let layout = layouts[ind];
+      // for(let i = 0; i < 9; i++){
+      //   for(let j = 0; j < 9; j++){
+      //     if(layout[i][j] == -1){
+      //       this.tiles[i][j].setValue(layout[i][j], false);
+      //     }else{
+      //       this.tiles[i][j].setValue(layout[i][j], true);
+      //     }
+      //   }
+      // }
 
-      var layout2 = [
-      //0  1  2  3  4  5  6  7  8
-      [N, N, N, 2, N, N, 5, N, N], // 0
-      [N, 6, N, N, 5, N, 4, 9, N], // 1
-      [N, 4, 5, N, N, 1, N, N, 7], // 2
-      [N, N, 7, N, N, N, N, 6, N], // 3
-      [N, 3, N, N, N, 4, N, N, 9], // 4
-      [1, N, N, N, N, N, 2, N, N], // 5
-      [N, N, N, 9, N, 5, 8, N, N], // 6
-      [N, N, N, 7, N, N, 6, 2, N], // 7
-      [7, N, N, N, N, N, N, N, N] // 8
-      ];
-
-      var layout3 = [
-      // 0  1  2  3  4  5  6  7  8
-      [N, N, N, N, N, 5, 1, N, N], // 0
-      [N, 8, N, N, N, N, N, N, 4], // 1
-      [6, N, 2, 8, N, N, N, N, N], // 2
-      [N, N, N, N, N, N, N, N, 6], // 3
-      [3, N, N, 6, N, N, N, N, 9], // 4
-      [5, N, N, N, 3, 7, N, 4, N], // 5
-      [N, 3, N, 2, 6, N, 8, N, 5], // 6
-      [N, N, N, N, 7, N, N, N, N], // 7
-      [1, 7, N, 5, N, N, N, N, N] // 8
-      ];
-
-      var layouts = [layout0, layout1, layout2, layout3];
-
-      var ind = Math.floor(Math.random() * 4);
-      console.log("Ind: " + ind);
-      var layout = layouts[ind];
+      this.qqwing.generatePuzzle();
+      this.qqwing.setPrintStyle(QQWING.PrintStyle.ONE_LINE);
+      var t = this.qqwing.getSolutionString();
+      console.log(t);
+      var toStr = {
+        '1': 1,
+        '2': 2,
+        '3': 3,
+        '4': 4,
+        '5': 5,
+        '6': 6,
+        '7': 7,
+        '8': 8,
+        '9': 9
+      };
+      var count = 0;
       for (var i = 0; i < 9; i++) {
         for (var j = 0; j < 9; j++) {
-          if (layout[i][j] == -1) {
-            this.tiles[i][j].setValue(layout[i][j], false);
+          // console.log(t[count]);
+          if (t[count] == '.') {
+            this.tiles[i][j].setValue(-1, false);
           } else {
-            this.tiles[i][j].setValue(layout[i][j], true);
+            // this.tiles[i][j].setValue(toStr[t[count]], true);
+            this.tiles[i][j].setValue(parseInt(t[count]), true);
           }
+          count++;
         }
       }
 
@@ -576,6 +587,41 @@ module.exports = function () {
       if (!this.selectedTile.isEmpty() && val != -1) return false;
       this.selectedTile.setValue(val);
       this.updateTileStyleStates();
+      var count = 0;
+      for (var i = 0; i < 9; i++) {
+        for (var j = 0; j < 9; j++) {
+          var v = this.tiles[i][j].getValue();
+          if (v == val) {
+            count++;
+          }
+        }
+      }
+      if (count == 9) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }, {
+    key: 'getCompletedValues',
+    value: function getCompletedValues() {
+      var vals = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+      for (var i = 0; i < 9; i++) {
+        for (var j = 0; j < 9; j++) {
+          var v = this.tiles[i][j].getValue();
+          if (v != -1) {
+            vals[v - 1]++;
+          }
+        }
+      }
+      console.log(vals);
+      var doneValues = [];
+      for (var i = 0; i < 9; i++) {
+        if (vals[i] == 9) {
+          doneValues.push(i + 1);
+        }
+      }
+      return doneValues;
     }
   }]);
 

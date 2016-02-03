@@ -32,111 +32,88 @@ module.exports = function () {
     this.removeBtnElem.textContent = 'X';
     this.optionsContainerElem.appendChild(this.removeBtnElem);
     this.removeBtnElem.addEventListener('mousedown', function (e) {
-      console.log("Pressed");
       _this.gameBoard.setSelectedTileValue(-1);
+      _this.updateTileStyleStates();
     });
+
+    this.STATE = {};
+    this.STATE.ENABLED = 0;
+    this.STATE.DISABLED = 1;
+
     //--------------------------------------------------------------------------
     // Create the selection tiles
     //--------------------------------------------------------------------------
     this.tilesContainerElem = document.createElement('div');
     this.tilesContainerElem.classList.add('tiles-container');
     this.containerElem.appendChild(this.tilesContainerElem);
-    // Tile 1
-    this.tile1 = document.createElement('div');
-    this.tile1.classList.add('tile');
-    this.tile1.classList.add('odd');
-    this.tile1.numValue = 1;
-    this.tile1.textContent = '1';
-    this.tilesContainerElem.appendChild(this.tile1);
-    this.tile1.addEventListener('mousedown', function (e) {
-      _this.gameBoard.setSelectedTileValue(1);
-    });
-    // Tile 2
-    this.tile2 = document.createElement('div');
-    this.tile2.classList.add('tile');
-    this.tile2.classList.add('even');
-    this.tile2.numValue = 2;
-    this.tile2.textContent = '2';
-    this.tilesContainerElem.appendChild(this.tile2);
-    this.tile2.addEventListener('mousedown', function (e) {
-      _this.gameBoard.setSelectedTileValue(2);
-    });
-    // Tile 3
-    this.tile3 = document.createElement('div');
-    this.tile3.classList.add('tile');
-    this.tile3.classList.add('odd');
-    this.tile3.numValue = 3;
-    this.tile3.textContent = '3';
-    this.tilesContainerElem.appendChild(this.tile3);
-    this.tile3.addEventListener('mousedown', function (e) {
-      _this.gameBoard.setSelectedTileValue(3);
-    });
-    // Tile 4
-    this.tile4 = document.createElement('div');
-    this.tile4.classList.add('tile');
-    this.tile4.classList.add('even');
-    this.tile4.numValue = 4;
-    this.tile4.textContent = '4';
-    this.tilesContainerElem.appendChild(this.tile4);
-    this.tile4.addEventListener('mousedown', function (e) {
-      _this.gameBoard.setSelectedTileValue(4);
-    });
-    // Tile 5
-    this.tile5 = document.createElement('div');
-    this.tile5.classList.add('tile');
-    this.tile5.classList.add('odd');
-    this.tile5.numValue = 5;
-    this.tile5.textContent = '5';
-    this.tilesContainerElem.appendChild(this.tile5);
-    this.tile5.addEventListener('mousedown', function (e) {
-      _this.gameBoard.setSelectedTileValue(5);
-    });
-    // Tile 6
-    this.tile6 = document.createElement('div');
-    this.tile6.classList.add('tile');
-    this.tile6.classList.add('even');
-    this.tile6.numValue = 6;
-    this.tile6.textContent = '6';
-    this.tilesContainerElem.appendChild(this.tile6);
-    this.tile6.addEventListener('mousedown', function (e) {
-      _this.gameBoard.setSelectedTileValue(6);
-    });
-    // Tile 7
-    this.tile7 = document.createElement('div');
-    this.tile7.classList.add('tile');
-    this.tile7.classList.add('odd');
-    this.tile7.numValue = 7;
-    this.tile7.textContent = '7';
-    this.tilesContainerElem.appendChild(this.tile7);
-    this.tile7.addEventListener('mousedown', function (e) {
-      _this.gameBoard.setSelectedTileValue(7);
-    });
-    // Tile 8
-    this.tile8 = document.createElement('div');
-    this.tile8.classList.add('tile');
-    this.tile8.classList.add('even');
-    this.tile8.numValue = 8;
-    this.tile8.textContent = '8';
-    this.tilesContainerElem.appendChild(this.tile8);
-    this.tile8.addEventListener('mousedown', function (e) {
-      _this.gameBoard.setSelectedTileValue(8);
-    });
-    // Tile 9
-    this.tile9 = document.createElement('div');
-    this.tile9.classList.add('tile');
-    this.tile9.classList.add('odd');
-    this.tile9.numValue = 9;
-    this.tile9.textContent = '9';
-    this.tilesContainerElem.appendChild(this.tile9);
-    this.tile9.addEventListener('mousedown', function (e) {
-      _this.gameBoard.setSelectedTileValue(9);
-    });
+
+    this.selectionTiles = [];
+
+    var _loop = function _loop(i) {
+      var tmpTile = document.createElement('div');
+      tmpTile.classList.add('tile');
+      if ((i + 1) % 2 == 0) {
+        tmpTile.classList.add('even');
+      } else {
+        tmpTile.classList.add('odd');
+      }
+      tmpTile.numValue = i + 1;
+      tmpTile.textContent = '' + tmpTile.numValue;
+      _this.tilesContainerElem.appendChild(tmpTile);
+      tmpTile.addEventListener('mousedown', function (e) {
+        if (!tmpTile.classList.contains('done')) {
+          var isDone = _this.gameBoard.setSelectedTileValue(tmpTile.numValue);
+          if (isDone) {
+            tmpTile.classList.add('done');
+          }
+        }
+      });
+      _this.selectionTiles.push(tmpTile);
+    };
+
+    for (var i = 0; i < 9; i++) {
+      _loop(i);
+    }
+
+    this.updateTileStyleStates();
   }
 
   _createClass(SelectionsBox, [{
     key: 'getElement',
     value: function getElement() {
       return this.containerElem;
+    }
+  }, {
+    key: 'updateTileStyleStates',
+    value: function updateTileStyleStates() {
+      var doneVals = this.gameBoard.getCompletedValues();
+      for (var i = 0; i < 9; i++) {
+        var _tmpTile = this.selectionTiles[i];
+        var found = false;
+        for (var j = 0; j < doneVals.length; j++) {
+          if (doneVals[j] == _tmpTile.numValue) {
+            found = true;
+          }
+        }
+        if (found) {
+          this.setTileActiveState(_tmpTile.numValue, this.STATE.DISABLED);
+        } else {
+          this.setTileActiveState(_tmpTile.numValue, this.STATE.ENABLED);
+        }
+      }
+    }
+  }, {
+    key: 'setTileActiveState',
+    value: function setTileActiveState(tileValue, state) {
+      if (state == this.STATE.ENABLED) {
+        if (this.selectionTiles[tileValue - 1].classList.contains('done')) {
+          this.selectionTiles[tileValue - 1].classList.remove('done');
+        }
+      } else if (state == this.STATE.DISABLED) {
+        if (!this.selectionTiles[tileValue - 1].classList.contains('done')) {
+          this.selectionTiles[tileValue - 1].classList.add('done');
+        }
+      }
     }
   }]);
 

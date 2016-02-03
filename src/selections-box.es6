@@ -23,113 +23,83 @@ class SelectionsBox {
     this.removeBtnElem.textContent = 'X';
     this.optionsContainerElem.appendChild(this.removeBtnElem);
     this.removeBtnElem.addEventListener('mousedown', (e) => {
-      console.log("Pressed");
       this.gameBoard.setSelectedTileValue(-1);
+      this.updateTileStyleStates();
     });
+
+    this.STATE = {};
+    this.STATE.ENABLED = 0;
+    this.STATE.DISABLED = 1;
+
     //--------------------------------------------------------------------------
     // Create the selection tiles
     //--------------------------------------------------------------------------
     this.tilesContainerElem = document.createElement('div');
     this.tilesContainerElem.classList.add('tiles-container');
     this.containerElem.appendChild(this.tilesContainerElem);
-    // Tile 1
-    this.tile1 = document.createElement('div');
-    this.tile1.classList.add('tile');
-    this.tile1.classList.add('odd');
-    this.tile1.numValue = 1;
-    this.tile1.textContent = '1';
-    this.tilesContainerElem.appendChild(this.tile1);
-    this.tile1.addEventListener('mousedown', (e) => {
-      this.gameBoard.setSelectedTileValue(1);
-    });
-    // Tile 2
-    this.tile2 = document.createElement('div');
-    this.tile2.classList.add('tile');
-    this.tile2.classList.add('even');
-    this.tile2.numValue = 2;
-    this.tile2.textContent = '2';
-    this.tilesContainerElem.appendChild(this.tile2);
-    this.tile2.addEventListener('mousedown', (e) => {
-      this.gameBoard.setSelectedTileValue(2);
-    });
-    // Tile 3
-    this.tile3 = document.createElement('div');
-    this.tile3.classList.add('tile');
-    this.tile3.classList.add('odd');
-    this.tile3.numValue = 3;
-    this.tile3.textContent = '3';
-    this.tilesContainerElem.appendChild(this.tile3);
-    this.tile3.addEventListener('mousedown', (e) => {
-      this.gameBoard.setSelectedTileValue(3);
-    });
-    // Tile 4
-    this.tile4 = document.createElement('div');
-    this.tile4.classList.add('tile');
-    this.tile4.classList.add('even');
-    this.tile4.numValue = 4;
-    this.tile4.textContent = '4';
-    this.tilesContainerElem.appendChild(this.tile4);
-    this.tile4.addEventListener('mousedown', (e) => {
-      this.gameBoard.setSelectedTileValue(4);
-    });
-    // Tile 5
-    this.tile5 = document.createElement('div');
-    this.tile5.classList.add('tile');
-    this.tile5.classList.add('odd');
-    this.tile5.numValue = 5;
-    this.tile5.textContent = '5';
-    this.tilesContainerElem.appendChild(this.tile5);
-    this.tile5.addEventListener('mousedown', (e) => {
-      this.gameBoard.setSelectedTileValue(5);
-    });
-    // Tile 6
-    this.tile6 = document.createElement('div');
-    this.tile6.classList.add('tile');
-    this.tile6.classList.add('even');
-    this.tile6.numValue = 6;
-    this.tile6.textContent = '6';
-    this.tilesContainerElem.appendChild(this.tile6);
-    this.tile6.addEventListener('mousedown', (e) => {
-      this.gameBoard.setSelectedTileValue(6);
-    });
-    // Tile 7
-    this.tile7 = document.createElement('div');
-    this.tile7.classList.add('tile');
-    this.tile7.classList.add('odd');
-    this.tile7.numValue = 7;
-    this.tile7.textContent = '7';
-    this.tilesContainerElem.appendChild(this.tile7);
-    this.tile7.addEventListener('mousedown', (e) => {
-      this.gameBoard.setSelectedTileValue(7);
-    });
-    // Tile 8
-    this.tile8 = document.createElement('div');
-    this.tile8.classList.add('tile');
-    this.tile8.classList.add('even');
-    this.tile8.numValue = 8;
-    this.tile8.textContent = '8';
-    this.tilesContainerElem.appendChild(this.tile8);
-    this.tile8.addEventListener('mousedown', (e) => {
-      this.gameBoard.setSelectedTileValue(8);
-    });
-    // Tile 9
-    this.tile9 = document.createElement('div');
-    this.tile9.classList.add('tile');
-    this.tile9.classList.add('odd');
-    this.tile9.numValue = 9;
-    this.tile9.textContent = '9';
-    this.tilesContainerElem.appendChild(this.tile9);
-    this.tile9.addEventListener('mousedown', (e) => {
-      this.gameBoard.setSelectedTileValue(9);
-    });
+
+
+    this.selectionTiles = [];
+    for(let i = 0; i < 9; i++){
+      let tmpTile = document.createElement('div');
+      tmpTile.classList.add('tile');
+      if((i+1) % 2 == 0){
+        tmpTile.classList.add('even');
+      }else{
+        tmpTile.classList.add('odd');
+      }
+      tmpTile.numValue = i+1;
+      tmpTile.textContent = ''+tmpTile.numValue;
+      this.tilesContainerElem.appendChild(tmpTile);
+      tmpTile.addEventListener('mousedown', (e) => {
+        if(!tmpTile.classList.contains('done')){
+          let isDone = this.gameBoard.setSelectedTileValue(tmpTile.numValue);
+          if(isDone){
+            tmpTile.classList.add('done');
+          }
+        }
+      });
+      this.selectionTiles.push(tmpTile);
+    }
 
 
 
+    this.updateTileStyleStates();
 
   }
 
   getElement(){
     return this.containerElem;
+  }
+
+  updateTileStyleStates(){
+    let doneVals = this.gameBoard.getCompletedValues();
+    for(let i = 0; i < 9; i++){
+      let tmpTile = this.selectionTiles[i];
+      let found = false;
+      for(let j = 0; j < doneVals.length; j++){
+        if(doneVals[j] == tmpTile.numValue){
+          found = true;
+        }
+      }
+      if(found){
+        this.setTileActiveState(tmpTile.numValue, this.STATE.DISABLED);
+      }else{
+        this.setTileActiveState(tmpTile.numValue, this.STATE.ENABLED);
+      }
+    }
+  }
+
+  setTileActiveState(tileValue, state){
+    if(state == this.STATE.ENABLED){
+      if(this.selectionTiles[tileValue-1].classList.contains('done')){
+        this.selectionTiles[tileValue-1].classList.remove('done')
+      }
+    }else if(state == this.STATE.DISABLED){
+      if(!this.selectionTiles[tileValue-1].classList.contains('done')){
+        this.selectionTiles[tileValue-1].classList.add('done')
+      }
+    }
   }
 
 }

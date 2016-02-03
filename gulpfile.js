@@ -6,7 +6,7 @@ var babel = require('gulp-babel');
 
 
 gulp.task('default', function () {
-    return gulp.src('src/*.es6')
+    return gulp.src('./src/**/*.es6')
       .pipe(babel({
     		presets: ['es2015']
       }))
@@ -14,7 +14,7 @@ gulp.task('default', function () {
 });
 
 gulp.task('babel', function() {
-  return gulp.src('src/**/*.es6')
+  return gulp.src('./src/**/*.es6')
     .pipe(babel({
       presets: ['es2015']
     }))

@@ -9,6 +9,7 @@ class App {
     this.containerElem = document.getElementById('app-container');
 
 
+
     this.gameBoard = new GameBoard();
     this.gameTopBox = new GameTopBox(this.gameBoard);
     this.gameStatsBox = new GameStatsBox(this.gameBoard);

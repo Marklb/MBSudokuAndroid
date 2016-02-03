@@ -1,997 +1,3 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-// shim for using process in browser
-
-var process = module.exports = {};
-var queue = [];
-var draining = false;
-var currentQueue;
-var queueIndex = -1;
-
-function cleanUpNextTick() {
-    draining = false;
-    if (currentQueue.length) {
-        queue = currentQueue.concat(queue);
-    } else {
-        queueIndex = -1;
-    }
-    if (queue.length) {
-        drainQueue();
-    }
-}
-
-function drainQueue() {
-    if (draining) {
-        return;
-    }
-    var timeout = setTimeout(cleanUpNextTick);
-    draining = true;
-
-    var len = queue.length;
-    while(len) {
-        currentQueue = queue;
-        queue = [];
-        while (++queueIndex < len) {
-            if (currentQueue) {
-                currentQueue[queueIndex].run();
-            }
-        }
-        queueIndex = -1;
-        len = queue.length;
-    }
-    currentQueue = null;
-    draining = false;
-    clearTimeout(timeout);
-}
-
-process.nextTick = function (fun) {
-    var args = new Array(arguments.length - 1);
-    if (arguments.length > 1) {
-        for (var i = 1; i < arguments.length; i++) {
-            args[i - 1] = arguments[i];
-        }
-    }
-    queue.push(new Item(fun, args));
-    if (queue.length === 1 && !draining) {
-        setTimeout(drainQueue, 0);
-    }
-};
-
-// v8 likes predictible objects
-function Item(fun, array) {
-    this.fun = fun;
-    this.array = array;
-}
-Item.prototype.run = function () {
-    this.fun.apply(null, this.array);
-};
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-process.version = ''; // empty string to avoid regexp issues
-process.versions = {};
-
-function noop() {}
-
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-};
-
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-process.umask = function() { return 0; };
-
-},{}],2:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-module.exports = function () {
-  function GameBoardTile(gameBoard, row, column) {
-    var _this = this;
-
-    _classCallCheck(this, GameBoardTile);
-
-    this.gameBoard = gameBoard;
-    this.containerElem = document.createElement('div');
-    this.containerElem.classList.add('tile');
-
-    this.row = row;
-    this.column = column;
-
-    this.VALUE_STATES = {};
-    this.VALUE_STATES.EMPTY = 0;
-    this.VALUE_STATES.ORIGINAL = 1;
-    this.VALUE_STATES.REGULAR = 2;
-
-    this.VALUE_STATES_CLASSES = [];
-    this.VALUE_STATES_CLASSES[this.VALUE_STATES.EMPTY] = 'empty-value';
-    this.VALUE_STATES_CLASSES[this.VALUE_STATES.ORIGINAL] = 'original-value';
-    this.VALUE_STATES_CLASSES[this.VALUE_STATES.REGULAR] = 'regular-value';
-    this.currValState = this.VALUE_STATES.EMPTY;
-    this.containerElem.classList.add(this.VALUE_STATES_CLASSES[this.currValState]);
-    // If value is -1 then it is blank
-    this.setValue(-1);
-
-    this.STYLE_STATES = {};
-    this.STYLE_STATES.BASIC = 0;
-    this.STYLE_STATES.SAME_VALUE = 1;
-    this.STYLE_STATES.CONFLICTING_VALUE = 2;
-
-    this.STYLE_STATES_CLASSES = {};
-    this.STYLE_STATES_CLASSES[this.STYLE_STATES.BASIC] = 'style-state-basic';
-    this.STYLE_STATES_CLASSES[this.STYLE_STATES.SAME_VALUE] = 'style-state-same-value';
-    this.STYLE_STATES_CLASSES[this.STYLE_STATES.CONFLICTING_VALUE] = 'style-state-conflicting-value';
-
-    this.containerElem.addEventListener('mousedown', function () {
-      _this.gameBoard.setSelectedTile(_this.row, _this.column);
-    });
-  }
-
-  _createClass(GameBoardTile, [{
-    key: 'getElement',
-    value: function getElement() {
-      return this.containerElem;
-    }
-  }, {
-    key: 'getRowIndex',
-    value: function getRowIndex() {
-      return this.row;
-    }
-  }, {
-    key: 'getColumnIndex',
-    value: function getColumnIndex() {
-      return this.column;
-    }
-  }, {
-    key: 'setSelected',
-    value: function setSelected(b) {
-      if (b) {
-        this.containerElem.classList.add('selected');
-      } else {
-        this.containerElem.classList.remove('selected');
-      }
-    }
-  }, {
-    key: 'setValue',
-    value: function setValue(val) {
-      var isOriginal = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
-
-      // console.log("Setting: "+val);
-      var tmpValState = this.currValState;
-      this.value = val;
-      this.containerElem.textContent = '' + this.value;
-
-      if (this.value == -1) {
-        this.currValState = this.VALUE_STATES.EMPTY;
-      } else {
-        if (isOriginal) {
-          this.currValState = this.VALUE_STATES.ORIGINAL;
-        } else {
-          this.currValState = this.VALUE_STATES.REGULAR;
-        }
-      }
-
-      if (this.currValState != tmpValState) {
-        this.containerElem.classList.remove(this.VALUE_STATES_CLASSES[tmpValState]);
-      }
-      if (!this.containerElem.classList.contains(this.VALUE_STATES_CLASSES[this.currValState])) {
-        this.containerElem.classList.add(this.VALUE_STATES_CLASSES[this.currValState]);
-      }
-    }
-  }, {
-    key: 'getValue',
-    value: function getValue() {
-      return this.value;
-    }
-  }, {
-    key: 'isEmpty',
-    value: function isEmpty() {
-      return this.value == -1;
-    }
-  }, {
-    key: 'isOriginal',
-    value: function isOriginal() {
-      return this.currValState == this.VALUE_STATES.ORIGINAL;
-    }
-  }, {
-    key: 'setStyleState',
-    value: function setStyleState(state) {
-      if (!this.currStyleState) {
-        this.currStyleState = this.STYLE_STATES.BASIC;
-        this.containerElem.classList.add(this.STYLE_STATES_CLASSES[this.currStyleState]);
-      }
-      if (this.currStyleState != state) {
-        this.containerElem.classList.remove(this.STYLE_STATES_CLASSES[this.currStyleState]);
-        this.currStyleState = state;
-        this.containerElem.classList.add(this.STYLE_STATES_CLASSES[this.currStyleState]);
-      }
-    }
-  }, {
-    key: 'setTilesInBlock',
-    value: function setTilesInBlock(tiles) {
-      this.tilesInBlock = tiles;
-    }
-  }, {
-    key: 'getTilesInBlock',
-    value: function getTilesInBlock() {
-      return this.tilesInBlock;
-    }
-  }]);
-
-  return GameBoardTile;
-}();
-},{}],3:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var QQWING = require('./libs/qqwing-1.3.4/qqwing-1.3.4.js');
-var GameBoardTile = require('./game-board-tile.js');
-
-module.exports = function () {
-  function GameBoard() {
-    var _this = this;
-
-    _classCallCheck(this, GameBoard);
-
-    console.log("Creating GameBoard");
-
-    this.qqwing = new QQWING();
-    // this.qqwing.generatePuzzle();
-    // this.qqwing.setPrintStyle(QQWING.PrintStyle.ONE_LINE);
-    // this.qqwing.printSolution();
-    // let t = this.qqwing.getSolutionString();
-    // console.log(t);
-
-    this.containerElem = document.createElement('div');
-    this.containerElem.classList.add('game-board');
-    // if(window.innerWidth < window.innerHeight){
-    //   this.containerWidth = window.innerWidth;
-    //   this.containerHeight = window.innerWidth;
-    // }else{
-    //   this.containerWidth = window.innerHeight;
-    //   this.containerHeight = window.innerHeight;
-    // }
-    // this.containerElem.setAttribute('style', 'width:'+this.containerWidth+'px;');
-    // this.containerElem.setAttribute('style', 'height:'+this.containerHeight+'px;');
-
-    //--------------------------------------------------------------------------
-    // Create the board rows
-    //--------------------------------------------------------------------------
-    this.boardRow1 = document.createElement('div');
-    this.boardRow1.classList.add('board-row');
-    this.containerElem.appendChild(this.boardRow1);
-
-    this.boardRow2 = document.createElement('div');
-    this.boardRow2.classList.add('board-row');
-    this.containerElem.appendChild(this.boardRow2);
-
-    this.boardRow3 = document.createElement('div');
-    this.boardRow3.classList.add('board-row');
-    this.containerElem.appendChild(this.boardRow3);
-
-    //--------------------------------------------------------------------------
-    // Create blocks
-    //--------------------------------------------------------------------------
-    // top left
-    this.block1 = document.createElement('div');
-    this.block1.classList.add('block');
-    this.boardRow1.appendChild(this.block1);
-    // top middle
-    this.block2 = document.createElement('div');
-    this.block2.classList.add('block');
-    this.boardRow1.appendChild(this.block2);
-    // top right
-    this.block3 = document.createElement('div');
-    this.block3.classList.add('block');
-    this.boardRow1.appendChild(this.block3);
-    // middle left
-    this.block4 = document.createElement('div');
-    this.block4.classList.add('block');
-    this.boardRow2.appendChild(this.block4);
-    // middle middle
-    this.block5 = document.createElement('div');
-    this.block5.classList.add('block');
-    this.boardRow2.appendChild(this.block5);
-    // middle right
-    this.block6 = document.createElement('div');
-    this.block6.classList.add('block');
-    this.boardRow2.appendChild(this.block6);
-    // bottom left
-    this.block7 = document.createElement('div');
-    this.block7.classList.add('block');
-    this.boardRow3.appendChild(this.block7);
-    // bottom middle
-    this.block8 = document.createElement('div');
-    this.block8.classList.add('block');
-    this.boardRow3.appendChild(this.block8);
-    // bottom right
-    this.block9 = document.createElement('div');
-    this.block9.classList.add('block');
-    this.boardRow3.appendChild(this.block9);
-
-    //--------------------------------------------------------------------------
-    // Create blocks rows
-    //--------------------------------------------------------------------------
-    // block1
-    this.block1row1 = document.createElement('div');
-    this.block1row1.classList.add('block-row');
-    this.block1.appendChild(this.block1row1);
-    this.block1row2 = document.createElement('div');
-    this.block1row2.classList.add('block-row');
-    this.block1.appendChild(this.block1row2);
-    this.block1row3 = document.createElement('div');
-    this.block1row3.classList.add('block-row');
-    this.block1.appendChild(this.block1row3);
-    // block2
-    this.block2row1 = document.createElement('div');
-    this.block2row1.classList.add('block-row');
-    this.block2.appendChild(this.block2row1);
-    this.block2row2 = document.createElement('div');
-    this.block2row2.classList.add('block-row');
-    this.block2.appendChild(this.block2row2);
-    this.block2row3 = document.createElement('div');
-    this.block2row3.classList.add('block-row');
-    this.block2.appendChild(this.block2row3);
-    // block3
-    this.block3row1 = document.createElement('div');
-    this.block3row1.classList.add('block-row');
-    this.block3.appendChild(this.block3row1);
-    this.block3row2 = document.createElement('div');
-    this.block3row2.classList.add('block-row');
-    this.block3.appendChild(this.block3row2);
-    this.block3row3 = document.createElement('div');
-    this.block3row3.classList.add('block-row');
-    this.block3.appendChild(this.block3row3);
-    // block4
-    this.block4row1 = document.createElement('div');
-    this.block4row1.classList.add('block-row');
-    this.block4.appendChild(this.block4row1);
-    this.block4row2 = document.createElement('div');
-    this.block4row2.classList.add('block-row');
-    this.block4.appendChild(this.block4row2);
-    this.block4row3 = document.createElement('div');
-    this.block4row3.classList.add('block-row');
-    this.block4.appendChild(this.block4row3);
-    // block5
-    this.block5row1 = document.createElement('div');
-    this.block5row1.classList.add('block-row');
-    this.block5.appendChild(this.block5row1);
-    this.block5row2 = document.createElement('div');
-    this.block5row2.classList.add('block-row');
-    this.block5.appendChild(this.block5row2);
-    this.block5row3 = document.createElement('div');
-    this.block5row3.classList.add('block-row');
-    this.block5.appendChild(this.block5row3);
-    // block6
-    this.block6row1 = document.createElement('div');
-    this.block6row1.classList.add('block-row');
-    this.block6.appendChild(this.block6row1);
-    this.block6row2 = document.createElement('div');
-    this.block6row2.classList.add('block-row');
-    this.block6.appendChild(this.block6row2);
-    this.block6row3 = document.createElement('div');
-    this.block6row3.classList.add('block-row');
-    this.block6.appendChild(this.block6row3);
-    // block7
-    this.block7row1 = document.createElement('div');
-    this.block7row1.classList.add('block-row');
-    this.block7.appendChild(this.block7row1);
-    this.block7row2 = document.createElement('div');
-    this.block7row2.classList.add('block-row');
-    this.block7.appendChild(this.block7row2);
-    this.block7row3 = document.createElement('div');
-    this.block7row3.classList.add('block-row');
-    this.block7.appendChild(this.block7row3);
-    // block8
-    this.block8row1 = document.createElement('div');
-    this.block8row1.classList.add('block-row');
-    this.block8.appendChild(this.block8row1);
-    this.block8row2 = document.createElement('div');
-    this.block8row2.classList.add('block-row');
-    this.block8.appendChild(this.block8row2);
-    this.block8row3 = document.createElement('div');
-    this.block8row3.classList.add('block-row');
-    this.block8.appendChild(this.block8row3);
-    // block9
-    this.block9row1 = document.createElement('div');
-    this.block9row1.classList.add('block-row');
-    this.block9.appendChild(this.block9row1);
-    this.block9row2 = document.createElement('div');
-    this.block9row2.classList.add('block-row');
-    this.block9.appendChild(this.block9row2);
-    this.block9row3 = document.createElement('div');
-    this.block9row3.classList.add('block-row');
-    this.block9.appendChild(this.block9row3);
-
-    //--------------------------------------------------------------------------
-    // Create tiles
-    //--------------------------------------------------------------------------
-    this.tiles = [];
-    for (var i = 0; i < 9; i++) {
-      var tmp = [];
-      for (var j = 0; j < 9; j++) {
-        tmp.push(new GameBoardTile(this, i, j));
-      }
-      this.tiles.push(tmp);
-    }
-    // block1 tiles
-    this.block1Tiles = [this.tiles[0][0], this.tiles[0][1], this.tiles[0][2], this.tiles[1][0], this.tiles[1][1], this.tiles[1][2], this.tiles[2][0], this.tiles[2][1], this.tiles[2][2]];
-    for (var i = 0; i < 9; i++) {
-      this.block1Tiles[i].setTilesInBlock(this.block1Tiles);
-    }
-    this.block1row1.appendChild(this.tiles[0][0].getElement());
-    this.block1row1.appendChild(this.tiles[0][1].getElement());
-    this.block1row1.appendChild(this.tiles[0][2].getElement());
-    this.block1row2.appendChild(this.tiles[1][0].getElement());
-    this.block1row2.appendChild(this.tiles[1][1].getElement());
-    this.block1row2.appendChild(this.tiles[1][2].getElement());
-    this.block1row3.appendChild(this.tiles[2][0].getElement());
-    this.block1row3.appendChild(this.tiles[2][1].getElement());
-    this.block1row3.appendChild(this.tiles[2][2].getElement());
-    // block2 tiles
-    this.block2Tiles = [this.tiles[0][3], this.tiles[0][4], this.tiles[0][5], this.tiles[1][3], this.tiles[1][4], this.tiles[1][5], this.tiles[2][3], this.tiles[2][4], this.tiles[2][5]];
-    for (var i = 0; i < 9; i++) {
-      this.block2Tiles[i].setTilesInBlock(this.block2Tiles);
-    }
-    this.block2row1.appendChild(this.tiles[0][3].getElement());
-    this.block2row1.appendChild(this.tiles[0][4].getElement());
-    this.block2row1.appendChild(this.tiles[0][5].getElement());
-    this.block2row2.appendChild(this.tiles[1][3].getElement());
-    this.block2row2.appendChild(this.tiles[1][4].getElement());
-    this.block2row2.appendChild(this.tiles[1][5].getElement());
-    this.block2row3.appendChild(this.tiles[2][3].getElement());
-    this.block2row3.appendChild(this.tiles[2][4].getElement());
-    this.block2row3.appendChild(this.tiles[2][5].getElement());
-    // block3 tiles
-    this.block3Tiles = [this.tiles[0][6], this.tiles[0][7], this.tiles[0][8], this.tiles[1][6], this.tiles[1][7], this.tiles[1][8], this.tiles[2][6], this.tiles[2][7], this.tiles[2][8]];
-    for (var i = 0; i < 9; i++) {
-      this.block3Tiles[i].setTilesInBlock(this.block3Tiles);
-    }
-    this.block3row1.appendChild(this.tiles[0][6].getElement());
-    this.block3row1.appendChild(this.tiles[0][7].getElement());
-    this.block3row1.appendChild(this.tiles[0][8].getElement());
-    this.block3row2.appendChild(this.tiles[1][6].getElement());
-    this.block3row2.appendChild(this.tiles[1][7].getElement());
-    this.block3row2.appendChild(this.tiles[1][8].getElement());
-    this.block3row3.appendChild(this.tiles[2][6].getElement());
-    this.block3row3.appendChild(this.tiles[2][7].getElement());
-    this.block3row3.appendChild(this.tiles[2][8].getElement());
-    // block4 tiles
-    this.block4Tiles = [this.tiles[3][0], this.tiles[3][1], this.tiles[3][2], this.tiles[4][0], this.tiles[4][1], this.tiles[4][2], this.tiles[5][0], this.tiles[5][1], this.tiles[5][2]];
-    for (var i = 0; i < 9; i++) {
-      this.block4Tiles[i].setTilesInBlock(this.block4Tiles);
-    }
-    this.block4row1.appendChild(this.tiles[3][0].getElement());
-    this.block4row1.appendChild(this.tiles[3][1].getElement());
-    this.block4row1.appendChild(this.tiles[3][2].getElement());
-    this.block4row2.appendChild(this.tiles[4][0].getElement());
-    this.block4row2.appendChild(this.tiles[4][1].getElement());
-    this.block4row2.appendChild(this.tiles[4][2].getElement());
-    this.block4row3.appendChild(this.tiles[5][0].getElement());
-    this.block4row3.appendChild(this.tiles[5][1].getElement());
-    this.block4row3.appendChild(this.tiles[5][2].getElement());
-    // block5 tiles
-    this.block5Tiles = [this.tiles[3][3], this.tiles[3][4], this.tiles[3][5], this.tiles[4][3], this.tiles[4][4], this.tiles[4][5], this.tiles[5][3], this.tiles[5][4], this.tiles[5][5]];
-    for (var i = 0; i < 9; i++) {
-      this.block5Tiles[i].setTilesInBlock(this.block5Tiles);
-    }
-    this.block5row1.appendChild(this.tiles[3][3].getElement());
-    this.block5row1.appendChild(this.tiles[3][4].getElement());
-    this.block5row1.appendChild(this.tiles[3][5].getElement());
-    this.block5row2.appendChild(this.tiles[4][3].getElement());
-    this.block5row2.appendChild(this.tiles[4][4].getElement());
-    this.block5row2.appendChild(this.tiles[4][5].getElement());
-    this.block5row3.appendChild(this.tiles[5][3].getElement());
-    this.block5row3.appendChild(this.tiles[5][4].getElement());
-    this.block5row3.appendChild(this.tiles[5][5].getElement());
-    // block6 tiles
-    this.block6Tiles = [this.tiles[3][6], this.tiles[3][7], this.tiles[3][8], this.tiles[4][6], this.tiles[4][7], this.tiles[4][8], this.tiles[5][6], this.tiles[5][7], this.tiles[5][8]];
-    for (var i = 0; i < 9; i++) {
-      this.block6Tiles[i].setTilesInBlock(this.block6Tiles);
-    }
-    this.block6row1.appendChild(this.tiles[3][6].getElement());
-    this.block6row1.appendChild(this.tiles[3][7].getElement());
-    this.block6row1.appendChild(this.tiles[3][8].getElement());
-    this.block6row2.appendChild(this.tiles[4][6].getElement());
-    this.block6row2.appendChild(this.tiles[4][7].getElement());
-    this.block6row2.appendChild(this.tiles[4][8].getElement());
-    this.block6row3.appendChild(this.tiles[5][6].getElement());
-    this.block6row3.appendChild(this.tiles[5][7].getElement());
-    this.block6row3.appendChild(this.tiles[5][8].getElement());
-    // block7 tiles
-    this.block7Tiles = [this.tiles[6][0], this.tiles[6][1], this.tiles[6][2], this.tiles[7][0], this.tiles[7][1], this.tiles[7][2], this.tiles[8][0], this.tiles[8][1], this.tiles[8][2]];
-    for (var i = 0; i < 9; i++) {
-      this.block7Tiles[i].setTilesInBlock(this.block7Tiles);
-    }
-    this.block7row1.appendChild(this.tiles[6][0].getElement());
-    this.block7row1.appendChild(this.tiles[6][1].getElement());
-    this.block7row1.appendChild(this.tiles[6][2].getElement());
-    this.block7row2.appendChild(this.tiles[7][0].getElement());
-    this.block7row2.appendChild(this.tiles[7][1].getElement());
-    this.block7row2.appendChild(this.tiles[7][2].getElement());
-    this.block7row3.appendChild(this.tiles[8][0].getElement());
-    this.block7row3.appendChild(this.tiles[8][1].getElement());
-    this.block7row3.appendChild(this.tiles[8][2].getElement());
-    // block8 tiles
-    this.block8Tiles = [this.tiles[6][3], this.tiles[6][4], this.tiles[6][5], this.tiles[7][3], this.tiles[7][4], this.tiles[7][5], this.tiles[8][3], this.tiles[8][4], this.tiles[8][5]];
-    for (var i = 0; i < 9; i++) {
-      this.block8Tiles[i].setTilesInBlock(this.block8Tiles);
-    }
-    this.block8row1.appendChild(this.tiles[6][3].getElement());
-    this.block8row1.appendChild(this.tiles[6][4].getElement());
-    this.block8row1.appendChild(this.tiles[6][5].getElement());
-    this.block8row2.appendChild(this.tiles[7][3].getElement());
-    this.block8row2.appendChild(this.tiles[7][4].getElement());
-    this.block8row2.appendChild(this.tiles[7][5].getElement());
-    this.block8row3.appendChild(this.tiles[8][3].getElement());
-    this.block8row3.appendChild(this.tiles[8][4].getElement());
-    this.block8row3.appendChild(this.tiles[8][5].getElement());
-    // block9 tiles
-    this.block9Tiles = [this.tiles[6][6], this.tiles[6][7], this.tiles[6][8], this.tiles[7][6], this.tiles[7][7], this.tiles[7][8], this.tiles[8][6], this.tiles[8][7], this.tiles[8][8]];
-    for (var i = 0; i < 9; i++) {
-      this.block9Tiles[i].setTilesInBlock(this.block9Tiles);
-    }
-    this.block9row1.appendChild(this.tiles[6][6].getElement());
-    this.block9row1.appendChild(this.tiles[6][7].getElement());
-    this.block9row1.appendChild(this.tiles[6][8].getElement());
-    this.block9row2.appendChild(this.tiles[7][6].getElement());
-    this.block9row2.appendChild(this.tiles[7][7].getElement());
-    this.block9row2.appendChild(this.tiles[7][8].getElement());
-    this.block9row3.appendChild(this.tiles[8][6].getElement());
-    this.block9row3.appendChild(this.tiles[8][7].getElement());
-    this.block9row3.appendChild(this.tiles[8][8].getElement());
-
-    this.blocksTiles = [this.block1Tiles, this.block2Tiles, this.block3Tiles, this.block4Tiles, this.block5Tiles, this.block6Tiles, this.block7Tiles, this.block8Tiles, this.block9Tiles];
-
-    this.initGameTiles();
-
-    this.startTime1 = Date.now();
-    setInterval(function () {
-      var endTime1 = Date.now();
-      var elapsed1 = endTime1 - _this.startTime1;
-      _this.startTime1 = endTime1;
-
-      var tmpTimeElapsed = JSON.parse(window.localStorage.getItem("timeElapsed"));
-      if (tmpTimeElapsed) {
-        elapsed1 = elapsed1 + tmpTimeElapsed;
-      }
-      window.localStorage.setItem("timeElapsed", JSON.stringify(elapsed1));
-    }, 1000);
-  }
-
-  _createClass(GameBoard, [{
-    key: 'getElement',
-    value: function getElement() {
-      return this.containerElem;
-    }
-  }, {
-    key: 'setSelectedTile',
-    value: function setSelectedTile(row, column) {
-      if (!this.selectedTile) {
-        this.selectedTile = this.tiles[0][0];
-        this.tiles[0][0].setSelected(true);
-      }
-      this.selectedTile.setSelected(false);
-      this.selectedTile = this.tiles[row][column];
-      this.selectedTile.setSelected(true);
-
-      this.updateTileStyleStates();
-    }
-  }, {
-    key: 'newGame',
-    value: function newGame() {
-      this.resetGameTiles();
-      this.updateTileStyleStates();
-    }
-  }, {
-    key: 'initGameTiles',
-    value: function initGameTiles() {
-      var storedGameBoard = JSON.parse(window.localStorage.getItem("gameboard"));
-      if (storedGameBoard) {
-        for (var i = 0; i < storedGameBoard.length; i++) {
-          // console.log("Setting:");
-          // console.log(storedGameBoard[i]);
-          this.tiles[storedGameBoard[i].x][storedGameBoard[i].y].setValue(storedGameBoard[i].value, storedGameBoard[i].isOriginal);
-        }
-      } else {
-        this.resetGameTiles();
-      }
-
-      var selectedTileItem = JSON.parse(window.localStorage.getItem("selectedTile"));
-      if (selectedTileItem) {
-        this.setSelectedTile(selectedTileItem.x, selectedTileItem.y);
-      } else {
-        this.setSelectedTile(0, 0);
-      }
-    }
-  }, {
-    key: 'resetGameTiles',
-    value: function resetGameTiles() {
-      // let layout = [
-      //   //0   1   2   3   4   5   6   7   8
-      //   [N, N, N, N, N, N, N, N, N], // 0
-      //   [N, N, N, N, N, N, N, N, N], // 1
-      //   [N, N, N, N, N, N, N, N, N], // 2
-      //   [N, N, N, N, N, N, N, N, N], // 3
-      //   [N, N, N, N, N, N, N, N, N], // 4
-      //   [N, N, N, N, N, N, N, N, N], // 5
-      //   [N, N, N, N, N, N, N, N, N], // 6
-      //   [N, N, N, N, N, N, N, N, N], // 7
-      //   [N, N, N, N, N, N, N, N, N]  // 8
-      // ];
-
-      // let N = -1;
-      // let layout0 = [
-      //   //0   1   2   3   4   5   6   7   8
-      //   [N, N, N, 7, N, N, 8, 4, N], // 0
-      //   [N, N, N, N, N, N, N, N, N], // 1
-      //   [N, N, 8, N, 5, N, N, N, N], // 2
-      //   [N, 2, 6, N, 4, N, N, N, 8], // 3
-      //   [N, 3, 5, N, N, N, N, 1, N], // 4
-      //   [N, 4, N, N, 3, 1, 6, N, N], // 5
-      //   [N, N, 4, N, N, N, N, N, N], // 6
-      //   [N, N, N, 6, N, 2, 4, N, N], // 7
-      //   [N, 7, N, 8, N, N, 9, 2, 6]  // 8
-      // ];
-      //
-      // let layout1 = [
-      //   //0   1   2   3   4   5   6   7   8
-      //   [N, N, 3, 1, N, N, 2, N, N], // 0
-      //   [N, N, N, 3, N, 4, 9, N, N], // 1
-      //   [N, N, N, N, N, N, N, N, N], // 2
-      //   [N, N, 9, N, N, 8, 6, 2, 4], // 3
-      //   [N, N, N, N, 3, N, 5, N, N], // 4
-      //   [N, 1, N, N, N, 6, N, N, 8], // 5
-      //   [9, N, N, 7, 4, N, N, 1, N], // 6
-      //   [7, 5, N, N, N, N, N, N, N], // 7
-      //   [1, 2, N, N, N, N, 4, N, 5]  // 8
-      // ];
-      //
-      // let layout2 = [
-      //   //0  1  2  3  4  5  6  7  8
-      //    [N, N, N, 2, N, N, 5, N, N], // 0
-      //    [N, 6, N, N, 5, N, 4, 9, N], // 1
-      //    [N, 4, 5, N, N, 1, N, N, 7], // 2
-      //    [N, N, 7, N, N, N, N, 6, N], // 3
-      //    [N, 3, N, N, N, 4, N, N, 9], // 4
-      //    [1, N, N, N, N, N, 2, N, N], // 5
-      //    [N, N, N, 9, N, 5, 8, N, N], // 6
-      //    [N, N, N, 7, N, N, 6, 2, N], // 7
-      //    [7, N, N, N, N, N, N, N, N]  // 8
-      // ];
-      //
-      // let layout3 = [
-      //   // 0  1  2  3  4  5  6  7  8
-      //     [N, N, N, N, N, 5, 1, N, N], // 0
-      //     [N, 8, N, N, N, N, N, N, 4], // 1
-      //     [6, N, 2, 8, N, N, N, N, N], // 2
-      //     [N, N, N, N, N, N, N, N, 6], // 3
-      //     [3, N, N, 6, N, N, N, N, 9], // 4
-      //     [5, N, N, N, 3, 7, N, 4, N], // 5
-      //     [N, 3, N, 2, 6, N, 8, N, 5], // 6
-      //     [N, N, N, N, 7, N, N, N, N], // 7
-      //     [1, 7, N, 5, N, N, N, N, N]  // 8
-      // ];
-      //
-      // let layouts = [layout0, layout1, layout2, layout3];
-
-      // let ind = Math.floor((Math.random() * 4));
-      // console.log("Ind: " + ind);
-      // let layout = layouts[ind];
-      // for(let i = 0; i < 9; i++){
-      //   for(let j = 0; j < 9; j++){
-      //     if(layout[i][j] == -1){
-      //       this.tiles[i][j].setValue(layout[i][j], false);
-      //     }else{
-      //       this.tiles[i][j].setValue(layout[i][j], true);
-      //     }
-      //   }
-      // }
-
-      this.qqwing.generatePuzzle();
-      this.qqwing.setPrintStyle(QQWING.PrintStyle.ONE_LINE);
-      var t = this.qqwing.getSolutionString();
-      console.log(t);
-      var toStr = {
-        '1': 1,
-        '2': 2,
-        '3': 3,
-        '4': 4,
-        '5': 5,
-        '6': 6,
-        '7': 7,
-        '8': 8,
-        '9': 9
-      };
-      var count = 0;
-      for (var i = 0; i < 9; i++) {
-        for (var j = 0; j < 9; j++) {
-          // console.log(t[count]);
-          if (t[count] == '.') {
-            this.tiles[i][j].setValue(-1, false);
-          } else {
-            // this.tiles[i][j].setValue(toStr[t[count]], true);
-            this.tiles[i][j].setValue(parseInt(t[count]), true);
-          }
-          count++;
-        }
-      }
-
-      window.localStorage.setItem("timeElapsed", JSON.stringify(0));
-    }
-  }, {
-    key: 'updateTileStyleStates',
-    value: function updateTileStyleStates() {
-      for (var i = 0; i < 9; i++) {
-        for (var j = 0; j < 9; j++) {
-          if (this.selectedTile.isEmpty()) {
-            this.tiles[i][j].setStyleState(this.tiles[i][j].STYLE_STATES.BASIC);
-          } else {
-            if (this.selectedTile.getValue() == this.tiles[i][j].getValue() && this.selectedTile.getRowIndex() != i && this.selectedTile.getColumnIndex() != j) {
-              this.tiles[i][j].setStyleState(this.tiles[i][j].STYLE_STATES.SAME_VALUE);
-            } else {
-              this.tiles[i][j].setStyleState(this.tiles[i][j].STYLE_STATES.BASIC);
-            }
-          }
-        }
-      }
-      this.checkForConflicts();
-      this.saveBoard();
-    }
-  }, {
-    key: 'saveBoard',
-    value: function saveBoard() {
-      var tmpBoard = [];
-      for (var i = 0; i < 9; i++) {
-        for (var j = 0; j < 9; j++) {
-          tmpBoard.push({
-            "x": i,
-            "y": j,
-            "value": this.tiles[i][j].getValue(),
-            "isOriginal": this.tiles[i][j].isOriginal()
-          });
-        }
-      }
-      window.localStorage.setItem("gameboard", JSON.stringify(tmpBoard));
-
-      window.localStorage.setItem("selectedTile", JSON.stringify({
-        "x": this.selectedTile.getRowIndex(),
-        "y": this.selectedTile.getColumnIndex()
-      }));
-    }
-  }, {
-    key: 'checkForConflicts',
-    value: function checkForConflicts() {
-      // Block Conflicts
-      for (var i = 0; i < this.blocksTiles.length; i++) {
-        this.checkTilesForConflict(this.blocksTiles[i]);
-      }
-      // Row Conflicts
-      for (var i = 0; i < 9; i++) {
-        var tmp = [];
-        for (var j = 0; j < 9; j++) {
-          tmp.push(this.tiles[i][j]);
-        }
-        this.checkTilesForConflict(tmp);
-      }
-      // Column Conflicts
-      for (var i = 0; i < 9; i++) {
-        var tmp = [];
-        for (var j = 0; j < 9; j++) {
-          tmp.push(this.tiles[j][i]);
-        }
-        this.checkTilesForConflict(tmp);
-      }
-    }
-  }, {
-    key: 'checkTilesForConflict',
-    value: function checkTilesForConflict(blockTiles) {
-      var counts = [[], [], [], [], [], [], [], [], []];
-      for (var i = 0; i < 9; i++) {
-        if (!blockTiles[i].isEmpty()) {
-          counts[blockTiles[i].getValue() - 1].push(blockTiles[i]);
-        }
-      }
-      for (var i = 0; i < 9; i++) {
-        if (counts[i].length > 1) {
-          for (var j = 0; j < counts[i].length; j++) {
-            counts[i][j].setStyleState(counts[i][j].STYLE_STATES.CONFLICTING_VALUE);
-          }
-        }
-      }
-    }
-  }, {
-    key: 'setSelectedTileValue',
-    value: function setSelectedTileValue(val) {
-      if (this.selectedTile.isOriginal()) return false;
-      if (!this.selectedTile.isEmpty() && val != -1) return false;
-      this.selectedTile.setValue(val);
-      this.updateTileStyleStates();
-      var count = 0;
-      for (var i = 0; i < 9; i++) {
-        for (var j = 0; j < 9; j++) {
-          var v = this.tiles[i][j].getValue();
-          if (v == val) {
-            count++;
-          }
-        }
-      }
-      if (count == 9) {
-        return true;
-      } else {
-        return false;
-      }
-    }
-  }, {
-    key: 'getCompletedValues',
-    value: function getCompletedValues() {
-      var vals = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-      for (var i = 0; i < 9; i++) {
-        for (var j = 0; j < 9; j++) {
-          var v = this.tiles[i][j].getValue();
-          if (v != -1) {
-            vals[v - 1]++;
-          }
-        }
-      }
-      console.log(vals);
-      var doneValues = [];
-      for (var i = 0; i < 9; i++) {
-        if (vals[i] == 9) {
-          doneValues.push(i + 1);
-        }
-      }
-      return doneValues;
-    }
-  }]);
-
-  return GameBoard;
-}();
-},{"./game-board-tile.js":2,"./libs/qqwing-1.3.4/qqwing-1.3.4.js":6}],4:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-module.exports = function () {
-  function GameStatsBox(gameBoard) {
-    var _this = this;
-
-    _classCallCheck(this, GameStatsBox);
-
-    this.gameBoard = gameBoard;
-    console.log('Creating Game Stats Box');
-    this.containerElem = document.createElement('div');
-    this.containerElem.classList.add('game-stats-box');
-
-    this.menuButtonElem = document.createElement('div');
-    this.menuButtonElem.classList.add('left');
-    this.menuButtonElem.textContent = "X";
-    this.containerElem.appendChild(this.menuButtonElem);
-
-    this.titleElem = document.createElement('div');
-    this.titleElem.classList.add('timer');
-    this.titleElem.textContent = "00:00:00";
-    this.containerElem.appendChild(this.titleElem);
-
-    this.resetBtnElem = document.createElement('div');
-    this.resetBtnElem.classList.add('right');
-    this.resetBtnElem.textContent = "X";
-    this.containerElem.appendChild(this.resetBtnElem);
-
-    setInterval(function () {
-      var timeElapsed = JSON.parse(window.localStorage.getItem("timeElapsed"));
-      if (timeElapsed) {
-        _this.setTime(timeElapsed);
-      } else {
-        _this.setTime(0);
-      }
-    }, 1000);
-  }
-
-  _createClass(GameStatsBox, [{
-    key: 'getElement',
-    value: function getElement() {
-      return this.containerElem;
-    }
-  }, {
-    key: 'setTime',
-    value: function setTime(t) {
-      var SECONDS = 1000;
-      var MINUTES = SECONDS * 60;
-      var HOURS = MINUTES * 60;
-      var DAYS = HOURS * 24;
-      var YEARS = DAYS * 365;
-
-      t = t / SECONDS;
-      var seconds = Math.round(t % 60);
-      var minutes = Math.round(t / 60 % 60);
-      var hours = Math.round(t / (60 * 60) % 24);
-
-      var secStr = "" + seconds;
-      if (seconds < 10) {
-        secStr = "0" + seconds;
-      }
-      var minStr = "" + minutes;
-      if (minutes < 10) {
-        minStr = "0" + minutes;
-      }
-      var hourStr = "" + hours;
-      if (hours < 10) {
-        hourStr = "0" + hours;
-      }
-
-      this.titleElem.textContent = hourStr + ":" + minStr + ":" + secStr;
-    }
-  }]);
-
-  return GameStatsBox;
-}();
-},{}],5:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-module.exports = function () {
-  function GameTopBox(gameBoard) {
-    var _this = this;
-
-    _classCallCheck(this, GameTopBox);
-
-    this.gameBoard = gameBoard;
-    console.log('Creating Game Top Box');
-    this.containerElem = document.createElement('div');
-    this.containerElem.classList.add('game-top-box');
-
-    this.menuButtonElem = document.createElement('div');
-    this.menuButtonElem.classList.add('menu-btn');
-    this.menuButtonElem.textContent = "X";
-    this.containerElem.appendChild(this.menuButtonElem);
-
-    this.titleElem = document.createElement('div');
-    this.titleElem.classList.add('title');
-    this.titleElem.textContent = "MB Sudoku";
-    this.containerElem.appendChild(this.titleElem);
-
-    this.resetBtnElem = document.createElement('div');
-    this.resetBtnElem.classList.add('reset-btn');
-    this.resetBtnElem.textContent = "X";
-    this.containerElem.appendChild(this.resetBtnElem);
-    this.resetBtnElem.addEventListener('mousedown', function (e) {
-      _this.gameBoard.newGame();
-    });
-  }
-
-  _createClass(GameTopBox, [{
-    key: 'getElement',
-    value: function getElement() {
-      return this.containerElem;
-    }
-  }]);
-
-  return GameTopBox;
-}();
-},{}],6:[function(require,module,exports){
-(function (process){
 /*!
  * qqwing - Sudoku solver and generator
  * Copyright (C) 2014 Stephen Ostermiller
@@ -2664,160 +1670,446 @@ qqwing.ROW_COL_SEC_SIZE = qqwing.GRID_SIZE*qqwing.GRID_SIZE;
 qqwing.SEC_GROUP_SIZE = qqwing.ROW_COL_SEC_SIZE*qqwing.GRID_SIZE;
 qqwing.BOARD_SIZE = qqwing.ROW_COL_SEC_SIZE*qqwing.ROW_COL_SEC_SIZE;
 qqwing.POSSIBILITY_SIZE = qqwing.BOARD_SIZE*qqwing.ROW_COL_SEC_SIZE;
+try {
+	// Start time for the application for timing
+	var applicationStartTime = getMicroseconds();
+
+	// The number of puzzles solved or generated.
+	var puzzleCount = 0;
+
+	// defaults for options
+	var printPuzzle = false;
+	var printSolution = false;
+	var printHistory = false;
+	var printInstructions = false;
+	var timer = false;
+	var countSolutions = false;
+	var action = "NONE";
+	var logHistory = false;
+	var printStyle = qqwing.PrintStyle.READABLE;
+	var numberToGenerate = 1;
+	var printStats = false;
+	var difficulty = qqwing.Difficulty.UNKNOWN;
+	var symmetry = qqwing.Symmetry.NONE;
+	var argv = process.argv;
+
+	// Read the arguments and set the options
+	for (var i=2; i<argv.length; i++){
+		if (argv[i] == "--puzzle"){
+			printPuzzle = true;
+		} else if (argv[i] == "--nopuzzle"){
+			printPuzzle = false;
+		} else if (argv[i] == "--solution"){
+			printSolution = true;
+		} else if (argv[i] == "--nosolution"){
+			printSolution = false;
+		} else if (argv[i] == "--history"){
+			printHistory = true;
+		} else if (argv[i] == "--nohistory"){
+			printHistory = false;
+		} else if (argv[i] == "--instructions"){
+			printInstructions = true;
+		} else if (argv[i] == "--noinstructions"){
+			printInstructions = false;
+		} else if (argv[i] == "--stats"){
+			printStats = true;
+		} else if (argv[i] == "--nostats"){
+			printStats = false;
+		} else if (argv[i] == "--timer"){
+			timer = true;
+		} else if (argv[i] == "--notimer"){
+			timer = false;
+		} else if (argv[i] == "--count-solutions"){
+			countSolutions = true;
+		} else if (argv[i] == "--nocount-solutions"){
+			countSolutions = false;
+		} else if (argv[i] == "--generate"){
+			action = "GENERATE";
+			printPuzzle = true;
+			if (i+1 < argv.length && argv[i+1].charAt(0) != "-"){
+				numberToGenerate = parseInt(argv[i+1]);
+				if (isNaN(numberToGenerate) || numberToGenerate <= 0){
+					console.log("Bad number of puzzles to generate: "+argv[i+1]);
+					process.exit(1);
+				}
+				i++;
+			}
+		} else if (argv[i] == "--difficulty") {
+			if (argv.length <= i+1){
+				console.log("Please specify a difficulty.");
+				process.exit(1);
+			} else if (argv[i+1].toLowerCase() == "simple"){
+				difficulty = qqwing.Difficulty.SIMPLE;
+			} else if (argv[i+1].toLowerCase() == "easy"){
+				difficulty = qqwing.Difficulty.EASY;
+			} else if (argv[i+1].toLowerCase() == "intermediate"){
+				difficulty = qqwing.Difficulty.INTERMEDIATE;
+			} else if (argv[i+1].toLowerCase() == "expert"){
+				difficulty = qqwing.Difficulty.EXPERT;
+			} else if (argv[i+1].toLowerCase() == "any"){
+				difficulty = qqwing.Difficulty.UNKNOWN;
+			} else {
+				console.log("Difficulty expected to be simple, easy, intermediate, expert, or any, not "+argv[i+1]);
+				process.exit(1);
+			}
+			i++;
+		} else if (argv[i] == "--symmetry") {
+			if (argv.length <= i+1){
+				console.log("Please specify a symmetry.");
+				process.exit(1);
+			} else if (argv[i+1] == "none") {
+				symmetry = qqwing.Symmetry.NONE;
+			} else if (argv[i+1] == "rotate90") {
+				symmetry = qqwing.Symmetry.ROTATE90;
+			} else if (argv[i+1] == "rotate180") {
+				symmetry = qqwing.Symmetry.ROTATE180;
+			} else if (argv[i+1] == "mirror") {
+				symmetry = qqwing.Symmetry.MIRROR;
+			} else if (argv[i+1] == "flip") {
+				symmetry = qqwing.Symmetry.FLIP;
+			} else if (argv[i+1] == "random") {
+				symmetry = qqwing.Symmetry.RANDOM;
+			} else {
+				console.log("Symmetry expected to be none, rotate90, rotate180, mirror, flip, or random, not " + argv[i+1]);
+				process.exit(1);
+			}
+			i++;
+		} else if (argv[i] == "--solve") {
+			action = "SOLVE";
+			printSolution = true;
+		} else if (argv[i] == "--log-history") {
+			logHistory = true;
+		} else if (argv[i] == "--nolog-history") {
+			logHistory = false;
+		} else if (argv[i] == "--one-line") {
+			printStyle=qqwing.PrintStyle.ONE_LINE;
+		} else if (argv[i] == "--compact") {
+			printStyle=qqwing.PrintStyle.COMPACT;
+		} else if (argv[i] == "--readable") {
+			printStyle=qqwing.PrintStyle.READABLE;
+		} else if (argv[i] == "--csv") {
+			printStyle=qqwing.PrintStyle.CSV;
+		} else if (argv[i] == "-n" || argv[i] == "--number") {
+			if (i+1 < argv.length){
+				numberToGenerate = parseInt(argv[i+1]);
+				i++;
+			} else {
+				console.log("Please specify a number.");
+				process.exit(1);
+			}
+		} else if (argv[i] == "-h" || argv[i] == "--help" || argv[i] == "help" || argv[i] == "?") {
+			printHelp();
+			process.exit(0);
+		} else if (argv[i] == "--version") {
+			printVersion();
+			process.exit(0);
+		} else if (argv[i] == "--about") {
+			printAbout();
+			process.exit(0);
+		} else {
+			console.log("Unknown argument: '"+argv[i]+"'");
+			printHelp();
+			process.exit(0);
+		}
+	}
+
+	if (action == "NONE"){
+		console.log("Either --solve or --generate must be specified.");
+		printHelp();
+		process.exit(1);
+	}
+
+	// If printing out CSV, print a header
+	if (printStyle == qqwing.PrintStyle.CSV){
+		if (printPuzzle) process.stdout.write("Puzzle,");
+		if (printSolution) process.stdout.write("Solution,");
+		if (printHistory) process.stdout.write("Solve History,");
+		if (printInstructions) process.stdout.write("Solve Instructions,");
+		if (countSolutions) process.stdout.write("Solution Count,");
+		if (timer) process.stdout.write("Time (milliseconds),");
+		if (printStats) process.stdout.write("Givens,Singles,Hidden Singles,Naked Pairs,Hidden Pairs,Pointing Pairs/Triples,Box/Line Intersections,Guesses,Backtracks,Difficulty");
+		console.log("");
+	}
+
+	// Create a new puzzle board
+	// and set the options
+	var ss = new qqwing();
+	ss.setRecordHistory(printHistory || printInstructions || printStats || difficulty!=qqwing.Difficulty.UNKNOWN);
+	ss.setLogHistory(logHistory);
+	ss.setPrintStyle(printStyle);
+
+	// Solve puzzle or generate puzzles
+	// until end of input for solving, or
+	// until we have generated the specified number.
+	var done = false;
+	var numberGenerated = 0;
+	while (!done){
+		// record the start time for the timer.
+		var puzzleStartTime = getMicroseconds();
+
+		// iff something has been printed for this particular puzzle
+		var printedSomething = false;
+
+		// Record whether the puzzle was possible or not,
+		// so that we don't try to solve impossible givens.
+		var havePuzzle = false;
+		if (action == "GENERATE"){
+			// Generate a puzzle
+			havePuzzle = ss.generatePuzzleSymmetry(symmetry);
+			if (!havePuzzle && printPuzzle){
+				process.stdout.write("Could not generate puzzle.");
+				if (printStyle==qqwing.PrintStyle.CSV){
+					console.log(",");
+				} else {
+					console.log("");
+				}
+				printedSomething = true;
+					process.exit(1);
+			}
+		} else {
+			// Read the next puzzle on STDIN
+			var puzzle = [];
+			if (readPuzzleFromStdIn(puzzle)){
+				havePuzzle = ss.setPuzzle(puzzle);
+				if (!havePuzzle){
+					if (printPuzzle){
+						ss.printPuzzle();
+						printedSomething = true;
+					}
+					if (printSolution) {
+						process.stdout.write("Puzzle is not possible.");
+						if (printStyle==qqwing.PrintStyle.CSV){
+							process.stdout.write(",");
+						} else {
+							console.log("");
+						}
+						printedSomething = true;
+					}
+				}
+			} else {
+				// Set loop to terminate when nothing is left on STDIN
+				havePuzzle = false;
+				done = true;
+			}
+			puzzle = null;
+		}
+
+		var solutions = 0;
+
+		if (havePuzzle){
+
+			// Count the solutions if requested.
+			// (Must be done before solving, as it would
+			// mess up the stats.)
+			if (countSolutions){
+				solutions = ss.countSolutions();
+			}
+
+			// Solve the puzzle
+			if (printSolution || printHistory || printStats || printInstructions || difficulty!=qqwing.Difficulty.UNKNOWN){
+				ss.solve();
+			}
+
+			// Bail out if it didn't meet the difficulty standards for generation
+			if (action == "GENERATE"){
+				if (difficulty!=qqwing.Difficulty.UNKNOWN && difficulty!=ss.getDifficulty()){
+					havePuzzle = false;
+				} else {
+					numberGenerated++;
+					// Set loop to terminate if enough have been generated.
+					if (numberGenerated >= numberToGenerate) done = true;
+				}
+			}
+		}
+
+		// Check havePuzzle again, it may have changed based on difficulty
+		if (havePuzzle){
+
+			// With a puzzle now in hand and possibly solved
+			// print out the solution, stats, etc.
+			printedSomething = true;
+
+			// Record the end time for the timer.
+			var puzzleDoneTime = getMicroseconds();
+
+			// Print the puzzle itself.
+			if (printPuzzle) ss.printPuzzle();
+
+			// Print the solution if there is one
+			if (printSolution){
+				if (ss.isSolved()){
+					ss.printSolution();
+				} else {
+					process.stdout.write("Puzzle has no solution.");
+					if (printStyle==qqwing.PrintStyle.CSV){
+						process.stdout.write(",");
+					} else {
+						console.log("");
+					}
+				}
+			}
+
+			// Print the steps taken to solve or attempt to solve the puzzle.
+			if (printHistory) ss.printSolveHistory();
+			// Print the instructions for solving the puzzle
+			if (printInstructions) ss.printSolveInstructions();
+
+			// Print the number of solutions to the puzzle.
+			if (countSolutions){
+				if (printStyle == qqwing.PrintStyle.CSV){
+					process.stdout.write(solutions+",");
+				} else {
+					if (solutions == 0){
+						console.log("There are no solutions to the puzzle.");
+					} else if (solutions == 1){
+						console.log("The solution to the puzzle is unique.");
+					} else {
+						console.log("There are "+solutions+" solutions to the puzzle.");
+					}
+				}
+			}
+
+			// Print out the time it took to solve the puzzle.
+			if (timer){
+				var t = (puzzleDoneTime - puzzleStartTime)/1000.0;
+				if (printStyle == qqwing.PrintStyle.CSV){
+					process.stdout.write(t+",");
+				} else {
+					console.log("Time: "+t +" milliseconds");
+				}
+			}
+
+			// Print any stats we were able to gather while solving the puzzle.
+			if (printStats){
+				var givenCount = ss.getGivenCount();
+				var singleCount = ss.getSingleCount();
+				var hiddenSingleCount = ss.getHiddenSingleCount();
+				var nakedPairCount = ss.getNakedPairCount();
+				var hiddenPairCount = ss.getHiddenPairCount();
+				var pointingPairTripleCount = ss.getPointingPairTripleCount();
+				var boxReductionCount = ss.getBoxLineReductionCount();
+				var guessCount = ss.getGuessCount();
+				var backtrackCount = ss.getBacktrackCount();
+				var difficultyString = ss.getDifficultyAsString();
+				if (printStyle == qqwing.PrintStyle.CSV){
+					console.log(givenCount+"," +singleCount+","+hiddenSingleCount
+							+","+nakedPairCount+","+hiddenPairCount
+							+"," +pointingPairTripleCount +"," +boxReductionCount
+							+","+guessCount+","+backtrackCount
+							+","+difficultyString+",");
+				} else {
+					console.log("Number of Givens: "+givenCount );
+					console.log("Number of Singles: "+singleCount);
+					console.log("Number of Hidden Singles: "+hiddenSingleCount );
+					console.log("Number of Naked Pairs: "+nakedPairCount );
+					console.log("Number of Hidden Pairs: "+hiddenPairCount );
+					console.log("Number of Pointing Pairs/Triples: "+pointingPairTripleCount );
+					console.log("Number of Box/Line Intersections: "+boxReductionCount );
+					console.log("Number of Guesses: "+guessCount );
+					console.log("Number of Backtracks: "+backtrackCount );
+					console.log("Difficulty: "+difficultyString );
+				}
+			}
+			puzzleCount++;
+		}
+		if (printedSomething && printStyle == qqwing.PrintStyle.CSV){
+			console.log("");
+		}
+	}
+
+	var applicationDoneTime = getMicroseconds();
+	// Print out the time it took to do everything
+	if (timer){
+		var t = (applicationDoneTime - applicationStartTime)/1000000.0;
+		console.log(puzzleCount+" puzzle"+((puzzleCount==1)?"":"s")+" "+(action=="GENERATE"?"generated":"solved")+" in "+t+" seconds.");
+	}
+} catch (e){
+	console.log(e.stack);
+	process.exit(1);
+}
+process.exit(0);
+
+function printHelp(){
+	console.log("qqwing <options>");
+	console.log("Sudoku solver and generator.");
+	console.log("  --generate <num>     Generate new puzzles");
+	console.log("  --solve              Solve all the puzzles from standard input");
+	console.log("  --difficulty <diff>  Generate only simple, easy, intermediate, expert, or any");
+	console.log("  --symmetry <sym>     Symmetry: none, rotate90, rotate180, mirror, flip, or random");
+	console.log("  --puzzle             Print the puzzle (default when generating)");
+	console.log("  --nopuzzle           Do not print the puzzle (default when solving)");
+	console.log("  --solution           Print the solution (default when solving)");
+	console.log("  --nosolution         Do not print the solution (default when generating)");
+	console.log("  --stats              Print statistics about moves used to solve the puzzle");
+	console.log("  --nostats            Do not print statistics (default)");
+	console.log("  --timer              Print time to generate or solve each puzzle");
+	console.log("  --notimer            Do not print solve or generation times (default)");
+	console.log("  --count-solutions    Count the number of solutions to puzzles");
+	console.log("  --nocount-solutions  Do not count the number of solutions (default)");
+	console.log("  --history            Print trial and error used when solving");
+	console.log("  --nohistory          Do not print trial and error to solve (default)");
+	console.log("  --instructions       Print the steps (at least 81) needed to solve the puzzle");
+	console.log("  --noinstructions     Do not print steps to solve (default)");
+	console.log("  --log-history        Print trial and error to solve as it happens");
+	console.log("  --nolog-history      Do not print trial and error  to solve as it happens");
+	console.log("  --one-line           Print puzzles on one line of 81 characters");
+	console.log("  --compact            Print puzzles on 9 lines of 9 characters");
+	console.log("  --readable           Print puzzles in human readable form (default)");
+	console.log("  --csv                Output CSV format with one line puzzles");
+	console.log("  --help               Print this message");
+	console.log("  --about              Author and license information");
+	console.log("  --version            Display current version number");
+}
+
+function printVersion(){
+	console.log("qqwing 1.3.4");
+}
+
+function printAbout(){
+	console.log("qqwing - Sudoku solver and generator");
+	console.log("Copyright (C) 2014 Stephen Ostermiller");
+	console.log("");
+	console.log("This program is free software; you can redistribute it and/or modify");
+	console.log("it under the terms of the GNU General Public License as published by");
+	console.log("the Free Software Foundation; either version 2 of the License, or");
+	console.log("(at your option) any later version.");
+	console.log("");
+	console.log("This program is distributed in the hope that it will be useful,");
+	console.log("but WITHOUT ANY WARRANTY; without even the implied warranty of");
+	console.log("MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the");
+	console.log("GNU General Public License for more details.");
+	console.log("");
+	console.log("You should have received a copy of the GNU General Public License along");
+	console.log("with this program; if not, write to the Free Software Foundation, Inc.,");
+	console.log("51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.");
+}
+
+function getMicroseconds(){
+	return new Date().getTime() * 1000;
+}
 
 
-
-module.exports = qqwing;
-
-}).call(this,require('_process'))
-},{"_process":1}],7:[function(require,module,exports){
-'use strict';
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var GameTopBox = require('./game-top-box.js');
-var GameStatsBox = require('./game-stats-box.js');
-var GameBoard = require('./game-board.js');
-var SelectionsBox = require('./selections-box.js');
-
-var App = function App() {
-    _classCallCheck(this, App);
-
-    console.log("Starting MB Sudoku");
-    this.containerElem = document.getElementById('app-container');
-
-    this.gameBoard = new GameBoard();
-    this.gameTopBox = new GameTopBox(this.gameBoard);
-    this.gameStatsBox = new GameStatsBox(this.gameBoard);
-    this.selectionsBox = new SelectionsBox(this.gameBoard);
-
-    this.containerElem.appendChild(this.gameTopBox.getElement());
-    this.containerElem.appendChild(this.gameStatsBox.getElement());
-    this.containerElem.appendChild(this.gameBoard.getElement());
-    this.containerElem.appendChild(this.selectionsBox.getElement());
-};
-
-var app = new App();
-},{"./game-board.js":3,"./game-stats-box.js":4,"./game-top-box.js":5,"./selections-box.js":8}],8:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-module.exports = function () {
-  function SelectionsBox(gameBoard) {
-    var _this = this;
-
-    _classCallCheck(this, SelectionsBox);
-
-    this.gameBoard = gameBoard;
-    console.log('Creating Selections Box');
-    this.containerElem = document.createElement('div');
-    this.containerElem.classList.add('selections-box');
-
-    //--------------------------------------------------------------------------
-    // Create the option buttons
-    //--------------------------------------------------------------------------
-    this.optionsContainerElem = document.createElement('div');
-    this.optionsContainerElem.classList.add('options-container');
-    this.containerElem.appendChild(this.optionsContainerElem);
-
-    this.spacerElem = document.createElement('div');
-    this.spacerElem.classList.add('spacer');
-    this.spacerElem.textContent = 'X';
-    this.optionsContainerElem.appendChild(this.spacerElem);
-
-    this.removeBtnElem = document.createElement('div');
-    this.removeBtnElem.classList.add('remove-btn');
-    this.removeBtnElem.textContent = 'X';
-    this.optionsContainerElem.appendChild(this.removeBtnElem);
-    this.removeBtnElem.addEventListener('mousedown', function (e) {
-      _this.gameBoard.setSelectedTileValue(-1);
-      _this.updateTileStyleStates();
-    });
-
-    this.STATE = {};
-    this.STATE.ENABLED = 0;
-    this.STATE.DISABLED = 1;
-
-    //--------------------------------------------------------------------------
-    // Create the selection tiles
-    //--------------------------------------------------------------------------
-    this.tilesContainerElem = document.createElement('div');
-    this.tilesContainerElem.classList.add('tiles-container');
-    this.containerElem.appendChild(this.tilesContainerElem);
-
-    this.selectionTiles = [];
-
-    var _loop = function _loop(i) {
-      var tmpTile = document.createElement('div');
-      tmpTile.classList.add('tile');
-      if ((i + 1) % 2 == 0) {
-        tmpTile.classList.add('even');
-      } else {
-        tmpTile.classList.add('odd');
-      }
-      tmpTile.numValue = i + 1;
-      tmpTile.textContent = '' + tmpTile.numValue;
-      _this.tilesContainerElem.appendChild(tmpTile);
-      tmpTile.addEventListener('mousedown', function (e) {
-        if (!tmpTile.classList.contains('done')) {
-          var isDone = _this.gameBoard.setSelectedTileValue(tmpTile.numValue);
-          if (isDone) {
-            tmpTile.classList.add('done');
-          }
-        }
-      });
-      _this.selectionTiles.push(tmpTile);
-    };
-
-    for (var i = 0; i < 9; i++) {
-      _loop(i);
-    }
-
-    this.updateTileStyleStates();
-  }
-
-  _createClass(SelectionsBox, [{
-    key: 'getElement',
-    value: function getElement() {
-      return this.containerElem;
-    }
-  }, {
-    key: 'updateTileStyleStates',
-    value: function updateTileStyleStates() {
-      var doneVals = this.gameBoard.getCompletedValues();
-      for (var i = 0; i < 9; i++) {
-        var _tmpTile = this.selectionTiles[i];
-        var found = false;
-        for (var j = 0; j < doneVals.length; j++) {
-          if (doneVals[j] == _tmpTile.numValue) {
-            found = true;
-          }
-        }
-        if (found) {
-          this.setTileActiveState(_tmpTile.numValue, this.STATE.DISABLED);
-        } else {
-          this.setTileActiveState(_tmpTile.numValue, this.STATE.ENABLED);
-        }
-      }
-    }
-  }, {
-    key: 'setTileActiveState',
-    value: function setTileActiveState(tileValue, state) {
-      if (state == this.STATE.ENABLED) {
-        if (this.selectionTiles[tileValue - 1].classList.contains('done')) {
-          this.selectionTiles[tileValue - 1].classList.remove('done');
-        }
-      } else if (state == this.STATE.DISABLED) {
-        if (!this.selectionTiles[tileValue - 1].classList.contains('done')) {
-          this.selectionTiles[tileValue - 1].classList.add('done');
-        }
-      }
-    }
-  }]);
-
-  return SelectionsBox;
-}();
-},{}]},{},[7]);
+/**
+ * Read a sudoku puzzle from standard input.
+ * STDIN is processed one character at a time
+ * until the sudoku is filled in.  Any digit
+ * or period is used to fill the sudoku, any
+ * other character is ignored.
+ */
+function readPuzzleFromStdIn(puzzle){
+	var fs = require('fs');
+	var read = 0;
+	while (read < qqwing.BOARD_SIZE){
+		var c = fs.readSync(process.stdin.fd, 1);
+		if (c[1] == 0) return false;
+		if (c[0] >= '1' && c[0] <='9'){
+			puzzle[read] = c[0]-'0';
+			read++;
+		}
+		if (c[0] == '.' || c[0] == '0'){
+			puzzle[read] = 0;
+			read++;
+		}
+	}
+	return true;
+}
