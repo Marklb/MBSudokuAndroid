@@ -472,17 +472,6 @@ module.exports = function () {
       this.qqwing.setPrintStyle(QQWING.PrintStyle.ONE_LINE);
       var t = this.qqwing.getSolutionString();
       console.log(t);
-      var toStr = {
-        '1': 1,
-        '2': 2,
-        '3': 3,
-        '4': 4,
-        '5': 5,
-        '6': 6,
-        '7': 7,
-        '8': 8,
-        '9': 9
-      };
       var count = 0;
       for (var i = 0; i < 9; i++) {
         for (var j = 0; j < 9; j++) {
@@ -490,7 +479,6 @@ module.exports = function () {
           if (t[count] == '.') {
             this.tiles[i][j].setValue(-1, false);
           } else {
-            // this.tiles[i][j].setValue(toStr[t[count]], true);
             this.tiles[i][j].setValue(parseInt(t[count]), true);
           }
           count++;

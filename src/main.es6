@@ -3,6 +3,17 @@ let GameStatsBox = require('./game-stats-box.js');
 let GameBoard = require('./game-board.js');
 let SelectionsBox = require('./selections-box.js');
 
+
+// TODO: History
+// TODO: Undo
+// TODO: Hint
+// TODO: Stats collector
+// TODO: Difficulty selector
+// TODO: New game conformation
+// TODO: Win screen
+// IDEA: Victory picture
+
+
 class App {
   constructor() {
     console.log("Starting MB Sudoku");

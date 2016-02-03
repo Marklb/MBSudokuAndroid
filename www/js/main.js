@@ -7,6 +7,15 @@ var GameStatsBox = require('./game-stats-box.js');
 var GameBoard = require('./game-board.js');
 var SelectionsBox = require('./selections-box.js');
 
+// TODO: History
+// TODO: Undo
+// TODO: Hint
+// TODO: Stats collector
+// TODO: Difficulty selector
+// TODO: New game conformation
+// TODO: Win screen
+// IDEA: Victory picture
+
 var App = function App() {
     _classCallCheck(this, App);
 

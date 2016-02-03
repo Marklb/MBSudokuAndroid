@@ -44,6 +44,9 @@ module.exports = function () {
     this.containerElem.addEventListener('mousedown', function () {
       _this.gameBoard.setSelectedTile(_this.row, _this.column);
     });
+    // this.containerElem.addEventListener('touchstart', () => {
+    //   this.gameBoard.setSelectedTile(this.row, this.column);
+    // });
   }
 
   _createClass(GameBoardTile, [{

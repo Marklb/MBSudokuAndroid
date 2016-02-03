@@ -135,7 +135,10 @@ module.exports = function () {
     this.STYLE_STATES_CLASSES[this.STYLE_STATES.SAME_VALUE] = 'style-state-same-value';
     this.STYLE_STATES_CLASSES[this.STYLE_STATES.CONFLICTING_VALUE] = 'style-state-conflicting-value';
 
-    this.containerElem.addEventListener('mousedown', function () {
+    // this.containerElem.addEventListener('mousedown', () => {
+    //   this.gameBoard.setSelectedTile(this.row, this.column);
+    // });
+    this.containerElem.addEventListener('touchstart', function () {
       _this.gameBoard.setSelectedTile(_this.row, _this.column);
     });
   }
@@ -708,17 +711,6 @@ module.exports = function () {
       this.qqwing.setPrintStyle(QQWING.PrintStyle.ONE_LINE);
       var t = this.qqwing.getSolutionString();
       console.log(t);
-      var toStr = {
-        '1': 1,
-        '2': 2,
-        '3': 3,
-        '4': 4,
-        '5': 5,
-        '6': 6,
-        '7': 7,
-        '8': 8,
-        '9': 9
-      };
       var count = 0;
       for (var i = 0; i < 9; i++) {
         for (var j = 0; j < 9; j++) {
@@ -726,7 +718,6 @@ module.exports = function () {
           if (t[count] == '.') {
             this.tiles[i][j].setValue(-1, false);
           } else {
-            // this.tiles[i][j].setValue(toStr[t[count]], true);
             this.tiles[i][j].setValue(parseInt(t[count]), true);
           }
           count++;
@@ -2679,6 +2670,15 @@ var GameTopBox = require('./game-top-box.js');
 var GameStatsBox = require('./game-stats-box.js');
 var GameBoard = require('./game-board.js');
 var SelectionsBox = require('./selections-box.js');
+
+// TODO: History
+// TODO: Undo
+// TODO: Hint
+// TODO: Stats collector
+// TODO: Difficulty selector
+// TODO: New game conformation
+// TODO: Win screen
+// IDEA: Victory picture
 
 var App = function App() {
     _classCallCheck(this, App);

@@ -39,6 +39,9 @@ class GameBoardTile {
     this.containerElem.addEventListener('mousedown', () => {
       this.gameBoard.setSelectedTile(this.row, this.column);
     });
+    // this.containerElem.addEventListener('touchstart', () => {
+    //   this.gameBoard.setSelectedTile(this.row, this.column);
+    // });
 
   }
 

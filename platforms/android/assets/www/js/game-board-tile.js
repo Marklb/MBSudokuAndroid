@@ -41,7 +41,10 @@ module.exports = function () {
     this.STYLE_STATES_CLASSES[this.STYLE_STATES.SAME_VALUE] = 'style-state-same-value';
     this.STYLE_STATES_CLASSES[this.STYLE_STATES.CONFLICTING_VALUE] = 'style-state-conflicting-value';
 
-    this.containerElem.addEventListener('mousedown', function () {
+    // this.containerElem.addEventListener('mousedown', () => {
+    //   this.gameBoard.setSelectedTile(this.row, this.column);
+    // });
+    this.containerElem.addEventListener('touchstart', function () {
       _this.gameBoard.setSelectedTile(_this.row, _this.column);
     });
   }
