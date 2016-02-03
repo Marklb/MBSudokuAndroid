@@ -399,7 +399,7 @@ class GameBoard {
     this.initGameTiles();
 
     this.startTime1 = Date.now();
-    setInterval(() => {
+    let timerIntervalFunc = () => {
       let endTime1 = Date.now();
       let elapsed1 = (endTime1 - this.startTime1);
       this.startTime1 = endTime1;
@@ -409,7 +409,17 @@ class GameBoard {
         elapsed1 = elapsed1 + tmpTimeElapsed;
       }
       window.localStorage.setItem("timeElapsed", JSON.stringify(elapsed1));
-    },1000);
+    };
+    this.timerInterval = setInterval(timerIntervalFunc,1000);
+
+    document.addEventListener("pause", (e) => {
+      clearInterval(this.timerInterval);
+    }, false);
+
+    document.addEventListener("resume", (e) => {
+      this.startTime1 = Date.now();
+      this.timerInterval = setInterval(timerIntervalFunc,1000);
+    }, false);
 
   }
 

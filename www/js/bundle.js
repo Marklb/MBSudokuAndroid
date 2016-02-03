@@ -565,7 +565,7 @@ module.exports = function () {
     this.initGameTiles();
 
     this.startTime1 = Date.now();
-    setInterval(function () {
+    var timerIntervalFunc = function timerIntervalFunc() {
       var endTime1 = Date.now();
       var elapsed1 = endTime1 - _this.startTime1;
       _this.startTime1 = endTime1;
@@ -575,7 +575,17 @@ module.exports = function () {
         elapsed1 = elapsed1 + tmpTimeElapsed;
       }
       window.localStorage.setItem("timeElapsed", JSON.stringify(elapsed1));
-    }, 1000);
+    };
+    this.timerInterval = setInterval(timerIntervalFunc, 1000);
+
+    document.addEventListener("pause", function (e) {
+      clearInterval(_this.timerInterval);
+    }, false);
+
+    document.addEventListener("resume", function (e) {
+      _this.startTime1 = Date.now();
+      _this.timerInterval = setInterval(timerIntervalFunc, 1000);
+    }, false);
   }
 
   _createClass(GameBoard, [{
