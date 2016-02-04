@@ -6,7 +6,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var MainMenu = require('./main-menu');
 var Game = require('./game');
-var attachFastClick = require('./libs/fastclick');
+// var attachFastClick = require('./libs/fastclick');
 
 // TODO: History
 // TODO: Undo
@@ -27,7 +27,7 @@ var App = function () {
   function App() {
     _classCallCheck(this, App);
 
-    attachFastClick(document.body);
+    // attachFastClick(document.body);
     console.log("Starting MB Sudoku");
     this.containerElem = document.getElementById('app-container');
 

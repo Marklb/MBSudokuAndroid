@@ -1,6 +1,6 @@
 let MainMenu = require('./main-menu');
 let Game = require('./game');
-var attachFastClick = require('./libs/fastclick');
+// var attachFastClick = require('./libs/fastclick');
 
 // TODO: History
 // TODO: Undo
@@ -20,7 +20,7 @@ global.VIEW_ID = {
 
 class App {
   constructor() {
-    attachFastClick(document.body);
+    // attachFastClick(document.body);
     console.log("Starting MB Sudoku");
     this.containerElem = document.getElementById('app-container');
 

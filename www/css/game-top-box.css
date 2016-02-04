@@ -1,4 +1,7 @@
 .game-top-box {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
   display: flex;
   flex-direction: row;
   -webkit-box-sizing: border-box;
@@ -10,6 +13,9 @@
   overflow: hidden;
 }
 .game-top-box .menu-btn{
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  -webkit-flex:1;
   flex: 1;
   -webkit-box-sizing: border-box;
      -moz-box-sizing: border-box;
@@ -17,6 +23,9 @@
   background-color: rgba(110,50,50,1);
   margin: 2px;
   border: 2px solid rgba(0,0,0,1);
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
   display: flex;
   justify-content: center; /* align horizontal */
   align-items: center; /* align vertical */
@@ -24,6 +33,9 @@
   cursor: default;
 }
 .game-top-box .title{
+  -webkit-box-flex: 8;
+  -moz-box-flex: 8;
+  -webkit-flex:8;
   flex: 8;
   -webkit-box-sizing: border-box;
      -moz-box-sizing: border-box;
@@ -32,6 +44,9 @@
   margin: 2px;
   border: 2px solid rgba(0,100,100,1);
   color: rgba(0,150,150,1);
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
   display: flex;
   justify-content: center; /* align horizontal */
   align-items: center; /* align vertical */
@@ -39,6 +54,9 @@
   cursor: default;
 }
 .game-top-box .reset-btn{
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  -webkit-flex:1;
   flex: 1;
   -webkit-box-sizing: border-box;
      -moz-box-sizing: border-box;
@@ -46,6 +64,9 @@
   background-color: rgba(110,50,50,1);
   margin: 2px;
   border: 2px solid rgba(0,0,0,1);
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
   display: flex;
   justify-content: center; /* align horizontal */
   align-items: center; /* align vertical */

@@ -1,5 +1,8 @@
 .game-board {
   /*background-color: rgba(50,50,50,0.2);*/
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
   display: flex;
   flex-direction: column;
   -webkit-box-sizing: border-box;
@@ -10,6 +13,9 @@
 }
 .game-board .board-row {
   flex-grow: 1;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
   display: flex;
   flex-direction: row;
   -webkit-box-sizing: border-box;
@@ -19,7 +25,13 @@
 .game-board .board-row .block {
   background-color: rgba(110,50,50,1);
   /*flex-grow: 1;*/
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  -webkit-flex:1
   flex: 1;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
   display: flex;
   flex-direction: column;
   -webkit-box-sizing: border-box;
@@ -30,8 +42,14 @@
 }
 .game-board .board-row .block .block-row {
   /*flex-grow: 1;*/
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  -webkit-flex:1
   flex: 1;
   background-color: rgba(110,50,50,1);
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
   display: flex;
   flex-direction: row;
   -webkit-box-sizing: border-box;
@@ -40,12 +58,18 @@
 }
 .game-board .board-row .block .block-row .tile {
   /*flex-grow: 1;*/
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  -webkit-flex:1;
   flex: 1;
   -webkit-box-sizing: border-box;
      -moz-box-sizing: border-box;
           box-sizing: border-box;
   margin: 2px;
   border: 2px solid rgba(0,0,0,1);
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
   display: flex;
   justify-content: center; /* align horizontal */
   align-items: center; /* align vertical */
