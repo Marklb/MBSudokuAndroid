@@ -1,2 +1,2 @@
 gulp;
-browserify www/js/main.js > www/js/bundle.js;
+browserify www/js/app.js > www/js/bundle.js;

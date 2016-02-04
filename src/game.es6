@@ -1,8 +1,8 @@
-let GameTopBox = require('./game-top-box.js');
-let GameStatsBox = require('./game-stats-box.js');
-let GameBoard = require('./game-board.js');
-let SelectionsBox = require('./selections-box.js');
-let View = require('./view.js');
+let GameTopBox = require('./game-top-box');
+let GameStatsBox = require('./game-stats-box');
+let GameBoard = require('./game-board');
+let SelectionsBox = require('./selections-box');
+let View = require('./view');
 
 module.exports =
 class Game extends View {

@@ -5,6 +5,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var CSS_CLASSES = {
+  VIEW: 'view',
   HIDDEN: 'hidden'
 };
 
@@ -13,7 +14,7 @@ module.exports = function () {
     _classCallCheck(this, View);
 
     this.viewElement = document.createElement('div');
-    this.getViewElement().classList.add('view');
+    this.getViewElement().classList.add(CSS_CLASSES.VIEW);
     this.getViewElement().classList.add(CSS_CLASSES.HIDDEN);
 
     this.setViewName(viewName);

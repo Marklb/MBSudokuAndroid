@@ -1,5 +1,5 @@
-let MainMenu = require('./main-menu.js');
-let Game = require('./game.js');
+let MainMenu = require('./main-menu');
+let Game = require('./game');
 var attachFastClick = require('./libs/fastclick');
 
 // TODO: History

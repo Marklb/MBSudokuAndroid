@@ -8,11 +8,11 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var GameTopBox = require('./game-top-box.js');
-var GameStatsBox = require('./game-stats-box.js');
-var GameBoard = require('./game-board.js');
-var SelectionsBox = require('./selections-box.js');
-var View = require('./view.js');
+var GameTopBox = require('./game-top-box');
+var GameStatsBox = require('./game-stats-box');
+var GameBoard = require('./game-board');
+var SelectionsBox = require('./selections-box');
+var View = require('./view');
 
 module.exports = function (_View) {
   _inherits(Game, _View);

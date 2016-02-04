@@ -1,4 +1,5 @@
 const CSS_CLASSES = {
+  VIEW: 'view',
   HIDDEN: 'hidden'
 };
 
@@ -6,7 +7,7 @@ module.exports =
 class View {
   constructor(viewName) {
     this.viewElement = document.createElement('div');
-    this.getViewElement().classList.add('view');
+    this.getViewElement().classList.add(CSS_CLASSES.VIEW);
     this.getViewElement().classList.add(CSS_CLASSES.HIDDEN);
 
 

@@ -1,5 +1,5 @@
-let QQWING = require('./libs/qqwing-1.3.4/qqwing-1.3.4.js');
-let GameBoardTile = require('./game-board-tile.js');
+let QQWING = require('./libs/qqwing-1.3.4/qqwing-1.3.4');
+let GameBoardTile = require('./game-board-tile');
 
 module.exports =
 class GameBoard {
@@ -7,11 +7,6 @@ class GameBoard {
     console.log("Creating GameBoard");
 
     this.qqwing = new QQWING();
-    // this.qqwing.generatePuzzle();
-    // this.qqwing.setPrintStyle(QQWING.PrintStyle.ONE_LINE);
-    // this.qqwing.printSolution();
-    // let t = this.qqwing.getSolutionString();
-    // console.log(t);
 
     this.containerElem = document.createElement('div');
     this.containerElem.classList.add('game-board');
@@ -28,57 +23,7 @@ class GameBoard {
     //--------------------------------------------------------------------------
     // Create the board rows
     //--------------------------------------------------------------------------
-    this.boardRow1 = document.createElement('div');
-    this.boardRow1.classList.add('board-row');
-    this.containerElem.appendChild(this.boardRow1);
-
-    this.boardRow2 = document.createElement('div');
-    this.boardRow2.classList.add('board-row');
-    this.containerElem.appendChild(this.boardRow2);
-
-    this.boardRow3 = document.createElement('div');
-    this.boardRow3.classList.add('board-row');
-    this.containerElem.appendChild(this.boardRow3);
-
-    //--------------------------------------------------------------------------
-    // Create blocks
-    //--------------------------------------------------------------------------
-    // top left
-    this.block1 = document.createElement('div');
-    this.block1.classList.add('block');
-    this.boardRow1.appendChild(this.block1);
-    // top middle
-    this.block2 = document.createElement('div');
-    this.block2.classList.add('block');
-    this.boardRow1.appendChild(this.block2);
-    // top right
-    this.block3 = document.createElement('div');
-    this.block3.classList.add('block');
-    this.boardRow1.appendChild(this.block3);
-    // middle left
-    this.block4 = document.createElement('div');
-    this.block4.classList.add('block');
-    this.boardRow2.appendChild(this.block4);
-    // middle middle
-    this.block5 = document.createElement('div');
-    this.block5.classList.add('block');
-    this.boardRow2.appendChild(this.block5);
-    // middle right
-    this.block6 = document.createElement('div');
-    this.block6.classList.add('block');
-    this.boardRow2.appendChild(this.block6);
-    // bottom left
-    this.block7 = document.createElement('div');
-    this.block7.classList.add('block');
-    this.boardRow3.appendChild(this.block7);
-    // bottom middle
-    this.block8 = document.createElement('div');
-    this.block8.classList.add('block');
-    this.boardRow3.appendChild(this.block8);
-    // bottom right
-    this.block9 = document.createElement('div');
-    this.block9.classList.add('block');
-    this.boardRow3.appendChild(this.block9);
+    this.initBoardRows();
 
     //--------------------------------------------------------------------------
     // Create blocks rows
@@ -86,93 +31,93 @@ class GameBoard {
     // block1
     this.block1row1 = document.createElement('div');
     this.block1row1.classList.add('block-row');
-    this.block1.appendChild(this.block1row1);
+    this.blocks[0].appendChild(this.block1row1);
     this.block1row2 = document.createElement('div');
     this.block1row2.classList.add('block-row');
-    this.block1.appendChild(this.block1row2);
+    this.blocks[0].appendChild(this.block1row2);
     this.block1row3 = document.createElement('div');
     this.block1row3.classList.add('block-row');
-    this.block1.appendChild(this.block1row3);
+    this.blocks[0].appendChild(this.block1row3);
     // block2
     this.block2row1 = document.createElement('div');
     this.block2row1.classList.add('block-row');
-    this.block2.appendChild(this.block2row1);
+    this.blocks[1].appendChild(this.block2row1);
     this.block2row2 = document.createElement('div');
     this.block2row2.classList.add('block-row');
-    this.block2.appendChild(this.block2row2);
+    this.blocks[1].appendChild(this.block2row2);
     this.block2row3 = document.createElement('div');
     this.block2row3.classList.add('block-row');
-    this.block2.appendChild(this.block2row3);
+    this.blocks[1].appendChild(this.block2row3);
     // block3
     this.block3row1 = document.createElement('div');
     this.block3row1.classList.add('block-row');
-    this.block3.appendChild(this.block3row1);
+    this.blocks[2].appendChild(this.block3row1);
     this.block3row2 = document.createElement('div');
     this.block3row2.classList.add('block-row');
-    this.block3.appendChild(this.block3row2);
+    this.blocks[2].appendChild(this.block3row2);
     this.block3row3 = document.createElement('div');
     this.block3row3.classList.add('block-row');
-    this.block3.appendChild(this.block3row3);
+    this.blocks[2].appendChild(this.block3row3);
     // block4
     this.block4row1 = document.createElement('div');
     this.block4row1.classList.add('block-row');
-    this.block4.appendChild(this.block4row1);
+    this.blocks[3].appendChild(this.block4row1);
     this.block4row2 = document.createElement('div');
     this.block4row2.classList.add('block-row');
-    this.block4.appendChild(this.block4row2);
+    this.blocks[3].appendChild(this.block4row2);
     this.block4row3 = document.createElement('div');
     this.block4row3.classList.add('block-row');
-    this.block4.appendChild(this.block4row3);
+    this.blocks[3].appendChild(this.block4row3);
     // block5
     this.block5row1 = document.createElement('div');
     this.block5row1.classList.add('block-row');
-    this.block5.appendChild(this.block5row1);
+    this.blocks[4].appendChild(this.block5row1);
     this.block5row2 = document.createElement('div');
     this.block5row2.classList.add('block-row');
-    this.block5.appendChild(this.block5row2);
+    this.blocks[4].appendChild(this.block5row2);
     this.block5row3 = document.createElement('div');
     this.block5row3.classList.add('block-row');
-    this.block5.appendChild(this.block5row3);
+    this.blocks[4].appendChild(this.block5row3);
     // block6
     this.block6row1 = document.createElement('div');
     this.block6row1.classList.add('block-row');
-    this.block6.appendChild(this.block6row1);
+    this.blocks[5].appendChild(this.block6row1);
     this.block6row2 = document.createElement('div');
     this.block6row2.classList.add('block-row');
-    this.block6.appendChild(this.block6row2);
+    this.blocks[5].appendChild(this.block6row2);
     this.block6row3 = document.createElement('div');
     this.block6row3.classList.add('block-row');
-    this.block6.appendChild(this.block6row3);
+    this.blocks[5].appendChild(this.block6row3);
     // block7
     this.block7row1 = document.createElement('div');
     this.block7row1.classList.add('block-row');
-    this.block7.appendChild(this.block7row1);
+    this.blocks[6].appendChild(this.block7row1);
     this.block7row2 = document.createElement('div');
     this.block7row2.classList.add('block-row');
-    this.block7.appendChild(this.block7row2);
+    this.blocks[6].appendChild(this.block7row2);
     this.block7row3 = document.createElement('div');
     this.block7row3.classList.add('block-row');
-    this.block7.appendChild(this.block7row3);
+    this.blocks[6].appendChild(this.block7row3);
     // block8
     this.block8row1 = document.createElement('div');
     this.block8row1.classList.add('block-row');
-    this.block8.appendChild(this.block8row1);
+    this.blocks[7].appendChild(this.block8row1);
     this.block8row2 = document.createElement('div');
     this.block8row2.classList.add('block-row');
-    this.block8.appendChild(this.block8row2);
+    this.blocks[7].appendChild(this.block8row2);
     this.block8row3 = document.createElement('div');
     this.block8row3.classList.add('block-row');
-    this.block8.appendChild(this.block8row3);
+    this.blocks[7].appendChild(this.block8row3);
     // block9
     this.block9row1 = document.createElement('div');
     this.block9row1.classList.add('block-row');
-    this.block9.appendChild(this.block9row1);
+    this.blocks[8].appendChild(this.block9row1);
     this.block9row2 = document.createElement('div');
     this.block9row2.classList.add('block-row');
-    this.block9.appendChild(this.block9row2);
+    this.blocks[8].appendChild(this.block9row2);
     this.block9row3 = document.createElement('div');
     this.block9row3.classList.add('block-row');
-    this.block9.appendChild(this.block9row3);
+    this.blocks[8].appendChild(this.block9row3);
 
     //--------------------------------------------------------------------------
     // Create tiles
@@ -426,6 +371,28 @@ class GameBoard {
   getElement(){
     return this.containerElem;
   }
+
+  initBoardRows(){
+    this.boardRows = [];
+    this.blocks = [];
+    for(let i = 0; i < 3; i++){
+      // Create baard row
+      let boardRow = document.createElement('div');
+      boardRow.classList.add('board-row');
+      this.containerElem.appendChild(boardRow);
+      this.boardRows.push(boardRow);
+
+      // Create blocks
+      for(let j = 0; j < 3; j++){
+        let block = document.createElement('div');
+        block.classList.add('block');
+        this.boardRows[i].appendChild(block);
+        this.blocks.push(block);
+      }
+    }
+  }
+
+
 
   setSelectedTile(row, column){
     if(!this.selectedTile){

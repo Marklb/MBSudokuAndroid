@@ -92,6 +92,91 @@ process.chdir = function (dir) {
 process.umask = function() { return 0; };
 
 },{}],2:[function(require,module,exports){
+(function (global){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var MainMenu = require('./main-menu');
+var Game = require('./game');
+var attachFastClick = require('./libs/fastclick');
+
+// TODO: History
+// TODO: Undo
+// TODO: Hint
+// TODO: Stats collector
+// TODO: Difficulty selector
+// TODO: New game conformation
+// TODO: Win screen
+// IDEA: Victory picture
+// TODO: Error notification
+
+global.VIEW_ID = {
+  MAIN_MENU: 'MAIN_MENU_VIEW',
+  GAME: 'GAME_VIEW'
+};
+
+var App = function () {
+  function App() {
+    _classCallCheck(this, App);
+
+    attachFastClick(document.body);
+    console.log("Starting MB Sudoku");
+    this.containerElem = document.getElementById('app-container');
+
+    this.mainMenu = new MainMenu();
+    this.addView(this.mainMenu);
+
+    this.game = new Game();
+    this.addView(this.game);
+
+    this.showView(this.mainMenu.getViewName());
+  }
+
+  _createClass(App, [{
+    key: 'getElement',
+    value: function getElement() {
+      return this.containerElem;
+    }
+  }, {
+    key: 'addView',
+    value: function addView(view) {
+      if (this.views === undefined) {
+        this.views = [];
+      }
+      this.views.push(view);
+      this.getElement().appendChild(view.getViewElement());
+    }
+  }, {
+    key: 'showView',
+    value: function showView(viewName) {
+      for (var i = 0; i < this.views.length; i++) {
+        if (this.views[i].getViewName() === viewName) {
+          this.hideActiveView();
+          this.views[i].show();
+          this.activeView = this.views[i];
+        }
+      }
+    }
+  }, {
+    key: 'hideActiveView',
+    value: function hideActiveView() {
+      if (this.activeView !== undefined) {
+        this.activeView.hide();
+      }
+    }
+  }]);
+
+  return App;
+}();
+
+global.app = new App();
+
+// module.exports = new App();
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./game":7,"./libs/fastclick":8,"./main-menu":10}],3:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -236,15 +321,15 @@ module.exports = function () {
 
   return GameBoardTile;
 }();
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var QQWING = require('./libs/qqwing-1.3.4/qqwing-1.3.4.js');
-var GameBoardTile = require('./game-board-tile.js');
+var QQWING = require('./libs/qqwing-1.3.4/qqwing-1.3.4');
+var GameBoardTile = require('./game-board-tile');
 
 module.exports = function () {
   function GameBoard() {
@@ -255,11 +340,6 @@ module.exports = function () {
     console.log("Creating GameBoard");
 
     this.qqwing = new QQWING();
-    // this.qqwing.generatePuzzle();
-    // this.qqwing.setPrintStyle(QQWING.PrintStyle.ONE_LINE);
-    // this.qqwing.printSolution();
-    // let t = this.qqwing.getSolutionString();
-    // console.log(t);
 
     this.containerElem = document.createElement('div');
     this.containerElem.classList.add('game-board');
@@ -276,57 +356,7 @@ module.exports = function () {
     //--------------------------------------------------------------------------
     // Create the board rows
     //--------------------------------------------------------------------------
-    this.boardRow1 = document.createElement('div');
-    this.boardRow1.classList.add('board-row');
-    this.containerElem.appendChild(this.boardRow1);
-
-    this.boardRow2 = document.createElement('div');
-    this.boardRow2.classList.add('board-row');
-    this.containerElem.appendChild(this.boardRow2);
-
-    this.boardRow3 = document.createElement('div');
-    this.boardRow3.classList.add('board-row');
-    this.containerElem.appendChild(this.boardRow3);
-
-    //--------------------------------------------------------------------------
-    // Create blocks
-    //--------------------------------------------------------------------------
-    // top left
-    this.block1 = document.createElement('div');
-    this.block1.classList.add('block');
-    this.boardRow1.appendChild(this.block1);
-    // top middle
-    this.block2 = document.createElement('div');
-    this.block2.classList.add('block');
-    this.boardRow1.appendChild(this.block2);
-    // top right
-    this.block3 = document.createElement('div');
-    this.block3.classList.add('block');
-    this.boardRow1.appendChild(this.block3);
-    // middle left
-    this.block4 = document.createElement('div');
-    this.block4.classList.add('block');
-    this.boardRow2.appendChild(this.block4);
-    // middle middle
-    this.block5 = document.createElement('div');
-    this.block5.classList.add('block');
-    this.boardRow2.appendChild(this.block5);
-    // middle right
-    this.block6 = document.createElement('div');
-    this.block6.classList.add('block');
-    this.boardRow2.appendChild(this.block6);
-    // bottom left
-    this.block7 = document.createElement('div');
-    this.block7.classList.add('block');
-    this.boardRow3.appendChild(this.block7);
-    // bottom middle
-    this.block8 = document.createElement('div');
-    this.block8.classList.add('block');
-    this.boardRow3.appendChild(this.block8);
-    // bottom right
-    this.block9 = document.createElement('div');
-    this.block9.classList.add('block');
-    this.boardRow3.appendChild(this.block9);
+    this.initBoardRows();
 
     //--------------------------------------------------------------------------
     // Create blocks rows
@@ -334,93 +364,93 @@ module.exports = function () {
     // block1
     this.block1row1 = document.createElement('div');
     this.block1row1.classList.add('block-row');
-    this.block1.appendChild(this.block1row1);
+    this.blocks[0].appendChild(this.block1row1);
     this.block1row2 = document.createElement('div');
     this.block1row2.classList.add('block-row');
-    this.block1.appendChild(this.block1row2);
+    this.blocks[0].appendChild(this.block1row2);
     this.block1row3 = document.createElement('div');
     this.block1row3.classList.add('block-row');
-    this.block1.appendChild(this.block1row3);
+    this.blocks[0].appendChild(this.block1row3);
     // block2
     this.block2row1 = document.createElement('div');
     this.block2row1.classList.add('block-row');
-    this.block2.appendChild(this.block2row1);
+    this.blocks[1].appendChild(this.block2row1);
     this.block2row2 = document.createElement('div');
     this.block2row2.classList.add('block-row');
-    this.block2.appendChild(this.block2row2);
+    this.blocks[1].appendChild(this.block2row2);
     this.block2row3 = document.createElement('div');
     this.block2row3.classList.add('block-row');
-    this.block2.appendChild(this.block2row3);
+    this.blocks[1].appendChild(this.block2row3);
     // block3
     this.block3row1 = document.createElement('div');
     this.block3row1.classList.add('block-row');
-    this.block3.appendChild(this.block3row1);
+    this.blocks[2].appendChild(this.block3row1);
     this.block3row2 = document.createElement('div');
     this.block3row2.classList.add('block-row');
-    this.block3.appendChild(this.block3row2);
+    this.blocks[2].appendChild(this.block3row2);
     this.block3row3 = document.createElement('div');
     this.block3row3.classList.add('block-row');
-    this.block3.appendChild(this.block3row3);
+    this.blocks[2].appendChild(this.block3row3);
     // block4
     this.block4row1 = document.createElement('div');
     this.block4row1.classList.add('block-row');
-    this.block4.appendChild(this.block4row1);
+    this.blocks[3].appendChild(this.block4row1);
     this.block4row2 = document.createElement('div');
     this.block4row2.classList.add('block-row');
-    this.block4.appendChild(this.block4row2);
+    this.blocks[3].appendChild(this.block4row2);
     this.block4row3 = document.createElement('div');
     this.block4row3.classList.add('block-row');
-    this.block4.appendChild(this.block4row3);
+    this.blocks[3].appendChild(this.block4row3);
     // block5
     this.block5row1 = document.createElement('div');
     this.block5row1.classList.add('block-row');
-    this.block5.appendChild(this.block5row1);
+    this.blocks[4].appendChild(this.block5row1);
     this.block5row2 = document.createElement('div');
     this.block5row2.classList.add('block-row');
-    this.block5.appendChild(this.block5row2);
+    this.blocks[4].appendChild(this.block5row2);
     this.block5row3 = document.createElement('div');
     this.block5row3.classList.add('block-row');
-    this.block5.appendChild(this.block5row3);
+    this.blocks[4].appendChild(this.block5row3);
     // block6
     this.block6row1 = document.createElement('div');
     this.block6row1.classList.add('block-row');
-    this.block6.appendChild(this.block6row1);
+    this.blocks[5].appendChild(this.block6row1);
     this.block6row2 = document.createElement('div');
     this.block6row2.classList.add('block-row');
-    this.block6.appendChild(this.block6row2);
+    this.blocks[5].appendChild(this.block6row2);
     this.block6row3 = document.createElement('div');
     this.block6row3.classList.add('block-row');
-    this.block6.appendChild(this.block6row3);
+    this.blocks[5].appendChild(this.block6row3);
     // block7
     this.block7row1 = document.createElement('div');
     this.block7row1.classList.add('block-row');
-    this.block7.appendChild(this.block7row1);
+    this.blocks[6].appendChild(this.block7row1);
     this.block7row2 = document.createElement('div');
     this.block7row2.classList.add('block-row');
-    this.block7.appendChild(this.block7row2);
+    this.blocks[6].appendChild(this.block7row2);
     this.block7row3 = document.createElement('div');
     this.block7row3.classList.add('block-row');
-    this.block7.appendChild(this.block7row3);
+    this.blocks[6].appendChild(this.block7row3);
     // block8
     this.block8row1 = document.createElement('div');
     this.block8row1.classList.add('block-row');
-    this.block8.appendChild(this.block8row1);
+    this.blocks[7].appendChild(this.block8row1);
     this.block8row2 = document.createElement('div');
     this.block8row2.classList.add('block-row');
-    this.block8.appendChild(this.block8row2);
+    this.blocks[7].appendChild(this.block8row2);
     this.block8row3 = document.createElement('div');
     this.block8row3.classList.add('block-row');
-    this.block8.appendChild(this.block8row3);
+    this.blocks[7].appendChild(this.block8row3);
     // block9
     this.block9row1 = document.createElement('div');
     this.block9row1.classList.add('block-row');
-    this.block9.appendChild(this.block9row1);
+    this.blocks[8].appendChild(this.block9row1);
     this.block9row2 = document.createElement('div');
     this.block9row2.classList.add('block-row');
-    this.block9.appendChild(this.block9row2);
+    this.blocks[8].appendChild(this.block9row2);
     this.block9row3 = document.createElement('div');
     this.block9row3.classList.add('block-row');
-    this.block9.appendChild(this.block9row3);
+    this.blocks[8].appendChild(this.block9row3);
 
     //--------------------------------------------------------------------------
     // Create tiles
@@ -592,6 +622,27 @@ module.exports = function () {
     key: 'getElement',
     value: function getElement() {
       return this.containerElem;
+    }
+  }, {
+    key: 'initBoardRows',
+    value: function initBoardRows() {
+      this.boardRows = [];
+      this.blocks = [];
+      for (var i = 0; i < 3; i++) {
+        // Create baard row
+        var boardRow = document.createElement('div');
+        boardRow.classList.add('board-row');
+        this.containerElem.appendChild(boardRow);
+        this.boardRows.push(boardRow);
+
+        // Create blocks
+        for (var j = 0; j < 3; j++) {
+          var block = document.createElement('div');
+          block.classList.add('block');
+          this.boardRows[i].appendChild(block);
+          this.blocks.push(block);
+        }
+      }
     }
   }, {
     key: 'setSelectedTile',
@@ -885,7 +936,7 @@ module.exports = function () {
 
   return GameBoard;
 }();
-},{"./game-board-tile.js":2,"./libs/qqwing-1.3.4/qqwing-1.3.4.js":8}],4:[function(require,module,exports){
+},{"./game-board-tile":3,"./libs/qqwing-1.3.4/qqwing-1.3.4":9}],5:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -966,7 +1017,7 @@ module.exports = function () {
 
   return GameStatsBox;
 }();
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1018,7 +1069,7 @@ module.exports = function () {
 
   return GameTopBox;
 }();
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1029,11 +1080,11 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var GameTopBox = require('./game-top-box.js');
-var GameStatsBox = require('./game-stats-box.js');
-var GameBoard = require('./game-board.js');
-var SelectionsBox = require('./selections-box.js');
-var View = require('./view.js');
+var GameTopBox = require('./game-top-box');
+var GameStatsBox = require('./game-stats-box');
+var GameBoard = require('./game-board');
+var SelectionsBox = require('./selections-box');
+var View = require('./view');
 
 module.exports = function (_View) {
   _inherits(Game, _View);
@@ -1072,7 +1123,7 @@ module.exports = function (_View) {
 
   return Game;
 }(View);
-},{"./game-board.js":3,"./game-stats-box.js":4,"./game-top-box.js":5,"./selections-box.js":11,"./view.js":12}],7:[function(require,module,exports){
+},{"./game-board":4,"./game-stats-box":5,"./game-top-box":6,"./selections-box":11,"./view":12}],8:[function(require,module,exports){
 /**
  * @preserve FastClick: polyfill to remove click delays on browsers with touch UIs.
  *
@@ -1864,7 +1915,7 @@ if (typeof define !== 'undefined' && define.amd) {
 	window.FastClick = FastClick;
 }
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 (function (process){
 /*!
  * qqwing - Sudoku solver and generator
@@ -3544,7 +3595,7 @@ qqwing.POSSIBILITY_SIZE = qqwing.BOARD_SIZE*qqwing.ROW_COL_SEC_SIZE;
 module.exports = qqwing;
 
 }).call(this,require('_process'))
-},{"_process":1}],9:[function(require,module,exports){
+},{"_process":1}],10:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -3683,92 +3734,7 @@ module.exports = function (_View) {
 
   return MainMenu;
 }(View);
-},{"./view":12}],10:[function(require,module,exports){
-(function (global){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var MainMenu = require('./main-menu.js');
-var Game = require('./game.js');
-var attachFastClick = require('./libs/fastclick');
-
-// TODO: History
-// TODO: Undo
-// TODO: Hint
-// TODO: Stats collector
-// TODO: Difficulty selector
-// TODO: New game conformation
-// TODO: Win screen
-// IDEA: Victory picture
-// TODO: Error notification
-
-global.VIEW_ID = {
-  MAIN_MENU: 'MAIN_MENU_VIEW',
-  GAME: 'GAME_VIEW'
-};
-
-var App = function () {
-  function App() {
-    _classCallCheck(this, App);
-
-    attachFastClick(document.body);
-    console.log("Starting MB Sudoku");
-    this.containerElem = document.getElementById('app-container');
-
-    this.mainMenu = new MainMenu();
-    this.addView(this.mainMenu);
-
-    this.game = new Game();
-    this.addView(this.game);
-
-    this.showView(this.mainMenu.getViewName());
-  }
-
-  _createClass(App, [{
-    key: 'getElement',
-    value: function getElement() {
-      return this.containerElem;
-    }
-  }, {
-    key: 'addView',
-    value: function addView(view) {
-      if (this.views === undefined) {
-        this.views = [];
-      }
-      this.views.push(view);
-      this.getElement().appendChild(view.getViewElement());
-    }
-  }, {
-    key: 'showView',
-    value: function showView(viewName) {
-      for (var i = 0; i < this.views.length; i++) {
-        if (this.views[i].getViewName() === viewName) {
-          this.hideActiveView();
-          this.views[i].show();
-          this.activeView = this.views[i];
-        }
-      }
-    }
-  }, {
-    key: 'hideActiveView',
-    value: function hideActiveView() {
-      if (this.activeView !== undefined) {
-        this.activeView.hide();
-      }
-    }
-  }]);
-
-  return App;
-}();
-
-global.app = new App();
-
-// module.exports = new App();
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./game.js":6,"./libs/fastclick":7,"./main-menu.js":9}],11:[function(require,module,exports){
+},{"./view":12}],11:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -3903,6 +3869,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var CSS_CLASSES = {
+  VIEW: 'view',
   HIDDEN: 'hidden'
 };
 
@@ -3911,7 +3878,7 @@ module.exports = function () {
     _classCallCheck(this, View);
 
     this.viewElement = document.createElement('div');
-    this.getViewElement().classList.add('view');
+    this.getViewElement().classList.add(CSS_CLASSES.VIEW);
     this.getViewElement().classList.add(CSS_CLASSES.HIDDEN);
 
     this.setViewName(viewName);
@@ -3951,4 +3918,4 @@ module.exports = function () {
 
   return View;
 }();
-},{}]},{},[10]);
+},{}]},{},[2]);
