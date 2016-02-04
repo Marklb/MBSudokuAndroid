@@ -32,7 +32,7 @@ module.exports = function () {
     this.removeBtnElem.textContent = 'X';
     this.optionsContainerElem.appendChild(this.removeBtnElem);
     // this.removeBtnElem.addEventListener('mousedown', (e) => {
-    this.removeBtnElem.addEventListener('touchstart', function (e) {
+    this.removeBtnElem.addEventListener(TOUCH_EVENT, function (e) {
       _this.gameBoard.setSelectedTileValue(-1);
       _this.updateTileStyleStates();
     });
@@ -62,7 +62,7 @@ module.exports = function () {
       tmpTile.textContent = '' + tmpTile.numValue;
       _this.tilesContainerElem.appendChild(tmpTile);
       // tmpTile.addEventListener('mousedown', (e) => {
-      tmpTile.addEventListener('touchstart', function (e) {
+      tmpTile.addEventListener(TOUCH_EVENT, function (e) {
         if (!tmpTile.classList.contains('done')) {
           var isDone = _this.gameBoard.setSelectedTileValue(tmpTile.numValue);
           if (isDone) {

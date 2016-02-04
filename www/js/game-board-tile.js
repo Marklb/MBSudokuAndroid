@@ -42,7 +42,7 @@ module.exports = function () {
     this.STYLE_STATES_CLASSES[this.STYLE_STATES.CONFLICTING_VALUE] = 'style-state-conflicting-value';
 
     // this.containerElem.addEventListener('mousedown', () => {
-    this.containerElem.addEventListener('touchstart', function () {
+    this.containerElem.addEventListener(TOUCH_EVENT, function () {
       _this.gameBoard.setSelectedTile(_this.row, _this.column);
     });
     // this.containerElem.addEventListener('touchstart', () => {

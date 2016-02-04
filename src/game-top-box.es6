@@ -12,7 +12,7 @@ class GameTopBox {
     this.menuButtonElem.textContent = "X";
     this.containerElem.appendChild(this.menuButtonElem);
     // this.menuButtonElem.addEventListener('mousedown', (e) => {
-    this.menuButtonElem.addEventListener('touchstart', (e) => {
+    this.menuButtonElem.addEventListener(TOUCH_EVENT, (e) => {
       // this.gameBoard.newGame();
       // let solution = this.gameBoard.getSolution();
       // console.log(solution);
@@ -29,7 +29,7 @@ class GameTopBox {
     this.resetBtnElem.textContent = "X";
     this.containerElem.appendChild(this.resetBtnElem);
     // this.resetBtnElem.addEventListener('mousedown', (e) => {
-    this.resetBtnElem.addEventListener('touchstart', (e) => {
+    this.resetBtnElem.addEventListener(TOUCH_EVENT, (e) => {
       this.gameBoard.newGame();
     });
 

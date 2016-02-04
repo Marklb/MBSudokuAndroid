@@ -20,7 +20,7 @@ module.exports = function () {
     this.menuButtonElem.textContent = "X";
     this.containerElem.appendChild(this.menuButtonElem);
     // this.menuButtonElem.addEventListener('mousedown', (e) => {
-    this.menuButtonElem.addEventListener('touchstart', function (e) {
+    this.menuButtonElem.addEventListener(TOUCH_EVENT, function (e) {
       // this.gameBoard.newGame();
       // let solution = this.gameBoard.getSolution();
       // console.log(solution);
@@ -37,7 +37,7 @@ module.exports = function () {
     this.resetBtnElem.textContent = "X";
     this.containerElem.appendChild(this.resetBtnElem);
     // this.resetBtnElem.addEventListener('mousedown', (e) => {
-    this.resetBtnElem.addEventListener('touchstart', function (e) {
+    this.resetBtnElem.addEventListener(TOUCH_EVENT, function (e) {
       _this.gameBoard.newGame();
     });
   }

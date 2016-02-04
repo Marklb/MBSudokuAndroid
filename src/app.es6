@@ -17,9 +17,12 @@ global.VIEW_ID = {
   GAME: 'GAME_VIEW'
 };
 
+// global.TOUCH_EVENT = 'mousedown';
+global.TOUCH_EVENT = 'touchstart';
 
 class App {
   constructor() {
+    // this.TOUCH_EVENT = 'mousedown';
     // attachFastClick(document.body);
     console.log("Starting MB Sudoku");
     this.containerElem = document.getElementById('app-container');

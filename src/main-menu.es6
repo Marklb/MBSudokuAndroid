@@ -86,7 +86,7 @@ class MainMenu extends View {
       this.startButton = this.createButton('Play');
       this.addButton(this.startButton);
       // this.startButton.addEventListener('mousedown', (e) => {
-      this.startButton.addEventListener('touchstart', (e) => {
+      this.startButton.addEventListener(TOUCH_EVENT, (e) => {
         app.showView(VIEW_ID.GAME);
       });
     }

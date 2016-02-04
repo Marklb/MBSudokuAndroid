@@ -23,7 +23,7 @@ class SelectionsBox {
     this.removeBtnElem.textContent = 'X';
     this.optionsContainerElem.appendChild(this.removeBtnElem);
     // this.removeBtnElem.addEventListener('mousedown', (e) => {
-    this.removeBtnElem.addEventListener('touchstart', (e) => {
+    this.removeBtnElem.addEventListener(TOUCH_EVENT, (e) => {
       this.gameBoard.setSelectedTileValue(-1);
       this.updateTileStyleStates();
     });
@@ -53,7 +53,7 @@ class SelectionsBox {
       tmpTile.textContent = ''+tmpTile.numValue;
       this.tilesContainerElem.appendChild(tmpTile);
       // tmpTile.addEventListener('mousedown', (e) => {
-      tmpTile.addEventListener('touchstart', (e) => {
+      tmpTile.addEventListener(TOUCH_EVENT, (e) => {
         if(!tmpTile.classList.contains('done')){
           let isDone = this.gameBoard.setSelectedTileValue(tmpTile.numValue);
           if(isDone){

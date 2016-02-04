@@ -115,7 +115,7 @@ module.exports = function (_View) {
         this.startButton = this.createButton('Play');
         this.addButton(this.startButton);
         // this.startButton.addEventListener('mousedown', (e) => {
-        this.startButton.addEventListener('touchstart', function (e) {
+        this.startButton.addEventListener(TOUCH_EVENT, function (e) {
           app.showView(VIEW_ID.GAME);
         });
       }
