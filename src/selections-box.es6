@@ -24,7 +24,7 @@ class SelectionsBox {
     this.optionsContainerElem.appendChild(this.removeBtnElem);
     // this.removeBtnElem.addEventListener('mousedown', (e) => {
     this.removeBtnElem.addEventListener(TOUCH_EVENT, (e) => {
-      this.gameBoard.setSelectedTileValue(-1);
+      this.gameBoard.setSelectedTileValue(this.gameBoard.EMPTY_VALUE);
       this.updateTileStyleStates();
     });
 

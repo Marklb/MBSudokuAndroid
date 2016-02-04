@@ -8,6 +8,7 @@ class GameBoardTile {
     this.row = row;
     this.column = column;
 
+    this.EMPTY_VALUE = 0;
 
     this.VALUE_STATES = {};
     this.VALUE_STATES.EMPTY = 0;
@@ -20,8 +21,8 @@ class GameBoardTile {
     this.VALUE_STATES_CLASSES[this.VALUE_STATES.REGULAR] = 'regular-value';
     this.currValState = this.VALUE_STATES.EMPTY;
     this.containerElem.classList.add(this.VALUE_STATES_CLASSES[this.currValState]);
-    // If value is -1 then it is blank
-    this.setValue(-1);
+    // If value is this.EMPTY_VALUE then it is blank
+    this.setValue(this.EMPTY_VALUE);
 
 
     this.STYLE_STATES = {};
@@ -72,7 +73,7 @@ class GameBoardTile {
     this.value = val;
     this.containerElem.textContent = ''+this.value;
 
-    if(this.value == -1){
+    if(this.value == this.EMPTY_VALUE){
       this.currValState = this.VALUE_STATES.EMPTY;
     }else{
       if(isOriginal){
@@ -96,7 +97,8 @@ class GameBoardTile {
   }
 
   isEmpty(){
-    return (this.value == -1);
+    console.log('Val:'+this.value+'    '+this.EMPTY_VALUE);
+    return (this.value == this.EMPTY_VALUE);
   }
 
   isOriginal(){

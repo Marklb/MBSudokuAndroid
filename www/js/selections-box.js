@@ -33,7 +33,7 @@ module.exports = function () {
     this.optionsContainerElem.appendChild(this.removeBtnElem);
     // this.removeBtnElem.addEventListener('mousedown', (e) => {
     this.removeBtnElem.addEventListener(TOUCH_EVENT, function (e) {
-      _this.gameBoard.setSelectedTileValue(-1);
+      _this.gameBoard.setSelectedTileValue(_this.gameBoard.EMPTY_VALUE);
       _this.updateTileStyleStates();
     });
 

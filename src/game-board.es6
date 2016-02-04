@@ -6,19 +6,21 @@ class GameBoard {
   constructor() {
     console.log("Creating GameBoard");
 
+    this.EMPTY_VALUE = 0;
+
     this.qqwing = new QQWING();
 
     this.containerElem = document.createElement('div');
     this.containerElem.classList.add('game-board');
-    // if(window.innerWidth < window.innerHeight){
-    //   this.containerWidth = window.innerWidth;
-    //   this.containerHeight = window.innerWidth;
-    // }else{
-    //   this.containerWidth = window.innerHeight;
-    //   this.containerHeight = window.innerHeight;
-    // }
-    // this.containerElem.setAttribute('style', 'width:'+this.containerWidth+'px;');
-    // this.containerElem.setAttribute('style', 'height:'+this.containerHeight+'px;');
+    if(window.innerWidth < window.innerHeight){
+      this.containerWidth = window.innerWidth;
+      this.containerHeight = window.innerWidth;
+    }else{
+      this.containerWidth = window.innerHeight;
+      this.containerHeight = window.innerHeight;
+    }
+    this.containerElem.setAttribute('style', 'width:'+this.containerWidth+'px;');
+    this.containerElem.setAttribute('style', 'height:'+this.containerHeight+'px;');
 
     //--------------------------------------------------------------------------
     // Create the board rows
@@ -419,7 +421,7 @@ class GameBoard {
   // }
 
   initGameTiles(){
-    let storedGameBoard = JSON.parse(window.localStorage.getItem("gameboard"));
+    let storedGameBoard = JSON.parse(window.localStorage.getItem("gameboard2"));
     if(storedGameBoard){
       for(let i = 0; i < storedGameBoard.length; i++){
         this.tiles[storedGameBoard[i].x][storedGameBoard[i].y].setValue(storedGameBoard[i].value, storedGameBoard[i].isOriginal);
@@ -450,7 +452,7 @@ class GameBoard {
     //   [N, N, N, N, N, N, N, N, N]  // 8
     // ];
 
-    // let N = -1;
+    // let N = this.EMPTY_VALUE;
     // let layout0 = [
     //   //0   1   2   3   4   5   6   7   8
     //   [N, N, N, 7, N, N, 8, 4, N], // 0
@@ -513,7 +515,7 @@ class GameBoard {
     // let layout = layouts[ind];
     // for(let i = 0; i < 9; i++){
     //   for(let j = 0; j < 9; j++){
-    //     if(layout[i][j] == -1){
+    //     if(layout[i][j] == this.EMPTY_VALUE){
     //       this.tiles[i][j].setValue(layout[i][j], false);
     //     }else{
     //       this.tiles[i][j].setValue(layout[i][j], true);
@@ -531,7 +533,7 @@ class GameBoard {
       for(let j = 0; j < 9; j++){
         // console.log(t[count]);
         if(t[count] == '.'){
-          this.tiles[i][j].setValue(-1, false);
+          this.tiles[i][j].setValue(this.EMPTY_VALUE, false);
         }else{
           this.tiles[i][j].setValue(parseInt(t[count]), true);
         }
@@ -588,7 +590,7 @@ class GameBoard {
         });
       }
     }
-    window.localStorage.setItem("gameboard", JSON.stringify(tmpBoard));
+    window.localStorage.setItem("gameboard2", JSON.stringify(tmpBoard));
 
     window.localStorage.setItem("selectedTile", JSON.stringify({
       "x": this.selectedTile.getRowIndex(),
@@ -637,7 +639,7 @@ class GameBoard {
 
   setSelectedTileValue(val){
     if(this.selectedTile.isOriginal()) return false;
-    if(!this.selectedTile.isEmpty() && val != -1) return false;
+    if(!this.selectedTile.isEmpty() && val != this.EMPTY_VALUE) return false;
     this.selectedTile.setValue(val);
     this.updateTileStyleStates();
     let count = 0;
@@ -661,7 +663,7 @@ class GameBoard {
     for(let i = 0; i < 9; i++){
       for(let j = 0; j < 9; j++){
         let v = this.tiles[i][j].getValue();
-        if(v != -1){
+        if(v != this.EMPTY_VALUE){
           vals[v-1]++;
         }
       }
@@ -670,7 +672,9 @@ class GameBoard {
     let doneValues = [];
     for(let i = 0; i < 9; i++){
       if(vals[i] == 9){
+        console.log('DoneVals');
         doneValues.push(i+1);
+        console.log('DoneVals2');
       }
     }
     return doneValues;

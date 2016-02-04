@@ -200,6 +200,8 @@ module.exports = function () {
     this.row = row;
     this.column = column;
 
+    this.EMPTY_VALUE = 0;
+
     this.VALUE_STATES = {};
     this.VALUE_STATES.EMPTY = 0;
     this.VALUE_STATES.ORIGINAL = 1;
@@ -211,8 +213,8 @@ module.exports = function () {
     this.VALUE_STATES_CLASSES[this.VALUE_STATES.REGULAR] = 'regular-value';
     this.currValState = this.VALUE_STATES.EMPTY;
     this.containerElem.classList.add(this.VALUE_STATES_CLASSES[this.currValState]);
-    // If value is -1 then it is blank
-    this.setValue(-1);
+    // If value is this.EMPTY_VALUE then it is blank
+    this.setValue(this.EMPTY_VALUE);
 
     this.STYLE_STATES = {};
     this.STYLE_STATES.BASIC = 0;
@@ -267,7 +269,7 @@ module.exports = function () {
       this.value = val;
       this.containerElem.textContent = '' + this.value;
 
-      if (this.value == -1) {
+      if (this.value == this.EMPTY_VALUE) {
         this.currValState = this.VALUE_STATES.EMPTY;
       } else {
         if (isOriginal) {
@@ -292,7 +294,8 @@ module.exports = function () {
   }, {
     key: 'isEmpty',
     value: function isEmpty() {
-      return this.value == -1;
+      console.log('Val:' + this.value + '    ' + this.EMPTY_VALUE);
+      return this.value == this.EMPTY_VALUE;
     }
   }, {
     key: 'isOriginal',
@@ -344,19 +347,21 @@ module.exports = function () {
 
     console.log("Creating GameBoard");
 
+    this.EMPTY_VALUE = 0;
+
     this.qqwing = new QQWING();
 
     this.containerElem = document.createElement('div');
     this.containerElem.classList.add('game-board');
-    // if(window.innerWidth < window.innerHeight){
-    //   this.containerWidth = window.innerWidth;
-    //   this.containerHeight = window.innerWidth;
-    // }else{
-    //   this.containerWidth = window.innerHeight;
-    //   this.containerHeight = window.innerHeight;
-    // }
-    // this.containerElem.setAttribute('style', 'width:'+this.containerWidth+'px;');
-    // this.containerElem.setAttribute('style', 'height:'+this.containerHeight+'px;');
+    if (window.innerWidth < window.innerHeight) {
+      this.containerWidth = window.innerWidth;
+      this.containerHeight = window.innerWidth;
+    } else {
+      this.containerWidth = window.innerHeight;
+      this.containerHeight = window.innerHeight;
+    }
+    this.containerElem.setAttribute('style', 'width:' + this.containerWidth + 'px;');
+    this.containerElem.setAttribute('style', 'height:' + this.containerHeight + 'px;');
 
     //--------------------------------------------------------------------------
     // Create the board rows
@@ -679,7 +684,7 @@ module.exports = function () {
   }, {
     key: 'initGameTiles',
     value: function initGameTiles() {
-      var storedGameBoard = JSON.parse(window.localStorage.getItem("gameboard"));
+      var storedGameBoard = JSON.parse(window.localStorage.getItem("gameboard2"));
       if (storedGameBoard) {
         for (var i = 0; i < storedGameBoard.length; i++) {
           this.tiles[storedGameBoard[i].x][storedGameBoard[i].y].setValue(storedGameBoard[i].value, storedGameBoard[i].isOriginal);
@@ -711,7 +716,7 @@ module.exports = function () {
       //   [N, N, N, N, N, N, N, N, N]  // 8
       // ];
 
-      // let N = -1;
+      // let N = this.EMPTY_VALUE;
       // let layout0 = [
       //   //0   1   2   3   4   5   6   7   8
       //   [N, N, N, 7, N, N, 8, 4, N], // 0
@@ -771,7 +776,7 @@ module.exports = function () {
       // let layout = layouts[ind];
       // for(let i = 0; i < 9; i++){
       //   for(let j = 0; j < 9; j++){
-      //     if(layout[i][j] == -1){
+      //     if(layout[i][j] == this.EMPTY_VALUE){
       //       this.tiles[i][j].setValue(layout[i][j], false);
       //     }else{
       //       this.tiles[i][j].setValue(layout[i][j], true);
@@ -788,7 +793,7 @@ module.exports = function () {
         for (var j = 0; j < 9; j++) {
           // console.log(t[count]);
           if (t[count] == '.') {
-            this.tiles[i][j].setValue(-1, false);
+            this.tiles[i][j].setValue(this.EMPTY_VALUE, false);
           } else {
             this.tiles[i][j].setValue(parseInt(t[count]), true);
           }
@@ -846,7 +851,7 @@ module.exports = function () {
           });
         }
       }
-      window.localStorage.setItem("gameboard", JSON.stringify(tmpBoard));
+      window.localStorage.setItem("gameboard2", JSON.stringify(tmpBoard));
 
       window.localStorage.setItem("selectedTile", JSON.stringify({
         "x": this.selectedTile.getRowIndex(),
@@ -898,7 +903,7 @@ module.exports = function () {
     key: 'setSelectedTileValue',
     value: function setSelectedTileValue(val) {
       if (this.selectedTile.isOriginal()) return false;
-      if (!this.selectedTile.isEmpty() && val != -1) return false;
+      if (!this.selectedTile.isEmpty() && val != this.EMPTY_VALUE) return false;
       this.selectedTile.setValue(val);
       this.updateTileStyleStates();
       var count = 0;
@@ -923,7 +928,7 @@ module.exports = function () {
       for (var i = 0; i < 9; i++) {
         for (var j = 0; j < 9; j++) {
           var v = this.tiles[i][j].getValue();
-          if (v != -1) {
+          if (v != this.EMPTY_VALUE) {
             vals[v - 1]++;
           }
         }
@@ -932,7 +937,9 @@ module.exports = function () {
       var doneValues = [];
       for (var i = 0; i < 9; i++) {
         if (vals[i] == 9) {
+          console.log('DoneVals');
           doneValues.push(i + 1);
+          console.log('DoneVals2');
         }
       }
       return doneValues;
@@ -2986,7 +2993,7 @@ module.exports = function () {
     this.optionsContainerElem.appendChild(this.removeBtnElem);
     // this.removeBtnElem.addEventListener('mousedown', (e) => {
     this.removeBtnElem.addEventListener(TOUCH_EVENT, function (e) {
-      _this.gameBoard.setSelectedTileValue(-1);
+      _this.gameBoard.setSelectedTileValue(_this.gameBoard.EMPTY_VALUE);
       _this.updateTileStyleStates();
     });
 
