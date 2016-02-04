@@ -220,7 +220,8 @@ module.exports = function () {
     this.STYLE_STATES_CLASSES[this.STYLE_STATES.SAME_VALUE] = 'style-state-same-value';
     this.STYLE_STATES_CLASSES[this.STYLE_STATES.CONFLICTING_VALUE] = 'style-state-conflicting-value';
 
-    this.containerElem.addEventListener('mousedown', function () {
+    // this.containerElem.addEventListener('mousedown', () => {
+    this.containerElem.addEventListener('touchstart', function () {
       _this.gameBoard.setSelectedTile(_this.row, _this.column);
     });
     // this.containerElem.addEventListener('touchstart', () => {
@@ -1039,7 +1040,8 @@ module.exports = function () {
     this.menuButtonElem.classList.add('menu-btn');
     this.menuButtonElem.textContent = "X";
     this.containerElem.appendChild(this.menuButtonElem);
-    this.menuButtonElem.addEventListener('mousedown', function (e) {
+    // this.menuButtonElem.addEventListener('mousedown', (e) => {
+    this.menuButtonElem.addEventListener('touchstart', function (e) {
       // this.gameBoard.newGame();
       // let solution = this.gameBoard.getSolution();
       // console.log(solution);
@@ -1055,7 +1057,8 @@ module.exports = function () {
     this.resetBtnElem.classList.add('reset-btn');
     this.resetBtnElem.textContent = "X";
     this.containerElem.appendChild(this.resetBtnElem);
-    this.resetBtnElem.addEventListener('mousedown', function (e) {
+    // this.resetBtnElem.addEventListener('mousedown', (e) => {
+    this.resetBtnElem.addEventListener('touchstart', function (e) {
       _this.gameBoard.newGame();
     });
   }
@@ -3712,7 +3715,8 @@ module.exports = function (_View) {
       if (this.startButton === undefined) {
         this.startButton = this.createButton('Play');
         this.addButton(this.startButton);
-        this.startButton.addEventListener('mousedown', function (e) {
+        // this.startButton.addEventListener('mousedown', (e) => {
+        this.startButton.addEventListener('touchstart', function (e) {
           app.showView(VIEW_ID.GAME);
         });
       }
@@ -3768,7 +3772,8 @@ module.exports = function () {
     this.removeBtnElem.classList.add('remove-btn');
     this.removeBtnElem.textContent = 'X';
     this.optionsContainerElem.appendChild(this.removeBtnElem);
-    this.removeBtnElem.addEventListener('mousedown', function (e) {
+    // this.removeBtnElem.addEventListener('mousedown', (e) => {
+    this.removeBtnElem.addEventListener('touchstart', function (e) {
       _this.gameBoard.setSelectedTileValue(-1);
       _this.updateTileStyleStates();
     });
@@ -3797,7 +3802,8 @@ module.exports = function () {
       tmpTile.numValue = i + 1;
       tmpTile.textContent = '' + tmpTile.numValue;
       _this.tilesContainerElem.appendChild(tmpTile);
-      tmpTile.addEventListener('mousedown', function (e) {
+      // tmpTile.addEventListener('mousedown', (e) => {
+      tmpTile.addEventListener('touchstart', function (e) {
         if (!tmpTile.classList.contains('done')) {
           var isDone = _this.gameBoard.setSelectedTileValue(tmpTile.numValue);
           if (isDone) {

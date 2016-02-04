@@ -11,7 +11,8 @@ class GameTopBox {
     this.menuButtonElem.classList.add('menu-btn');
     this.menuButtonElem.textContent = "X";
     this.containerElem.appendChild(this.menuButtonElem);
-    this.menuButtonElem.addEventListener('mousedown', (e) => {
+    // this.menuButtonElem.addEventListener('mousedown', (e) => {
+    this.menuButtonElem.addEventListener('touchstart', (e) => {
       // this.gameBoard.newGame();
       // let solution = this.gameBoard.getSolution();
       // console.log(solution);
@@ -27,7 +28,8 @@ class GameTopBox {
     this.resetBtnElem.classList.add('reset-btn');
     this.resetBtnElem.textContent = "X";
     this.containerElem.appendChild(this.resetBtnElem);
-    this.resetBtnElem.addEventListener('mousedown', (e) => {
+    // this.resetBtnElem.addEventListener('mousedown', (e) => {
+    this.resetBtnElem.addEventListener('touchstart', (e) => {
       this.gameBoard.newGame();
     });
 
