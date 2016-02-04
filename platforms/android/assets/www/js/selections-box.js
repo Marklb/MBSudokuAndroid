@@ -84,6 +84,11 @@ module.exports = function () {
       return this.containerElem;
     }
   }, {
+    key: 'update',
+    value: function update() {
+      this.updateTileStyleStates();
+    }
+  }, {
     key: 'updateTileStyleStates',
     value: function updateTileStyleStates() {
       var doneVals = this.gameBoard.getCompletedValues();

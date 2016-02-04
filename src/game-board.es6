@@ -444,12 +444,17 @@ class GameBoard {
     this.updateTileStyleStates();
   }
 
+  // hide(){
+  //   // TODO: Fix this to a proper implementation
+  //   let view = document.getElementById('game-container');
+  //   view.classList.add('hidden');
+  //   // this.getElement().classList.add('hidden');
+  // }
+
   initGameTiles(){
     let storedGameBoard = JSON.parse(window.localStorage.getItem("gameboard"));
     if(storedGameBoard){
       for(let i = 0; i < storedGameBoard.length; i++){
-        // console.log("Setting:");
-        // console.log(storedGameBoard[i]);
         this.tiles[storedGameBoard[i].x][storedGameBoard[i].y].setValue(storedGameBoard[i].value, storedGameBoard[i].isOriginal);
       }
     }else{
@@ -573,6 +578,12 @@ class GameBoard {
     window.localStorage.setItem("timeElapsed", JSON.stringify(0));
   }
 
+  getSolution(){
+    // TODO: Fix. Does not give solution
+    this.qqwing.solve();
+    return this.qqwing.getSolutionString();
+  }
+
   updateTileStyleStates(){
     for(let i = 0; i < 9; i++){
       for(let j = 0; j < 9; j++){
@@ -589,6 +600,13 @@ class GameBoard {
     }
     this.checkForConflicts();
     this.saveBoard();
+    if(this.selectionsBox){
+      this.selectionsBox.update();
+    }
+  }
+
+  setSelectionsBox(sbox){
+    this.selectionsBox = sbox;
   }
 
   saveBoard(){

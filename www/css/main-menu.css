@@ -1,0 +1,69 @@
+.main-menu-container {
+
+}
+
+.main-menu-container .main-menu {
+  display: flex;
+  flex-direction: column;
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+  /*padding: 10px;*/
+  padding-top: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  overflow: hidden;
+}
+
+.main-menu-container .main-menu .title{
+  flex: 1;
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+  background-color: rgba(110,50,50,1);
+  margin: 2px;
+  border: 2px solid rgba(0,100,100,1);
+  color: rgba(0,150,150,1);
+  display: flex;
+  justify-content: center; /* align horizontal */
+  align-items: center; /* align vertical */
+  font-size: 5.9vw;
+  cursor: default;
+}
+
+.main-menu-container .main-menu .buttons-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+  /*padding: 10px;*/
+  padding-top: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  overflow: hidden;
+}
+
+.main-menu-container .main-menu .buttons-container .btn{
+  flex: 1;
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+  background-color: rgba(110,50,50,1);
+  margin: 4px;
+  margin-top: 0;
+  border: 2px solid rgba(0,100,100,1);
+  color: rgba(0,150,150,1);
+  display: flex;
+  justify-content: center; /* align horizontal */
+  align-items: center; /* align vertical */
+  font-size: 5.9vw;
+  cursor: default;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+.main-menu-container .main-menu .buttons-container .btn:active{
+  margin: 0;
+  color: rgba(0, 255, 0, 1);
+}

@@ -373,14 +373,20 @@ module.exports = function () {
       this.resetGameTiles();
       this.updateTileStyleStates();
     }
+
+    // hide(){
+    //   // TODO: Fix this to a proper implementation
+    //   let view = document.getElementById('game-container');
+    //   view.classList.add('hidden');
+    //   // this.getElement().classList.add('hidden');
+    // }
+
   }, {
     key: 'initGameTiles',
     value: function initGameTiles() {
       var storedGameBoard = JSON.parse(window.localStorage.getItem("gameboard"));
       if (storedGameBoard) {
         for (var i = 0; i < storedGameBoard.length; i++) {
-          // console.log("Setting:");
-          // console.log(storedGameBoard[i]);
           this.tiles[storedGameBoard[i].x][storedGameBoard[i].y].setValue(storedGameBoard[i].value, storedGameBoard[i].isOriginal);
         }
       } else {
@@ -498,6 +504,13 @@ module.exports = function () {
       window.localStorage.setItem("timeElapsed", JSON.stringify(0));
     }
   }, {
+    key: 'getSolution',
+    value: function getSolution() {
+      // TODO: Fix. Does not give solution
+      this.qqwing.solve();
+      return this.qqwing.getSolutionString();
+    }
+  }, {
     key: 'updateTileStyleStates',
     value: function updateTileStyleStates() {
       for (var i = 0; i < 9; i++) {
@@ -515,6 +528,14 @@ module.exports = function () {
       }
       this.checkForConflicts();
       this.saveBoard();
+      if (this.selectionsBox) {
+        this.selectionsBox.update();
+      }
+    }
+  }, {
+    key: 'setSelectionsBox',
+    value: function setSelectionsBox(sbox) {
+      this.selectionsBox = sbox;
     }
   }, {
     key: 'saveBoard',

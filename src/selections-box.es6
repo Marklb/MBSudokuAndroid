@@ -72,6 +72,10 @@ class SelectionsBox {
     return this.containerElem;
   }
 
+  update(){
+    this.updateTileStyleStates();
+  }
+
   updateTileStyleStates(){
     let doneVals = this.gameBoard.getCompletedValues();
     for(let i = 0; i < 9; i++){

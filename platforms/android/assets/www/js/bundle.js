@@ -135,7 +135,7 @@ module.exports = function () {
     this.STYLE_STATES_CLASSES[this.STYLE_STATES.SAME_VALUE] = 'style-state-same-value';
     this.STYLE_STATES_CLASSES[this.STYLE_STATES.CONFLICTING_VALUE] = 'style-state-conflicting-value';
 
-    this.containerElem.addEventListener('mousedown', function () {
+    this.containerElem.addEventListener('touchstart' || 'mousedown', function () {
       _this.gameBoard.setSelectedTile(_this.row, _this.column);
     });
     // this.containerElem.addEventListener('touchstart', () => {
@@ -612,14 +612,20 @@ module.exports = function () {
       this.resetGameTiles();
       this.updateTileStyleStates();
     }
+
+    // hide(){
+    //   // TODO: Fix this to a proper implementation
+    //   let view = document.getElementById('game-container');
+    //   view.classList.add('hidden');
+    //   // this.getElement().classList.add('hidden');
+    // }
+
   }, {
     key: 'initGameTiles',
     value: function initGameTiles() {
       var storedGameBoard = JSON.parse(window.localStorage.getItem("gameboard"));
       if (storedGameBoard) {
         for (var i = 0; i < storedGameBoard.length; i++) {
-          // console.log("Setting:");
-          // console.log(storedGameBoard[i]);
           this.tiles[storedGameBoard[i].x][storedGameBoard[i].y].setValue(storedGameBoard[i].value, storedGameBoard[i].isOriginal);
         }
       } else {
@@ -737,6 +743,13 @@ module.exports = function () {
       window.localStorage.setItem("timeElapsed", JSON.stringify(0));
     }
   }, {
+    key: 'getSolution',
+    value: function getSolution() {
+      // TODO: Fix. Does not give solution
+      this.qqwing.solve();
+      return this.qqwing.getSolutionString();
+    }
+  }, {
     key: 'updateTileStyleStates',
     value: function updateTileStyleStates() {
       for (var i = 0; i < 9; i++) {
@@ -754,6 +767,14 @@ module.exports = function () {
       }
       this.checkForConflicts();
       this.saveBoard();
+      if (this.selectionsBox) {
+        this.selectionsBox.update();
+      }
+    }
+  }, {
+    key: 'setSelectionsBox',
+    value: function setSelectionsBox(sbox) {
+      this.selectionsBox = sbox;
     }
   }, {
     key: 'saveBoard',
@@ -864,7 +885,7 @@ module.exports = function () {
 
   return GameBoard;
 }();
-},{"./game-board-tile.js":2,"./libs/qqwing-1.3.4/qqwing-1.3.4.js":6}],4:[function(require,module,exports){
+},{"./game-board-tile.js":2,"./libs/qqwing-1.3.4/qqwing-1.3.4.js":7}],4:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -967,6 +988,12 @@ module.exports = function () {
     this.menuButtonElem.classList.add('menu-btn');
     this.menuButtonElem.textContent = "X";
     this.containerElem.appendChild(this.menuButtonElem);
+    this.menuButtonElem.addEventListener('mousedown', function (e) {
+      // this.gameBoard.newGame();
+      // let solution = this.gameBoard.getSolution();
+      // console.log(solution);
+      app.showView(VIEW_ID.MAIN_MENU);
+    });
 
     this.titleElem = document.createElement('div');
     this.titleElem.classList.add('title');
@@ -992,6 +1019,60 @@ module.exports = function () {
   return GameTopBox;
 }();
 },{}],6:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var GameTopBox = require('./game-top-box.js');
+var GameStatsBox = require('./game-stats-box.js');
+var GameBoard = require('./game-board.js');
+var SelectionsBox = require('./selections-box.js');
+var View = require('./view.js');
+
+module.exports = function (_View) {
+  _inherits(Game, _View);
+
+  function Game() {
+    _classCallCheck(this, Game);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Game).call(this, VIEW_ID.GAME));
+
+    console.log("Starting Game");
+    // this.containerElem = document.getElementById('app-container');
+    _this.containerElem = document.createElement('div');
+    _this.containerElem.classList.add('game-container');
+    _this.addElement(_this.getElement());
+
+    _this.gameBoard = new GameBoard();
+    _this.gameTopBox = new GameTopBox(_this.gameBoard);
+    _this.gameStatsBox = new GameStatsBox(_this.gameBoard);
+    _this.selectionsBox = new SelectionsBox(_this.gameBoard);
+    _this.gameBoard.setSelectionsBox(_this.selectionsBox);
+
+    _this.containerElem.appendChild(_this.gameTopBox.getElement());
+    _this.containerElem.appendChild(_this.gameStatsBox.getElement());
+    _this.containerElem.appendChild(_this.gameBoard.getElement());
+    _this.containerElem.appendChild(_this.selectionsBox.getElement());
+
+    return _this;
+  }
+
+  _createClass(Game, [{
+    key: 'getElement',
+    value: function getElement() {
+      return this.containerElem;
+    }
+  }]);
+
+  return Game;
+}(View);
+},{"./game-board.js":3,"./game-stats-box.js":4,"./game-top-box.js":5,"./selections-box.js":10,"./view.js":11}],7:[function(require,module,exports){
 (function (process){
 /*!
  * qqwing - Sudoku solver and generator
@@ -2671,15 +2752,155 @@ qqwing.POSSIBILITY_SIZE = qqwing.BOARD_SIZE*qqwing.ROW_COL_SEC_SIZE;
 module.exports = qqwing;
 
 }).call(this,require('_process'))
-},{"_process":1}],7:[function(require,module,exports){
+},{"_process":1}],8:[function(require,module,exports){
 'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var GameTopBox = require('./game-top-box.js');
-var GameStatsBox = require('./game-stats-box.js');
-var GameBoard = require('./game-board.js');
-var SelectionsBox = require('./selections-box.js');
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var View = require('./view');
+
+var DEBUG_PREFIX = '[MainMenu]: ';
+
+module.exports = function (_View) {
+  _inherits(MainMenu, _View);
+
+  function MainMenu() {
+    _classCallCheck(this, MainMenu);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(MainMenu).call(this, VIEW_ID.MAIN_MENU));
+
+    _this.containerElem = document.createElement('div');
+    _this.containerElem.classList.add('main-menu-container');
+    _this.addElement(_this.getElement());
+
+    _this.mainMenuContainer = document.createElement('div');
+    _this.mainMenuContainer.classList.add('main-menu');
+    _this.getElement().appendChild(_this.mainMenuContainer);
+
+    _this.initTitle();
+    _this.initButtons();
+
+    return _this;
+  }
+
+  _createClass(MainMenu, [{
+    key: 'getElement',
+    value: function getElement() {
+      return this.containerElem;
+    }
+
+    /*
+     * Title
+     */
+
+  }, {
+    key: 'initTitle',
+    value: function initTitle() {
+      if (!this.titleElem) {
+        this.titleElem = document.createElement('div');
+        this.titleElem.classList.add('title');
+        this.mainMenuContainer.appendChild(this.getTitleElem());
+      }
+      this.setTitle('MB Sudoku');
+    }
+  }, {
+    key: 'getTitleElem',
+    value: function getTitleElem() {
+      return this.titleElem;
+    }
+  }, {
+    key: 'setTitle',
+    value: function setTitle(title) {
+      this.getTitleElem().innerHTML = title;
+    }
+
+    /*
+     * Buttons
+     */
+
+  }, {
+    key: 'initButtons',
+    value: function initButtons() {
+      if (this.buttons === undefined) {
+        this.buttons = [];
+        this.buttonsContainer = document.createElement('div');
+        this.buttonsContainer.classList.add('buttons-container');
+        this.mainMenuContainer.appendChild(this.buttonsContainer);
+      }
+      this.initPlayButton();
+      this.initStatsButton();
+    }
+  }, {
+    key: 'getButtonsContainer',
+    value: function getButtonsContainer() {
+      if (this.buttonsContainer === undefined) {
+        console.log(DEBUG_PREFIX + 'Buttons container undefined.');
+      }
+      return this.buttonsContainer;
+    }
+  }, {
+    key: 'addButton',
+    value: function addButton(btn) {
+      this.buttons.push(btn);
+      this.getButtonsContainer().appendChild(btn);
+    }
+  }, {
+    key: 'createButton',
+    value: function createButton(buttonName) {
+      var btn = document.createElement('div');
+      btn.classList.add('btn');
+      btn.innerHTML = buttonName;
+      return btn;
+    }
+
+    /*
+     * Play Button
+     */
+
+  }, {
+    key: 'initPlayButton',
+    value: function initPlayButton() {
+      if (this.startButton === undefined) {
+        this.startButton = this.createButton('Play');
+        this.addButton(this.startButton);
+        this.startButton.addEventListener('mousedown', function (e) {
+          app.showView(VIEW_ID.GAME);
+        });
+      }
+    }
+
+    /*
+     * Stats Button
+     */
+
+  }, {
+    key: 'initStatsButton',
+    value: function initStatsButton() {
+      if (this.statsButton === undefined) {
+        this.statsButton = this.createButton('Stats');
+        this.addButton(this.statsButton);
+      }
+    }
+  }]);
+
+  return MainMenu;
+}(View);
+},{"./view":11}],9:[function(require,module,exports){
+(function (global){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var MainMenu = require('./main-menu.js');
+var Game = require('./game.js');
 
 // TODO: History
 // TODO: Undo
@@ -2689,26 +2910,71 @@ var SelectionsBox = require('./selections-box.js');
 // TODO: New game conformation
 // TODO: Win screen
 // IDEA: Victory picture
+// TODO: Error notification
 
-var App = function App() {
+global.VIEW_ID = {
+  MAIN_MENU: 'MAIN_MENU_VIEW',
+  GAME: 'GAME_VIEW'
+};
+
+var App = function () {
+  function App() {
     _classCallCheck(this, App);
 
     console.log("Starting MB Sudoku");
     this.containerElem = document.getElementById('app-container');
 
-    this.gameBoard = new GameBoard();
-    this.gameTopBox = new GameTopBox(this.gameBoard);
-    this.gameStatsBox = new GameStatsBox(this.gameBoard);
-    this.selectionsBox = new SelectionsBox(this.gameBoard);
+    this.mainMenu = new MainMenu();
+    this.addView(this.mainMenu);
 
-    this.containerElem.appendChild(this.gameTopBox.getElement());
-    this.containerElem.appendChild(this.gameStatsBox.getElement());
-    this.containerElem.appendChild(this.gameBoard.getElement());
-    this.containerElem.appendChild(this.selectionsBox.getElement());
-};
+    this.game = new Game();
+    this.addView(this.game);
 
-var app = new App();
-},{"./game-board.js":3,"./game-stats-box.js":4,"./game-top-box.js":5,"./selections-box.js":8}],8:[function(require,module,exports){
+    this.showView(this.mainMenu.getViewName());
+  }
+
+  _createClass(App, [{
+    key: 'getElement',
+    value: function getElement() {
+      return this.containerElem;
+    }
+  }, {
+    key: 'addView',
+    value: function addView(view) {
+      if (this.views === undefined) {
+        this.views = [];
+      }
+      this.views.push(view);
+      this.getElement().appendChild(view.getViewElement());
+    }
+  }, {
+    key: 'showView',
+    value: function showView(viewName) {
+      for (var i = 0; i < this.views.length; i++) {
+        if (this.views[i].getViewName() === viewName) {
+          this.hideActiveView();
+          this.views[i].show();
+          this.activeView = this.views[i];
+        }
+      }
+    }
+  }, {
+    key: 'hideActiveView',
+    value: function hideActiveView() {
+      if (this.activeView !== undefined) {
+        this.activeView.hide();
+      }
+    }
+  }]);
+
+  return App;
+}();
+
+global.app = new App();
+
+// module.exports = new App();
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./game.js":6,"./main-menu.js":8}],10:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -2795,6 +3061,11 @@ module.exports = function () {
       return this.containerElem;
     }
   }, {
+    key: 'update',
+    value: function update() {
+      this.updateTileStyleStates();
+    }
+  }, {
     key: 'updateTileStyleStates',
     value: function updateTileStyleStates() {
       var doneVals = this.gameBoard.getCompletedValues();
@@ -2830,4 +3101,60 @@ module.exports = function () {
 
   return SelectionsBox;
 }();
-},{}]},{},[7]);
+},{}],11:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var CSS_CLASSES = {
+  HIDDEN: 'hidden'
+};
+
+module.exports = function () {
+  function View(viewName) {
+    _classCallCheck(this, View);
+
+    this.viewElement = document.createElement('div');
+    this.getViewElement().classList.add('view');
+    this.getViewElement().classList.add(CSS_CLASSES.HIDDEN);
+
+    this.setViewName(viewName);
+  }
+
+  _createClass(View, [{
+    key: 'setViewName',
+    value: function setViewName(name) {
+      this.viewName = name;
+    }
+  }, {
+    key: 'getViewName',
+    value: function getViewName() {
+      return this.viewName;
+    }
+  }, {
+    key: 'getViewElement',
+    value: function getViewElement() {
+      return this.viewElement;
+    }
+  }, {
+    key: 'addElement',
+    value: function addElement(elem) {
+      this.getViewElement().appendChild(elem);
+    }
+  }, {
+    key: 'show',
+    value: function show() {
+      this.getViewElement().classList.remove(CSS_CLASSES.HIDDEN);
+    }
+  }, {
+    key: 'hide',
+    value: function hide() {
+      this.getViewElement().classList.add(CSS_CLASSES.HIDDEN);
+    }
+  }]);
+
+  return View;
+}();
+},{}]},{},[9]);

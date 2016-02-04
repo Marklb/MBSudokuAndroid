@@ -19,6 +19,12 @@ module.exports = function () {
     this.menuButtonElem.classList.add('menu-btn');
     this.menuButtonElem.textContent = "X";
     this.containerElem.appendChild(this.menuButtonElem);
+    this.menuButtonElem.addEventListener('mousedown', function (e) {
+      // this.gameBoard.newGame();
+      // let solution = this.gameBoard.getSolution();
+      // console.log(solution);
+      app.showView(VIEW_ID.MAIN_MENU);
+    });
 
     this.titleElem = document.createElement('div');
     this.titleElem.classList.add('title');
