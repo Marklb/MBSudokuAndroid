@@ -1,4 +1,19 @@
 .view {
+  overflow: hidden;
+}
+
+.view.hidden {
+
+}
+
+
+
+
+
+
+
+
+.view {
   width: 100%;
   height: 100%;
 }
