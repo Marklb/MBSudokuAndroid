@@ -4,8 +4,9 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var MainMenu = require('./main-menu');
-var Game = require('./game');
+// let MainMenu = require('./main-menu');
+// let Game = require('./game');
+var Game = require('./views/game/game');
 // var attachFastClick = require('./libs/fastclick');
 
 // TODO: History
@@ -23,8 +24,8 @@ global.VIEW_ID = {
   GAME: 'GAME_VIEW'
 };
 
-// global.TOUCH_EVENT = 'mousedown';
-global.TOUCH_EVENT = 'touchstart';
+global.TOUCH_EVENT = 'mousedown';
+// global.TOUCH_EVENT = 'touchstart';
 
 var App = function () {
   function App() {
@@ -35,13 +36,20 @@ var App = function () {
     console.log("Starting MB Sudoku");
     this.containerElem = document.getElementById('app-container');
 
-    this.mainMenu = new MainMenu();
-    this.addView(this.mainMenu);
+    // this.mainMenu = new MainMenu();
+    // this.addView(this.mainMenu);
+    //
+    // this.game = new Game();
+    // this.addView(this.game);
+    //
+    //
+    //
+    // this.showView(this.mainMenu.getViewName());
 
-    this.game = new Game();
-    this.addView(this.game);
+    this.gameView = new Game();
+    this.addView(this.gameView.getView());
 
-    this.showView(this.mainMenu.getViewName());
+    this.showView(VIEW_ID.GAME);
   }
 
   _createClass(App, [{

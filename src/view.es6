@@ -11,6 +11,8 @@ const CSS_CLASSES = {
   HIDDEN: 'hidden2'
 };
 
+
+
 //------------------------------------------------------------------------------
 // A View takes up the entire screen.
 // Only one view is visible at a time.
@@ -19,11 +21,12 @@ const CSS_CLASSES = {
 module.exports =
 class View {
   constructor(viewName) {
+    console.log('Load Id: '+viewName);
     this.viewElement = document.createElement('div');
     this.getViewElement().classList.add(CSS_CLASSES.VIEW);
     this.getViewElement().classList.add(CSS_CLASSES.HIDDEN);
 
-    initDimensions();
+    this.initDimensions();
 
     this.setViewName(viewName);
   }
@@ -35,6 +38,26 @@ class View {
       w: window.innerWidth,
       h: window.innerHeight
     };
+  }
+
+  getDimensions(){
+    return this.dimensions;
+  }
+
+  getX(){
+    return this.getDimensions().x;
+  }
+
+  getY(){
+    return this.getDimensions().y;
+  }
+
+  getWidth(){
+    return this.getDimensions().w;
+  }
+
+  getHeight(){
+    return this.getDimensions().h;
   }
 
   setViewName(name){

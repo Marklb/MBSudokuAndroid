@@ -1,5 +1,6 @@
-let MainMenu = require('./main-menu');
-let Game = require('./game');
+// let MainMenu = require('./main-menu');
+// let Game = require('./game');
+let Game = require('./views/game/game');
 // var attachFastClick = require('./libs/fastclick');
 
 // TODO: History
@@ -17,8 +18,8 @@ global.VIEW_ID = {
   GAME: 'GAME_VIEW'
 };
 
-// global.TOUCH_EVENT = 'mousedown';
-global.TOUCH_EVENT = 'touchstart';
+global.TOUCH_EVENT = 'mousedown';
+// global.TOUCH_EVENT = 'touchstart';
 
 class App {
   constructor() {
@@ -28,15 +29,23 @@ class App {
     this.containerElem = document.getElementById('app-container');
 
 
-    this.mainMenu = new MainMenu();
-    this.addView(this.mainMenu);
+    // this.mainMenu = new MainMenu();
+    // this.addView(this.mainMenu);
+    //
+    // this.game = new Game();
+    // this.addView(this.game);
+    //
+    //
+    //
+    // this.showView(this.mainMenu.getViewName());
 
-    this.game = new Game();
-    this.addView(this.game);
+
+    this.gameView = new Game();
+    this.addView(this.gameView.getView());
 
 
+    this.showView(VIEW_ID.GAME);
 
-    this.showView(this.mainMenu.getViewName());
   }
 
   getElement(){

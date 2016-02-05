@@ -4,23 +4,74 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+// const CSS_CLASSES = {
+//   VIEW: 'view',
+//   HIDDEN: 'hidden'
+// };
+
+//------------------------------------------------------------------------------
+// CSS Classes used by class View.
+//------------------------------------------------------------------------------
 var CSS_CLASSES = {
-  VIEW: 'view',
-  HIDDEN: 'hidden'
+  VIEW: 'view2',
+  HIDDEN: 'hidden2'
 };
 
+//------------------------------------------------------------------------------
+// A View takes up the entire screen.
+// Only one view is visible at a time.
+// Anything seen has to be added to a View.
+//------------------------------------------------------------------------------
 module.exports = function () {
   function View(viewName) {
     _classCallCheck(this, View);
 
+    console.log('Load Id: ' + viewName);
     this.viewElement = document.createElement('div');
     this.getViewElement().classList.add(CSS_CLASSES.VIEW);
     this.getViewElement().classList.add(CSS_CLASSES.HIDDEN);
+
+    this.initDimensions();
 
     this.setViewName(viewName);
   }
 
   _createClass(View, [{
+    key: 'initDimensions',
+    value: function initDimensions() {
+      this.dimensions = {
+        x: 0,
+        y: 0,
+        w: window.innerWidth,
+        h: window.innerHeight
+      };
+    }
+  }, {
+    key: 'getDimensions',
+    value: function getDimensions() {
+      return this.dimensions;
+    }
+  }, {
+    key: 'getX',
+    value: function getX() {
+      return this.getDimensions().x;
+    }
+  }, {
+    key: 'getY',
+    value: function getY() {
+      return this.getDimensions().y;
+    }
+  }, {
+    key: 'getWidth',
+    value: function getWidth() {
+      return this.getDimensions().w;
+    }
+  }, {
+    key: 'getHeight',
+    value: function getHeight() {
+      return this.getDimensions().h;
+    }
+  }, {
     key: 'setViewName',
     value: function setViewName(name) {
       this.viewName = name;
