@@ -6,10 +6,13 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+var Debug = require('./debug');
 // let MainMenu = require('./main-menu');
 // let Game = require('./game');
 var Game = require('./views/game/game');
 // var attachFastClick = require('./libs/fastclick');
+
+var DEBUG = new Debug('App');
 
 // TODO: History
 // TODO: Undo
@@ -33,9 +36,10 @@ var App = function () {
   function App() {
     _classCallCheck(this, App);
 
+    DEBUG.log('Starting MB Sudoku');
     // this.TOUCH_EVENT = 'mousedown';
     // attachFastClick(document.body);
-    console.log("Starting MB Sudoku");
+
     this.containerElem = document.getElementById('app-container');
 
     // this.mainMenu = new MainMenu();
@@ -66,13 +70,13 @@ var App = function () {
         this.views = [];
       }
       this.views.push(view);
-      this.getElement().appendChild(view.getViewElement());
+      this.getElement().appendChild(view.getElement());
     }
   }, {
     key: 'showView',
-    value: function showView(viewName) {
+    value: function showView(viewId) {
       for (var i = 0; i < this.views.length; i++) {
-        if (this.views[i].getViewName() === viewName) {
+        if (this.views[i].getViewId() === viewId) {
           this.hideActiveView();
           this.views[i].show();
           this.activeView = this.views[i];
@@ -95,7 +99,7 @@ global.app = new App();
 
 // module.exports = new App();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./views/game/game":6}],2:[function(require,module,exports){
+},{"./debug":2,"./views/game/game":5}],2:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -119,114 +123,6 @@ module.exports = function () {
   return Debug;
 }();
 },{}],3:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-// const CSS_CLASSES = {
-//   VIEW: 'view',
-//   HIDDEN: 'hidden'
-// };
-
-//------------------------------------------------------------------------------
-// CSS Classes used by class View.
-//------------------------------------------------------------------------------
-var CSS_CLASSES = {
-  VIEW: 'view2',
-  HIDDEN: 'hidden2'
-};
-
-//------------------------------------------------------------------------------
-// A View takes up the entire screen.
-// Only one view is visible at a time.
-// Anything seen has to be added to a View.
-//------------------------------------------------------------------------------
-module.exports = function () {
-  function View(viewName) {
-    _classCallCheck(this, View);
-
-    console.log('Load Id: ' + viewName);
-    this.viewElement = document.createElement('div');
-    this.getViewElement().classList.add(CSS_CLASSES.VIEW);
-    this.getViewElement().classList.add(CSS_CLASSES.HIDDEN);
-
-    this.initDimensions();
-
-    this.setViewName(viewName);
-  }
-
-  _createClass(View, [{
-    key: 'initDimensions',
-    value: function initDimensions() {
-      this.dimensions = {
-        x: 0,
-        y: 0,
-        w: window.innerWidth,
-        h: window.innerHeight
-      };
-    }
-  }, {
-    key: 'getDimensions',
-    value: function getDimensions() {
-      return this.dimensions;
-    }
-  }, {
-    key: 'getX',
-    value: function getX() {
-      return this.getDimensions().x;
-    }
-  }, {
-    key: 'getY',
-    value: function getY() {
-      return this.getDimensions().y;
-    }
-  }, {
-    key: 'getWidth',
-    value: function getWidth() {
-      return this.getDimensions().w;
-    }
-  }, {
-    key: 'getHeight',
-    value: function getHeight() {
-      return this.getDimensions().h;
-    }
-  }, {
-    key: 'setViewName',
-    value: function setViewName(name) {
-      this.viewName = name;
-    }
-  }, {
-    key: 'getViewName',
-    value: function getViewName() {
-      return this.viewName;
-    }
-  }, {
-    key: 'getViewElement',
-    value: function getViewElement() {
-      return this.viewElement;
-    }
-  }, {
-    key: 'addElement',
-    value: function addElement(elem) {
-      this.getViewElement().appendChild(elem);
-    }
-  }, {
-    key: 'show',
-    value: function show() {
-      this.getViewElement().classList.remove(CSS_CLASSES.HIDDEN);
-    }
-  }, {
-    key: 'hide',
-    value: function hide() {
-      this.getViewElement().classList.add(CSS_CLASSES.HIDDEN);
-    }
-  }]);
-
-  return View;
-}();
-},{}],4:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -314,7 +210,7 @@ module.exports = function () {
 
   return GameBoard;
 }();
-},{"../../../debug":2}],5:[function(require,module,exports){
+},{"../../../debug":2}],4:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -326,7 +222,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var Debug = require('../../debug');
-var View = require('../../view');
+var View = require('../view');
 
 var GameBoard = require('./elements/gameboard');
 
@@ -357,7 +253,7 @@ module.exports = function (_View) {
 
   return GameView;
 }(View);
-},{"../../debug":2,"../../view":3,"./elements/gameboard":4}],6:[function(require,module,exports){
+},{"../../debug":2,"../view":6,"./elements/gameboard":3}],5:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -386,4 +282,125 @@ module.exports = function () {
 
   return Game;
 }();
-},{"../../debug":2,"./game-view":5}]},{},[1]);
+},{"../../debug":2,"./game-view":4}],6:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Debug = require('../debug');
+
+var DEBUG = new Debug('View');
+
+//------------------------------------------------------------------------------
+// CSS Classes used by class View.
+//------------------------------------------------------------------------------
+var CSS_CLASSES = {
+  VIEW: 'view',
+  HIDDEN: 'hidden'
+};
+
+//------------------------------------------------------------------------------
+// A View takes up the entire screen.
+// Only one view is visible at a time.
+// Anything seen has to be added to a View.
+//------------------------------------------------------------------------------
+module.exports = function () {
+  function View(viewId) {
+    _classCallCheck(this, View);
+
+    DEBUG.log('Loading: ' + viewId);
+    this.setViewId(viewId);
+
+    this.initElement();
+    this.initBounds();
+
+    this.updateElement();
+  }
+
+  _createClass(View, [{
+    key: 'initBounds',
+    value: function initBounds() {
+      this.bounds = {
+        x: 0,
+        y: 0,
+        w: window.innerWidth,
+        h: window.innerHeight
+      };
+    }
+  }, {
+    key: 'getBounds',
+    value: function getBounds() {
+      return this.bounds;
+    }
+  }, {
+    key: 'getX',
+    value: function getX() {
+      return this.getBounds().x;
+    }
+  }, {
+    key: 'getY',
+    value: function getY() {
+      return this.getBounds().y;
+    }
+  }, {
+    key: 'getWidth',
+    value: function getWidth() {
+      return this.getBounds().w;
+    }
+  }, {
+    key: 'getHeight',
+    value: function getHeight() {
+      return this.getBounds().h;
+    }
+  }, {
+    key: 'setViewId',
+    value: function setViewId(id) {
+      this.viewId = id;
+    }
+  }, {
+    key: 'getViewId',
+    value: function getViewId() {
+      return this.viewId;
+    }
+  }, {
+    key: 'initElement',
+    value: function initElement() {
+      this.element = document.createElement('div');
+      this.getElement().classList.add(CSS_CLASSES.VIEW);
+      this.getElement().classList.add(CSS_CLASSES.HIDDEN);
+    }
+  }, {
+    key: 'getElement',
+    value: function getElement() {
+      return this.element;
+    }
+  }, {
+    key: 'updateElement',
+    value: function updateElement() {
+      this.getElement().setAttribute('style', 'left:' + this.getX() + 'px;');
+      this.getElement().setAttribute('style', 'top:' + this.getY() + 'px;');
+      this.getElement().setAttribute('style', 'width:' + this.getWidth() + 'px;');
+      this.getElement().setAttribute('style', 'height:' + this.getHeight() + 'px;');
+    }
+  }, {
+    key: 'addElement',
+    value: function addElement(elem) {
+      this.getElement().appendChild(elem);
+    }
+  }, {
+    key: 'show',
+    value: function show() {
+      this.getElement().classList.remove(CSS_CLASSES.HIDDEN);
+    }
+  }, {
+    key: 'hide',
+    value: function hide() {
+      this.getElement().classList.add(CSS_CLASSES.HIDDEN);
+    }
+  }]);
+
+  return View;
+}();
+},{"../debug":2}]},{},[1]);

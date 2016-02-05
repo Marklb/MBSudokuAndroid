@@ -4,10 +4,13 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+var Debug = require('./debug');
 // let MainMenu = require('./main-menu');
 // let Game = require('./game');
 var Game = require('./views/game/game');
 // var attachFastClick = require('./libs/fastclick');
+
+var DEBUG = new Debug('App');
 
 // TODO: History
 // TODO: Undo
@@ -31,9 +34,10 @@ var App = function () {
   function App() {
     _classCallCheck(this, App);
 
+    DEBUG.log('Starting MB Sudoku');
     // this.TOUCH_EVENT = 'mousedown';
     // attachFastClick(document.body);
-    console.log("Starting MB Sudoku");
+
     this.containerElem = document.getElementById('app-container');
 
     // this.mainMenu = new MainMenu();
@@ -64,13 +68,13 @@ var App = function () {
         this.views = [];
       }
       this.views.push(view);
-      this.getElement().appendChild(view.getViewElement());
+      this.getElement().appendChild(view.getElement());
     }
   }, {
     key: 'showView',
-    value: function showView(viewName) {
+    value: function showView(viewId) {
       for (var i = 0; i < this.views.length; i++) {
-        if (this.views[i].getViewName() === viewName) {
+        if (this.views[i].getViewId() === viewId) {
           this.hideActiveView();
           this.views[i].show();
           this.activeView = this.views[i];

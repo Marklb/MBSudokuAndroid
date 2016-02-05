@@ -1,7 +1,10 @@
+let Debug = require('./debug');
 // let MainMenu = require('./main-menu');
 // let Game = require('./game');
 let Game = require('./views/game/game');
 // var attachFastClick = require('./libs/fastclick');
+
+let DEBUG = new Debug('App');
 
 // TODO: History
 // TODO: Undo
@@ -23,9 +26,10 @@ global.TOUCH_EVENT = 'mousedown';
 
 class App {
   constructor() {
+    DEBUG.log('Starting MB Sudoku');
     // this.TOUCH_EVENT = 'mousedown';
     // attachFastClick(document.body);
-    console.log("Starting MB Sudoku");
+
     this.containerElem = document.getElementById('app-container');
 
 
@@ -57,12 +61,12 @@ class App {
       this.views = [];
     }
     this.views.push(view);
-    this.getElement().appendChild(view.getViewElement());
+    this.getElement().appendChild(view.getElement());
   }
 
-  showView(viewName){
+  showView(viewId){
     for(let i = 0; i < this.views.length; i++){
-      if(this.views[i].getViewName() === viewName){
+      if(this.views[i].getViewId() === viewId){
         this.hideActiveView();
         this.views[i].show();
         this.activeView = this.views[i];

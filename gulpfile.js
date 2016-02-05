@@ -2,7 +2,7 @@
 
 var gulp = require('gulp');
 var babel = require('gulp-babel');
-// var sass = require('gulp-sass');
+var sass = require('gulp-sass');
 
 
 gulp.task('default', function () {
@@ -21,11 +21,11 @@ gulp.task('babel', function() {
     .pipe(gulp.dest('./www/js'))
 });
 
-// gulp.task('sass', function () {
-//   gulp.src('./src/**/*.scss')
-//     .pipe(sass().on('error', sass.logError))
-//     .pipe(gulp.dest('./dist'));
-// });
+gulp.task('sass', function () {
+  gulp.src('./src/styles/styles.scss')
+    .pipe(sass().on('error', sass.logError))
+    .pipe(gulp.dest('./www/css'));
+});
 
 // gulp.task('movehtml', function() {
 //   return gulp.src('src/**/*.html')
@@ -36,6 +36,6 @@ gulp.task('babel', function() {
 gulp.task('watch', ['babel'], function (){
   // gulp.watch('src/**/*.html', ['movehtml']);
   gulp.watch('src/**/*.es6', ['babel']);
-  // gulp.watch('src/**/*.scss', ['sass']);
+  gulp.watch('src/**/*.scss', ['sass']);
 
 });

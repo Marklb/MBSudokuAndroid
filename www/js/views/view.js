@@ -4,7 +4,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Debug = require('./debug');
+var Debug = require('../debug');
 
 var DEBUG = new Debug('View');
 
@@ -26,29 +26,23 @@ module.exports = function () {
     _classCallCheck(this, View);
 
     DEBUG.log('Loading: ' + viewId);
-    this.viewElement = document.createElement('div');
-    this.getViewElement().classList.add(CSS_CLASSES.VIEW);
-    this.getViewElement().classList.add(CSS_CLASSES.HIDDEN);
-
-    this.initBounds();
-
     this.setViewId(viewId);
 
-    DEBUG.log('w: ' + this.getWidth());
-    DEBUG.log('h: ' + this.getHeight());
+    this.initElement();
+    this.initBounds();
+
+    this.updateElement();
   }
 
   _createClass(View, [{
     key: 'initBounds',
     value: function initBounds() {
-      // DEBUG.log('InitBounds');
       this.bounds = {
         x: 0,
         y: 0,
         w: window.innerWidth,
         h: window.innerHeight
       };
-      // DEBUG.log('w:' + this.bounds.w);
     }
   }, {
     key: 'getBounds',
@@ -86,24 +80,39 @@ module.exports = function () {
       return this.viewId;
     }
   }, {
-    key: 'getViewElement',
-    value: function getViewElement() {
-      return this.viewElement;
+    key: 'initElement',
+    value: function initElement() {
+      this.element = document.createElement('div');
+      this.getElement().classList.add(CSS_CLASSES.VIEW);
+      this.getElement().classList.add(CSS_CLASSES.HIDDEN);
+    }
+  }, {
+    key: 'getElement',
+    value: function getElement() {
+      return this.element;
+    }
+  }, {
+    key: 'updateElement',
+    value: function updateElement() {
+      this.getElement().setAttribute('style', 'left:' + this.getX() + 'px;');
+      this.getElement().setAttribute('style', 'top:' + this.getY() + 'px;');
+      this.getElement().setAttribute('style', 'width:' + this.getWidth() + 'px;');
+      this.getElement().setAttribute('style', 'height:' + this.getHeight() + 'px;');
     }
   }, {
     key: 'addElement',
     value: function addElement(elem) {
-      this.getViewElement().appendChild(elem);
+      this.getElement().appendChild(elem);
     }
   }, {
     key: 'show',
     value: function show() {
-      this.getViewElement().classList.remove(CSS_CLASSES.HIDDEN);
+      this.getElement().classList.remove(CSS_CLASSES.HIDDEN);
     }
   }, {
     key: 'hide',
     value: function hide() {
-      this.getViewElement().classList.add(CSS_CLASSES.HIDDEN);
+      this.getElement().classList.add(CSS_CLASSES.HIDDEN);
     }
   }]);
 

@@ -1,5 +1,5 @@
 let Debug = require('../../debug');
-let View = require('../../view');
+let View = require('../view');
 
 let GameBoard = require('./elements/gameboard');
 
@@ -12,7 +12,6 @@ class GameView extends View {
     DEBUG.log('Loading');
 
     this.initBoard();
-
 
   }
 
