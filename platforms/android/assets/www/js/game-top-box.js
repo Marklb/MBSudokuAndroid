@@ -19,7 +19,8 @@ module.exports = function () {
     this.menuButtonElem.classList.add('menu-btn');
     this.menuButtonElem.textContent = "X";
     this.containerElem.appendChild(this.menuButtonElem);
-    this.menuButtonElem.addEventListener('mousedown', function (e) {
+    // this.menuButtonElem.addEventListener('mousedown', (e) => {
+    this.menuButtonElem.addEventListener(TOUCH_EVENT, function (e) {
       // this.gameBoard.newGame();
       // let solution = this.gameBoard.getSolution();
       // console.log(solution);
@@ -35,7 +36,8 @@ module.exports = function () {
     this.resetBtnElem.classList.add('reset-btn');
     this.resetBtnElem.textContent = "X";
     this.containerElem.appendChild(this.resetBtnElem);
-    this.resetBtnElem.addEventListener('mousedown', function (e) {
+    // this.resetBtnElem.addEventListener('mousedown', (e) => {
+    this.resetBtnElem.addEventListener(TOUCH_EVENT, function (e) {
       _this.gameBoard.newGame();
     });
   }

@@ -1,0 +1,31 @@
+.gameboard-tile {
+  display: block;
+  box-sizing: border-box;
+  border: 2px solid rgba(0,150,190,1);
+  background-color: rgba(0,0,0,1);
+
+  justify-content: center; /* align horizontal */
+  align-items: center; /* align vertical */
+  text-align: center;
+  cursor: default;
+}
+
+// .gameboard-tile.selected {
+//   border: 2px solid rgba(0,200,100,1);
+// }
+//
+// .gameboard-tile[original='false']{
+//   color: rgba(0,150,190,1);
+// }
+// .gameboard-tile[original='true']{
+//   color: rgba(0,120,190,1);
+// }
+//
+// .gameboard-tile[value='0'] {
+//   color: rgba(0,0,0,0) !important;
+//   border-color: rgba(0,150,190,1) !important;
+// }
+//
+// .gameboard-tile[samevalue='true']{
+//   border-color: rgba(0,200,140,1);
+// }

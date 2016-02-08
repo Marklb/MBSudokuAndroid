@@ -1,11 +1,19 @@
 module.exports =
 class Debug {
-  constructor(debug_id) {
-    this.debug_id = debug_id;
+  constructor(debugId) {
+    this.debugId = debugId;
+  }
+
+  getMessagePrefix(){
+    return '['+this.debugId+']: ';
   }
 
   log(msg){
-    console.log('['+this.debug_id+']: '+msg);
+    console.log(this.getMessagePrefix()+msg);
+  }
+
+  error(msg){
+    console.error(this.getMessagePrefix()+msg);
   }
 
 }

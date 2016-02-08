@@ -31,8 +31,9 @@ module.exports = function () {
     this.removeBtnElem.classList.add('remove-btn');
     this.removeBtnElem.textContent = 'X';
     this.optionsContainerElem.appendChild(this.removeBtnElem);
-    this.removeBtnElem.addEventListener('mousedown', function (e) {
-      _this.gameBoard.setSelectedTileValue(-1);
+    // this.removeBtnElem.addEventListener('mousedown', (e) => {
+    this.removeBtnElem.addEventListener(TOUCH_EVENT, function (e) {
+      _this.gameBoard.setSelectedTileValue(_this.gameBoard.EMPTY_VALUE);
       _this.updateTileStyleStates();
     });
 
@@ -60,7 +61,8 @@ module.exports = function () {
       tmpTile.numValue = i + 1;
       tmpTile.textContent = '' + tmpTile.numValue;
       _this.tilesContainerElem.appendChild(tmpTile);
-      tmpTile.addEventListener('mousedown', function (e) {
+      // tmpTile.addEventListener('mousedown', (e) => {
+      tmpTile.addEventListener(TOUCH_EVENT, function (e) {
         if (!tmpTile.classList.contains('done')) {
           var isDone = _this.gameBoard.setSelectedTileValue(tmpTile.numValue);
           if (isDone) {

@@ -76,14 +76,19 @@ class View {
   }
 
   updateElement(){
-    this.getElement().setAttribute('style', 'left:'+this.getX()+'px;');
-    this.getElement().setAttribute('style', 'top:'+this.getY()+'px;');
-    this.getElement().setAttribute('style', 'width:'+this.getWidth()+'px;');
-    this.getElement().setAttribute('style', 'height:'+this.getHeight()+'px;');
+    let style = 'left:'+this.getX()+'px;'
+      +'top:'+this.getY()+'px;'
+      +'width:'+this.getWidth()+'px;'
+      +'height:'+this.getHeight()+'px;';
+    this.getElement().setAttribute('style', style);
   }
 
   addElement(elem){
     this.getElement().appendChild(elem);
+  }
+
+  addClass(className){
+    this.getElement().classList.add(className);
   }
 
   show(){

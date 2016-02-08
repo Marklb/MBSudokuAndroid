@@ -1,0 +1,12 @@
+.clock {
+  display: block;
+  box-sizing: border-box;
+  border: 2px solid rgba(0,150,190,1);
+  background-color: rgba(0,0,0,1);
+
+  color: rgba(0,150,190,1);
+  justify-content: center; /* align horizontal */
+  align-items: center; /* align vertical */
+  text-align: center;
+  cursor: default;
+}

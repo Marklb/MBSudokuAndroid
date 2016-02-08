@@ -1,10 +1,15 @@
+@import "elements/gameboard-tile.scss";
 @import "elements/gameboard.scss";
+@import "elements/selection-tile.scss";
+@import "elements/erase-tile-button.scss";
+@import "elements/new-game-button.scss";
+@import "elements/top-title.scss";
+@import "elements/clock.scss";
 
 .game-view {
     display: block;
-    border: 2px solid rgba(0,0,200,1);
+    // border: 2px solid rgba(0,0,200,1);
     background-color: rgba(0,0,0,1);
-
-
-
+    overflow: hidden;
+    box-sizing: border-box;
 }

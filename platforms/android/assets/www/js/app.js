@@ -4,9 +4,13 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var MainMenu = require('./main-menu');
-var Game = require('./game');
-var attachFastClick = require('./libs/fastclick');
+var Debug = require('./debug');
+// let MainMenu = require('./main-menu');
+// let Game = require('./game');
+var Game = require('./views/game/game');
+// var attachFastClick = require('./libs/fastclick');
+
+var DEBUG = new Debug('App');
 
 // TODO: History
 // TODO: Undo
@@ -23,21 +27,33 @@ global.VIEW_ID = {
   GAME: 'GAME_VIEW'
 };
 
+global.TOUCH_START_EVENT = 'mousedown';
+// global.TOUCH_START_EVENT = 'touchstart';
+
+global.VERSION = '0';
+
 var App = function () {
   function App() {
     _classCallCheck(this, App);
 
-    attachFastClick(document.body);
-    console.log("Starting MB Sudoku");
+    DEBUG.log('Starting MB Sudoku');
+
     this.containerElem = document.getElementById('app-container');
 
-    this.mainMenu = new MainMenu();
-    this.addView(this.mainMenu);
+    // this.mainMenu = new MainMenu();
+    // this.addView(this.mainMenu);
+    //
+    // this.game = new Game();
+    // this.addView(this.game);
+    //
+    //
+    //
+    // this.showView(this.mainMenu.getViewName());
 
-    this.game = new Game();
-    this.addView(this.game);
+    this.gameView = new Game();
+    this.addView(this.gameView.getView());
 
-    this.showView(this.mainMenu.getViewName());
+    this.showView(VIEW_ID.GAME);
   }
 
   _createClass(App, [{
@@ -52,13 +68,13 @@ var App = function () {
         this.views = [];
       }
       this.views.push(view);
-      this.getElement().appendChild(view.getViewElement());
+      this.getElement().appendChild(view.getElement());
     }
   }, {
     key: 'showView',
-    value: function showView(viewName) {
+    value: function showView(viewId) {
       for (var i = 0; i < this.views.length; i++) {
-        if (this.views[i].getViewName() === viewName) {
+        if (this.views[i].getViewId() === viewId) {
           this.hideActiveView();
           this.views[i].show();
           this.activeView = this.views[i];

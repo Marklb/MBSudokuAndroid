@@ -45,10 +45,14 @@ class GameStatsBox {
     let DAYS = HOURS * 24;
     let YEARS = DAYS * 365;
 
-    t = t/SECONDS;
-    let seconds = Math.round(t % 60);
-    let minutes = Math.round((t / 60) % 60);
-    let hours = Math.round((t / (60 * 60)) % 24);
+    // t = t/SECONDS;
+    // let seconds = Math.round(t % 60);
+    // let minutes = Math.round((t / 60) % 60);
+    // let hours = Math.round((t / (60 * 60)) % 24);
+    let d = new Date(t);
+    let seconds = d.getSeconds();
+    let minutes = d.getMinutes();
+    let hours = d.getHours();
 
     let secStr = ""+seconds;
     if(seconds<10){secStr = "0"+seconds;}

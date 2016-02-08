@@ -1,4 +1,7 @@
 .game-stats-box {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
   display: flex;
   flex-direction: row;
   -webkit-box-sizing: border-box;
@@ -10,6 +13,9 @@
   overflow: hidden;
 }
 .game-stats-box .left{
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  -webkit-flex:1;
   flex: 1;
   -webkit-box-sizing: border-box;
      -moz-box-sizing: border-box;
@@ -18,6 +24,9 @@
   margin: 2px;
   border: 2px solid rgba(0,0,0,0);
   color: rgba(0,150,150,0);
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
   display: flex;
   justify-content: center; /* align horizontal */
   align-items: center; /* align vertical */
@@ -25,6 +34,9 @@
   cursor: default;
 }
 .game-stats-box .timer{
+  -webkit-box-flex: 8;
+  -moz-box-flex: 8;
+  -webkit-flex:8;
   flex: 8;
   -webkit-box-sizing: border-box;
      -moz-box-sizing: border-box;
@@ -33,6 +45,9 @@
   margin: 2px;
   border: 2px solid rgba(0,100,100,0);
   color: rgba(0,150,150,1);
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
   display: flex;
   justify-content: center; /* align horizontal */
   align-items: center; /* align vertical */
@@ -40,6 +55,9 @@
   cursor: default;
 }
 .game-stats-box .right{
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  -webkit-flex:1;
   flex: 1;
   -webkit-box-sizing: border-box;
      -moz-box-sizing: border-box;
@@ -48,6 +66,9 @@
   margin: 2px;
   border: 2px solid rgba(0,0,0,0);
   color: rgba(0,150,150,0);
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
   display: flex;
   justify-content: center; /* align horizontal */
   align-items: center; /* align vertical */

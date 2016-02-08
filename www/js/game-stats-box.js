@@ -54,10 +54,14 @@ module.exports = function () {
       var DAYS = HOURS * 24;
       var YEARS = DAYS * 365;
 
-      t = t / SECONDS;
-      var seconds = Math.round(t % 60);
-      var minutes = Math.round(t / 60 % 60);
-      var hours = Math.round(t / (60 * 60) % 24);
+      // t = t/SECONDS;
+      // let seconds = Math.round(t % 60);
+      // let minutes = Math.round((t / 60) % 60);
+      // let hours = Math.round((t / (60 * 60)) % 24);
+      var d = new Date(t);
+      var seconds = d.getSeconds();
+      var minutes = d.getMinutes();
+      var hours = d.getHours();
 
       var secStr = "" + seconds;
       if (seconds < 10) {

@@ -3,6 +3,9 @@
 }
 
 .main-menu-container .main-menu {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
   display: flex;
   flex-direction: column;
   -webkit-box-sizing: border-box;
@@ -16,6 +19,9 @@
 }
 
 .main-menu-container .main-menu .title{
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  -webkit-flex:1;
   flex: 1;
   -webkit-box-sizing: border-box;
      -moz-box-sizing: border-box;
@@ -24,6 +30,9 @@
   margin: 2px;
   border: 2px solid rgba(0,100,100,1);
   color: rgba(0,150,150,1);
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
   display: flex;
   justify-content: center; /* align horizontal */
   align-items: center; /* align vertical */
@@ -32,7 +41,13 @@
 }
 
 .main-menu-container .main-menu .buttons-container {
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  -webkit-flex:1;
   flex: 1;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
   display: flex;
   flex-direction: column;
   -webkit-box-sizing: border-box;
@@ -46,6 +61,9 @@
 }
 
 .main-menu-container .main-menu .buttons-container .btn{
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  -webkit-flex:1;
   flex: 1;
   -webkit-box-sizing: border-box;
      -moz-box-sizing: border-box;
@@ -55,6 +73,9 @@
   margin-top: 0;
   border: 2px solid rgba(0,100,100,1);
   color: rgba(0,150,150,1);
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
   display: flex;
   justify-content: center; /* align horizontal */
   align-items: center; /* align vertical */

@@ -16,19 +16,20 @@ let DEBUG = new Debug('App');
 // IDEA: Victory picture
 // TODO: Error notification
 
+
 global.VIEW_ID = {
   MAIN_MENU: 'MAIN_MENU_VIEW',
   GAME: 'GAME_VIEW'
 };
 
-global.TOUCH_EVENT = 'mousedown';
-// global.TOUCH_EVENT = 'touchstart';
+global.TOUCH_START_EVENT = 'mousedown';
+// global.TOUCH_START_EVENT = 'touchstart';
+
+global.VERSION = '0';
 
 class App {
   constructor() {
     DEBUG.log('Starting MB Sudoku');
-    // this.TOUCH_EVENT = 'mousedown';
-    // attachFastClick(document.body);
 
     this.containerElem = document.getElementById('app-container');
 

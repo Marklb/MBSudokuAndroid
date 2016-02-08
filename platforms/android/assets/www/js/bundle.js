@@ -99,9 +99,13 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var MainMenu = require('./main-menu');
-var Game = require('./game');
-var attachFastClick = require('./libs/fastclick');
+var Debug = require('./debug');
+// let MainMenu = require('./main-menu');
+// let Game = require('./game');
+var Game = require('./views/game/game');
+// var attachFastClick = require('./libs/fastclick');
+
+var DEBUG = new Debug('App');
 
 // TODO: History
 // TODO: Undo
@@ -118,21 +122,33 @@ global.VIEW_ID = {
   GAME: 'GAME_VIEW'
 };
 
+global.TOUCH_START_EVENT = 'mousedown';
+// global.TOUCH_START_EVENT = 'touchstart';
+
+global.VERSION = '0';
+
 var App = function () {
   function App() {
     _classCallCheck(this, App);
 
-    attachFastClick(document.body);
-    console.log("Starting MB Sudoku");
+    DEBUG.log('Starting MB Sudoku');
+
     this.containerElem = document.getElementById('app-container');
 
-    this.mainMenu = new MainMenu();
-    this.addView(this.mainMenu);
+    // this.mainMenu = new MainMenu();
+    // this.addView(this.mainMenu);
+    //
+    // this.game = new Game();
+    // this.addView(this.game);
+    //
+    //
+    //
+    // this.showView(this.mainMenu.getViewName());
 
-    this.game = new Game();
-    this.addView(this.game);
+    this.gameView = new Game();
+    this.addView(this.gameView.getView());
 
-    this.showView(this.mainMenu.getViewName());
+    this.showView(VIEW_ID.GAME);
   }
 
   _createClass(App, [{
@@ -147,13 +163,13 @@ var App = function () {
         this.views = [];
       }
       this.views.push(view);
-      this.getElement().appendChild(view.getViewElement());
+      this.getElement().appendChild(view.getElement());
     }
   }, {
     key: 'showView',
-    value: function showView(viewName) {
+    value: function showView(viewId) {
       for (var i = 0; i < this.views.length; i++) {
-        if (this.views[i].getViewName() === viewName) {
+        if (this.views[i].getViewId() === viewId) {
           this.hideActiveView();
           this.views[i].show();
           this.activeView = this.views[i];
@@ -176,7 +192,7 @@ global.app = new App();
 
 // module.exports = new App();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./game":7,"./libs/fastclick":8,"./main-menu":10}],3:[function(require,module,exports){
+},{"./debug":3,"./views/game/game":14}],3:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -184,1738 +200,32 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 module.exports = function () {
-  function GameBoardTile(gameBoard, row, column) {
-    var _this = this;
+  function Debug(debugId) {
+    _classCallCheck(this, Debug);
 
-    _classCallCheck(this, GameBoardTile);
-
-    this.gameBoard = gameBoard;
-    this.containerElem = document.createElement('div');
-    this.containerElem.classList.add('tile');
-
-    this.row = row;
-    this.column = column;
-
-    this.VALUE_STATES = {};
-    this.VALUE_STATES.EMPTY = 0;
-    this.VALUE_STATES.ORIGINAL = 1;
-    this.VALUE_STATES.REGULAR = 2;
-
-    this.VALUE_STATES_CLASSES = [];
-    this.VALUE_STATES_CLASSES[this.VALUE_STATES.EMPTY] = 'empty-value';
-    this.VALUE_STATES_CLASSES[this.VALUE_STATES.ORIGINAL] = 'original-value';
-    this.VALUE_STATES_CLASSES[this.VALUE_STATES.REGULAR] = 'regular-value';
-    this.currValState = this.VALUE_STATES.EMPTY;
-    this.containerElem.classList.add(this.VALUE_STATES_CLASSES[this.currValState]);
-    // If value is -1 then it is blank
-    this.setValue(-1);
-
-    this.STYLE_STATES = {};
-    this.STYLE_STATES.BASIC = 0;
-    this.STYLE_STATES.SAME_VALUE = 1;
-    this.STYLE_STATES.CONFLICTING_VALUE = 2;
-
-    this.STYLE_STATES_CLASSES = {};
-    this.STYLE_STATES_CLASSES[this.STYLE_STATES.BASIC] = 'style-state-basic';
-    this.STYLE_STATES_CLASSES[this.STYLE_STATES.SAME_VALUE] = 'style-state-same-value';
-    this.STYLE_STATES_CLASSES[this.STYLE_STATES.CONFLICTING_VALUE] = 'style-state-conflicting-value';
-
-    this.containerElem.addEventListener('mousedown', function () {
-      _this.gameBoard.setSelectedTile(_this.row, _this.column);
-    });
-    // this.containerElem.addEventListener('touchstart', () => {
-    //   this.gameBoard.setSelectedTile(this.row, this.column);
-    // });
+    this.debugId = debugId;
   }
 
-  _createClass(GameBoardTile, [{
-    key: 'getElement',
-    value: function getElement() {
-      return this.containerElem;
+  _createClass(Debug, [{
+    key: 'getMessagePrefix',
+    value: function getMessagePrefix() {
+      return '[' + this.debugId + ']: ';
     }
   }, {
-    key: 'getRowIndex',
-    value: function getRowIndex() {
-      return this.row;
+    key: 'log',
+    value: function log(msg) {
+      console.log(this.getMessagePrefix() + msg);
     }
   }, {
-    key: 'getColumnIndex',
-    value: function getColumnIndex() {
-      return this.column;
-    }
-  }, {
-    key: 'setSelected',
-    value: function setSelected(b) {
-      if (b) {
-        this.containerElem.classList.add('selected');
-      } else {
-        this.containerElem.classList.remove('selected');
-      }
-    }
-  }, {
-    key: 'setValue',
-    value: function setValue(val) {
-      var isOriginal = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
-
-      // console.log("Setting: "+val);
-      var tmpValState = this.currValState;
-      this.value = val;
-      this.containerElem.textContent = '' + this.value;
-
-      if (this.value == -1) {
-        this.currValState = this.VALUE_STATES.EMPTY;
-      } else {
-        if (isOriginal) {
-          this.currValState = this.VALUE_STATES.ORIGINAL;
-        } else {
-          this.currValState = this.VALUE_STATES.REGULAR;
-        }
-      }
-
-      if (this.currValState != tmpValState) {
-        this.containerElem.classList.remove(this.VALUE_STATES_CLASSES[tmpValState]);
-      }
-      if (!this.containerElem.classList.contains(this.VALUE_STATES_CLASSES[this.currValState])) {
-        this.containerElem.classList.add(this.VALUE_STATES_CLASSES[this.currValState]);
-      }
-    }
-  }, {
-    key: 'getValue',
-    value: function getValue() {
-      return this.value;
-    }
-  }, {
-    key: 'isEmpty',
-    value: function isEmpty() {
-      return this.value == -1;
-    }
-  }, {
-    key: 'isOriginal',
-    value: function isOriginal() {
-      return this.currValState == this.VALUE_STATES.ORIGINAL;
-    }
-  }, {
-    key: 'setStyleState',
-    value: function setStyleState(state) {
-      if (!this.currStyleState) {
-        this.currStyleState = this.STYLE_STATES.BASIC;
-        this.containerElem.classList.add(this.STYLE_STATES_CLASSES[this.currStyleState]);
-      }
-      if (this.currStyleState != state) {
-        this.containerElem.classList.remove(this.STYLE_STATES_CLASSES[this.currStyleState]);
-        this.currStyleState = state;
-        this.containerElem.classList.add(this.STYLE_STATES_CLASSES[this.currStyleState]);
-      }
-    }
-  }, {
-    key: 'setTilesInBlock',
-    value: function setTilesInBlock(tiles) {
-      this.tilesInBlock = tiles;
-    }
-  }, {
-    key: 'getTilesInBlock',
-    value: function getTilesInBlock() {
-      return this.tilesInBlock;
+    key: 'error',
+    value: function error(msg) {
+      console.error(this.getMessagePrefix() + msg);
     }
   }]);
 
-  return GameBoardTile;
+  return Debug;
 }();
 },{}],4:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var QQWING = require('./libs/qqwing-1.3.4/qqwing-1.3.4');
-var GameBoardTile = require('./game-board-tile');
-
-module.exports = function () {
-  function GameBoard() {
-    var _this = this;
-
-    _classCallCheck(this, GameBoard);
-
-    console.log("Creating GameBoard");
-
-    this.qqwing = new QQWING();
-
-    this.containerElem = document.createElement('div');
-    this.containerElem.classList.add('game-board');
-    // if(window.innerWidth < window.innerHeight){
-    //   this.containerWidth = window.innerWidth;
-    //   this.containerHeight = window.innerWidth;
-    // }else{
-    //   this.containerWidth = window.innerHeight;
-    //   this.containerHeight = window.innerHeight;
-    // }
-    // this.containerElem.setAttribute('style', 'width:'+this.containerWidth+'px;');
-    // this.containerElem.setAttribute('style', 'height:'+this.containerHeight+'px;');
-
-    //--------------------------------------------------------------------------
-    // Create the board rows
-    //--------------------------------------------------------------------------
-    this.initBoardRows();
-
-    //--------------------------------------------------------------------------
-    // Create blocks rows
-    //--------------------------------------------------------------------------
-    // block1
-    this.block1row1 = document.createElement('div');
-    this.block1row1.classList.add('block-row');
-    this.blocks[0].appendChild(this.block1row1);
-    this.block1row2 = document.createElement('div');
-    this.block1row2.classList.add('block-row');
-    this.blocks[0].appendChild(this.block1row2);
-    this.block1row3 = document.createElement('div');
-    this.block1row3.classList.add('block-row');
-    this.blocks[0].appendChild(this.block1row3);
-    // block2
-    this.block2row1 = document.createElement('div');
-    this.block2row1.classList.add('block-row');
-    this.blocks[1].appendChild(this.block2row1);
-    this.block2row2 = document.createElement('div');
-    this.block2row2.classList.add('block-row');
-    this.blocks[1].appendChild(this.block2row2);
-    this.block2row3 = document.createElement('div');
-    this.block2row3.classList.add('block-row');
-    this.blocks[1].appendChild(this.block2row3);
-    // block3
-    this.block3row1 = document.createElement('div');
-    this.block3row1.classList.add('block-row');
-    this.blocks[2].appendChild(this.block3row1);
-    this.block3row2 = document.createElement('div');
-    this.block3row2.classList.add('block-row');
-    this.blocks[2].appendChild(this.block3row2);
-    this.block3row3 = document.createElement('div');
-    this.block3row3.classList.add('block-row');
-    this.blocks[2].appendChild(this.block3row3);
-    // block4
-    this.block4row1 = document.createElement('div');
-    this.block4row1.classList.add('block-row');
-    this.blocks[3].appendChild(this.block4row1);
-    this.block4row2 = document.createElement('div');
-    this.block4row2.classList.add('block-row');
-    this.blocks[3].appendChild(this.block4row2);
-    this.block4row3 = document.createElement('div');
-    this.block4row3.classList.add('block-row');
-    this.blocks[3].appendChild(this.block4row3);
-    // block5
-    this.block5row1 = document.createElement('div');
-    this.block5row1.classList.add('block-row');
-    this.blocks[4].appendChild(this.block5row1);
-    this.block5row2 = document.createElement('div');
-    this.block5row2.classList.add('block-row');
-    this.blocks[4].appendChild(this.block5row2);
-    this.block5row3 = document.createElement('div');
-    this.block5row3.classList.add('block-row');
-    this.blocks[4].appendChild(this.block5row3);
-    // block6
-    this.block6row1 = document.createElement('div');
-    this.block6row1.classList.add('block-row');
-    this.blocks[5].appendChild(this.block6row1);
-    this.block6row2 = document.createElement('div');
-    this.block6row2.classList.add('block-row');
-    this.blocks[5].appendChild(this.block6row2);
-    this.block6row3 = document.createElement('div');
-    this.block6row3.classList.add('block-row');
-    this.blocks[5].appendChild(this.block6row3);
-    // block7
-    this.block7row1 = document.createElement('div');
-    this.block7row1.classList.add('block-row');
-    this.blocks[6].appendChild(this.block7row1);
-    this.block7row2 = document.createElement('div');
-    this.block7row2.classList.add('block-row');
-    this.blocks[6].appendChild(this.block7row2);
-    this.block7row3 = document.createElement('div');
-    this.block7row3.classList.add('block-row');
-    this.blocks[6].appendChild(this.block7row3);
-    // block8
-    this.block8row1 = document.createElement('div');
-    this.block8row1.classList.add('block-row');
-    this.blocks[7].appendChild(this.block8row1);
-    this.block8row2 = document.createElement('div');
-    this.block8row2.classList.add('block-row');
-    this.blocks[7].appendChild(this.block8row2);
-    this.block8row3 = document.createElement('div');
-    this.block8row3.classList.add('block-row');
-    this.blocks[7].appendChild(this.block8row3);
-    // block9
-    this.block9row1 = document.createElement('div');
-    this.block9row1.classList.add('block-row');
-    this.blocks[8].appendChild(this.block9row1);
-    this.block9row2 = document.createElement('div');
-    this.block9row2.classList.add('block-row');
-    this.blocks[8].appendChild(this.block9row2);
-    this.block9row3 = document.createElement('div');
-    this.block9row3.classList.add('block-row');
-    this.blocks[8].appendChild(this.block9row3);
-
-    //--------------------------------------------------------------------------
-    // Create tiles
-    //--------------------------------------------------------------------------
-    this.tiles = [];
-    for (var i = 0; i < 9; i++) {
-      var tmp = [];
-      for (var j = 0; j < 9; j++) {
-        tmp.push(new GameBoardTile(this, i, j));
-      }
-      this.tiles.push(tmp);
-    }
-    // block1 tiles
-    this.block1Tiles = [this.tiles[0][0], this.tiles[0][1], this.tiles[0][2], this.tiles[1][0], this.tiles[1][1], this.tiles[1][2], this.tiles[2][0], this.tiles[2][1], this.tiles[2][2]];
-    for (var i = 0; i < 9; i++) {
-      this.block1Tiles[i].setTilesInBlock(this.block1Tiles);
-    }
-    this.block1row1.appendChild(this.tiles[0][0].getElement());
-    this.block1row1.appendChild(this.tiles[0][1].getElement());
-    this.block1row1.appendChild(this.tiles[0][2].getElement());
-    this.block1row2.appendChild(this.tiles[1][0].getElement());
-    this.block1row2.appendChild(this.tiles[1][1].getElement());
-    this.block1row2.appendChild(this.tiles[1][2].getElement());
-    this.block1row3.appendChild(this.tiles[2][0].getElement());
-    this.block1row3.appendChild(this.tiles[2][1].getElement());
-    this.block1row3.appendChild(this.tiles[2][2].getElement());
-    // block2 tiles
-    this.block2Tiles = [this.tiles[0][3], this.tiles[0][4], this.tiles[0][5], this.tiles[1][3], this.tiles[1][4], this.tiles[1][5], this.tiles[2][3], this.tiles[2][4], this.tiles[2][5]];
-    for (var i = 0; i < 9; i++) {
-      this.block2Tiles[i].setTilesInBlock(this.block2Tiles);
-    }
-    this.block2row1.appendChild(this.tiles[0][3].getElement());
-    this.block2row1.appendChild(this.tiles[0][4].getElement());
-    this.block2row1.appendChild(this.tiles[0][5].getElement());
-    this.block2row2.appendChild(this.tiles[1][3].getElement());
-    this.block2row2.appendChild(this.tiles[1][4].getElement());
-    this.block2row2.appendChild(this.tiles[1][5].getElement());
-    this.block2row3.appendChild(this.tiles[2][3].getElement());
-    this.block2row3.appendChild(this.tiles[2][4].getElement());
-    this.block2row3.appendChild(this.tiles[2][5].getElement());
-    // block3 tiles
-    this.block3Tiles = [this.tiles[0][6], this.tiles[0][7], this.tiles[0][8], this.tiles[1][6], this.tiles[1][7], this.tiles[1][8], this.tiles[2][6], this.tiles[2][7], this.tiles[2][8]];
-    for (var i = 0; i < 9; i++) {
-      this.block3Tiles[i].setTilesInBlock(this.block3Tiles);
-    }
-    this.block3row1.appendChild(this.tiles[0][6].getElement());
-    this.block3row1.appendChild(this.tiles[0][7].getElement());
-    this.block3row1.appendChild(this.tiles[0][8].getElement());
-    this.block3row2.appendChild(this.tiles[1][6].getElement());
-    this.block3row2.appendChild(this.tiles[1][7].getElement());
-    this.block3row2.appendChild(this.tiles[1][8].getElement());
-    this.block3row3.appendChild(this.tiles[2][6].getElement());
-    this.block3row3.appendChild(this.tiles[2][7].getElement());
-    this.block3row3.appendChild(this.tiles[2][8].getElement());
-    // block4 tiles
-    this.block4Tiles = [this.tiles[3][0], this.tiles[3][1], this.tiles[3][2], this.tiles[4][0], this.tiles[4][1], this.tiles[4][2], this.tiles[5][0], this.tiles[5][1], this.tiles[5][2]];
-    for (var i = 0; i < 9; i++) {
-      this.block4Tiles[i].setTilesInBlock(this.block4Tiles);
-    }
-    this.block4row1.appendChild(this.tiles[3][0].getElement());
-    this.block4row1.appendChild(this.tiles[3][1].getElement());
-    this.block4row1.appendChild(this.tiles[3][2].getElement());
-    this.block4row2.appendChild(this.tiles[4][0].getElement());
-    this.block4row2.appendChild(this.tiles[4][1].getElement());
-    this.block4row2.appendChild(this.tiles[4][2].getElement());
-    this.block4row3.appendChild(this.tiles[5][0].getElement());
-    this.block4row3.appendChild(this.tiles[5][1].getElement());
-    this.block4row3.appendChild(this.tiles[5][2].getElement());
-    // block5 tiles
-    this.block5Tiles = [this.tiles[3][3], this.tiles[3][4], this.tiles[3][5], this.tiles[4][3], this.tiles[4][4], this.tiles[4][5], this.tiles[5][3], this.tiles[5][4], this.tiles[5][5]];
-    for (var i = 0; i < 9; i++) {
-      this.block5Tiles[i].setTilesInBlock(this.block5Tiles);
-    }
-    this.block5row1.appendChild(this.tiles[3][3].getElement());
-    this.block5row1.appendChild(this.tiles[3][4].getElement());
-    this.block5row1.appendChild(this.tiles[3][5].getElement());
-    this.block5row2.appendChild(this.tiles[4][3].getElement());
-    this.block5row2.appendChild(this.tiles[4][4].getElement());
-    this.block5row2.appendChild(this.tiles[4][5].getElement());
-    this.block5row3.appendChild(this.tiles[5][3].getElement());
-    this.block5row3.appendChild(this.tiles[5][4].getElement());
-    this.block5row3.appendChild(this.tiles[5][5].getElement());
-    // block6 tiles
-    this.block6Tiles = [this.tiles[3][6], this.tiles[3][7], this.tiles[3][8], this.tiles[4][6], this.tiles[4][7], this.tiles[4][8], this.tiles[5][6], this.tiles[5][7], this.tiles[5][8]];
-    for (var i = 0; i < 9; i++) {
-      this.block6Tiles[i].setTilesInBlock(this.block6Tiles);
-    }
-    this.block6row1.appendChild(this.tiles[3][6].getElement());
-    this.block6row1.appendChild(this.tiles[3][7].getElement());
-    this.block6row1.appendChild(this.tiles[3][8].getElement());
-    this.block6row2.appendChild(this.tiles[4][6].getElement());
-    this.block6row2.appendChild(this.tiles[4][7].getElement());
-    this.block6row2.appendChild(this.tiles[4][8].getElement());
-    this.block6row3.appendChild(this.tiles[5][6].getElement());
-    this.block6row3.appendChild(this.tiles[5][7].getElement());
-    this.block6row3.appendChild(this.tiles[5][8].getElement());
-    // block7 tiles
-    this.block7Tiles = [this.tiles[6][0], this.tiles[6][1], this.tiles[6][2], this.tiles[7][0], this.tiles[7][1], this.tiles[7][2], this.tiles[8][0], this.tiles[8][1], this.tiles[8][2]];
-    for (var i = 0; i < 9; i++) {
-      this.block7Tiles[i].setTilesInBlock(this.block7Tiles);
-    }
-    this.block7row1.appendChild(this.tiles[6][0].getElement());
-    this.block7row1.appendChild(this.tiles[6][1].getElement());
-    this.block7row1.appendChild(this.tiles[6][2].getElement());
-    this.block7row2.appendChild(this.tiles[7][0].getElement());
-    this.block7row2.appendChild(this.tiles[7][1].getElement());
-    this.block7row2.appendChild(this.tiles[7][2].getElement());
-    this.block7row3.appendChild(this.tiles[8][0].getElement());
-    this.block7row3.appendChild(this.tiles[8][1].getElement());
-    this.block7row3.appendChild(this.tiles[8][2].getElement());
-    // block8 tiles
-    this.block8Tiles = [this.tiles[6][3], this.tiles[6][4], this.tiles[6][5], this.tiles[7][3], this.tiles[7][4], this.tiles[7][5], this.tiles[8][3], this.tiles[8][4], this.tiles[8][5]];
-    for (var i = 0; i < 9; i++) {
-      this.block8Tiles[i].setTilesInBlock(this.block8Tiles);
-    }
-    this.block8row1.appendChild(this.tiles[6][3].getElement());
-    this.block8row1.appendChild(this.tiles[6][4].getElement());
-    this.block8row1.appendChild(this.tiles[6][5].getElement());
-    this.block8row2.appendChild(this.tiles[7][3].getElement());
-    this.block8row2.appendChild(this.tiles[7][4].getElement());
-    this.block8row2.appendChild(this.tiles[7][5].getElement());
-    this.block8row3.appendChild(this.tiles[8][3].getElement());
-    this.block8row3.appendChild(this.tiles[8][4].getElement());
-    this.block8row3.appendChild(this.tiles[8][5].getElement());
-    // block9 tiles
-    this.block9Tiles = [this.tiles[6][6], this.tiles[6][7], this.tiles[6][8], this.tiles[7][6], this.tiles[7][7], this.tiles[7][8], this.tiles[8][6], this.tiles[8][7], this.tiles[8][8]];
-    for (var i = 0; i < 9; i++) {
-      this.block9Tiles[i].setTilesInBlock(this.block9Tiles);
-    }
-    this.block9row1.appendChild(this.tiles[6][6].getElement());
-    this.block9row1.appendChild(this.tiles[6][7].getElement());
-    this.block9row1.appendChild(this.tiles[6][8].getElement());
-    this.block9row2.appendChild(this.tiles[7][6].getElement());
-    this.block9row2.appendChild(this.tiles[7][7].getElement());
-    this.block9row2.appendChild(this.tiles[7][8].getElement());
-    this.block9row3.appendChild(this.tiles[8][6].getElement());
-    this.block9row3.appendChild(this.tiles[8][7].getElement());
-    this.block9row3.appendChild(this.tiles[8][8].getElement());
-
-    this.blocksTiles = [this.block1Tiles, this.block2Tiles, this.block3Tiles, this.block4Tiles, this.block5Tiles, this.block6Tiles, this.block7Tiles, this.block8Tiles, this.block9Tiles];
-
-    this.initGameTiles();
-
-    this.startTime1 = Date.now();
-    var timerIntervalFunc = function timerIntervalFunc() {
-      var endTime1 = Date.now();
-      var elapsed1 = endTime1 - _this.startTime1;
-      _this.startTime1 = endTime1;
-
-      var tmpTimeElapsed = JSON.parse(window.localStorage.getItem("timeElapsed"));
-      if (tmpTimeElapsed) {
-        elapsed1 = elapsed1 + tmpTimeElapsed;
-      }
-      window.localStorage.setItem("timeElapsed", JSON.stringify(elapsed1));
-    };
-    this.timerInterval = setInterval(timerIntervalFunc, 1000);
-
-    document.addEventListener("pause", function (e) {
-      clearInterval(_this.timerInterval);
-    }, false);
-
-    document.addEventListener("resume", function (e) {
-      _this.startTime1 = Date.now();
-      _this.timerInterval = setInterval(timerIntervalFunc, 1000);
-    }, false);
-  }
-
-  _createClass(GameBoard, [{
-    key: 'getElement',
-    value: function getElement() {
-      return this.containerElem;
-    }
-  }, {
-    key: 'initBoardRows',
-    value: function initBoardRows() {
-      this.boardRows = [];
-      this.blocks = [];
-      for (var i = 0; i < 3; i++) {
-        // Create baard row
-        var boardRow = document.createElement('div');
-        boardRow.classList.add('board-row');
-        this.containerElem.appendChild(boardRow);
-        this.boardRows.push(boardRow);
-
-        // Create blocks
-        for (var j = 0; j < 3; j++) {
-          var block = document.createElement('div');
-          block.classList.add('block');
-          this.boardRows[i].appendChild(block);
-          this.blocks.push(block);
-        }
-      }
-    }
-  }, {
-    key: 'setSelectedTile',
-    value: function setSelectedTile(row, column) {
-      if (!this.selectedTile) {
-        this.selectedTile = this.tiles[0][0];
-        this.tiles[0][0].setSelected(true);
-      }
-      this.selectedTile.setSelected(false);
-      this.selectedTile = this.tiles[row][column];
-      this.selectedTile.setSelected(true);
-
-      this.updateTileStyleStates();
-    }
-  }, {
-    key: 'newGame',
-    value: function newGame() {
-      this.resetGameTiles();
-      this.updateTileStyleStates();
-    }
-
-    // hide(){
-    //   // TODO: Fix this to a proper implementation
-    //   let view = document.getElementById('game-container');
-    //   view.classList.add('hidden');
-    //   // this.getElement().classList.add('hidden');
-    // }
-
-  }, {
-    key: 'initGameTiles',
-    value: function initGameTiles() {
-      var storedGameBoard = JSON.parse(window.localStorage.getItem("gameboard"));
-      if (storedGameBoard) {
-        for (var i = 0; i < storedGameBoard.length; i++) {
-          this.tiles[storedGameBoard[i].x][storedGameBoard[i].y].setValue(storedGameBoard[i].value, storedGameBoard[i].isOriginal);
-        }
-      } else {
-        this.resetGameTiles();
-      }
-
-      var selectedTileItem = JSON.parse(window.localStorage.getItem("selectedTile"));
-      if (selectedTileItem) {
-        this.setSelectedTile(selectedTileItem.x, selectedTileItem.y);
-      } else {
-        this.setSelectedTile(0, 0);
-      }
-    }
-  }, {
-    key: 'resetGameTiles',
-    value: function resetGameTiles() {
-      // let layout = [
-      //   //0   1   2   3   4   5   6   7   8
-      //   [N, N, N, N, N, N, N, N, N], // 0
-      //   [N, N, N, N, N, N, N, N, N], // 1
-      //   [N, N, N, N, N, N, N, N, N], // 2
-      //   [N, N, N, N, N, N, N, N, N], // 3
-      //   [N, N, N, N, N, N, N, N, N], // 4
-      //   [N, N, N, N, N, N, N, N, N], // 5
-      //   [N, N, N, N, N, N, N, N, N], // 6
-      //   [N, N, N, N, N, N, N, N, N], // 7
-      //   [N, N, N, N, N, N, N, N, N]  // 8
-      // ];
-
-      // let N = -1;
-      // let layout0 = [
-      //   //0   1   2   3   4   5   6   7   8
-      //   [N, N, N, 7, N, N, 8, 4, N], // 0
-      //   [N, N, N, N, N, N, N, N, N], // 1
-      //   [N, N, 8, N, 5, N, N, N, N], // 2
-      //   [N, 2, 6, N, 4, N, N, N, 8], // 3
-      //   [N, 3, 5, N, N, N, N, 1, N], // 4
-      //   [N, 4, N, N, 3, 1, 6, N, N], // 5
-      //   [N, N, 4, N, N, N, N, N, N], // 6
-      //   [N, N, N, 6, N, 2, 4, N, N], // 7
-      //   [N, 7, N, 8, N, N, 9, 2, 6]  // 8
-      // ];
-      //
-      // let layout1 = [
-      //   //0   1   2   3   4   5   6   7   8
-      //   [N, N, 3, 1, N, N, 2, N, N], // 0
-      //   [N, N, N, 3, N, 4, 9, N, N], // 1
-      //   [N, N, N, N, N, N, N, N, N], // 2
-      //   [N, N, 9, N, N, 8, 6, 2, 4], // 3
-      //   [N, N, N, N, 3, N, 5, N, N], // 4
-      //   [N, 1, N, N, N, 6, N, N, 8], // 5
-      //   [9, N, N, 7, 4, N, N, 1, N], // 6
-      //   [7, 5, N, N, N, N, N, N, N], // 7
-      //   [1, 2, N, N, N, N, 4, N, 5]  // 8
-      // ];
-      //
-      // let layout2 = [
-      //   //0  1  2  3  4  5  6  7  8
-      //    [N, N, N, 2, N, N, 5, N, N], // 0
-      //    [N, 6, N, N, 5, N, 4, 9, N], // 1
-      //    [N, 4, 5, N, N, 1, N, N, 7], // 2
-      //    [N, N, 7, N, N, N, N, 6, N], // 3
-      //    [N, 3, N, N, N, 4, N, N, 9], // 4
-      //    [1, N, N, N, N, N, 2, N, N], // 5
-      //    [N, N, N, 9, N, 5, 8, N, N], // 6
-      //    [N, N, N, 7, N, N, 6, 2, N], // 7
-      //    [7, N, N, N, N, N, N, N, N]  // 8
-      // ];
-      //
-      // let layout3 = [
-      //   // 0  1  2  3  4  5  6  7  8
-      //     [N, N, N, N, N, 5, 1, N, N], // 0
-      //     [N, 8, N, N, N, N, N, N, 4], // 1
-      //     [6, N, 2, 8, N, N, N, N, N], // 2
-      //     [N, N, N, N, N, N, N, N, 6], // 3
-      //     [3, N, N, 6, N, N, N, N, 9], // 4
-      //     [5, N, N, N, 3, 7, N, 4, N], // 5
-      //     [N, 3, N, 2, 6, N, 8, N, 5], // 6
-      //     [N, N, N, N, 7, N, N, N, N], // 7
-      //     [1, 7, N, 5, N, N, N, N, N]  // 8
-      // ];
-      //
-      // let layouts = [layout0, layout1, layout2, layout3];
-
-      // let ind = Math.floor((Math.random() * 4));
-      // console.log("Ind: " + ind);
-      // let layout = layouts[ind];
-      // for(let i = 0; i < 9; i++){
-      //   for(let j = 0; j < 9; j++){
-      //     if(layout[i][j] == -1){
-      //       this.tiles[i][j].setValue(layout[i][j], false);
-      //     }else{
-      //       this.tiles[i][j].setValue(layout[i][j], true);
-      //     }
-      //   }
-      // }
-
-      this.qqwing.generatePuzzle();
-      this.qqwing.setPrintStyle(QQWING.PrintStyle.ONE_LINE);
-      var t = this.qqwing.getSolutionString();
-      console.log(t);
-      var count = 0;
-      for (var i = 0; i < 9; i++) {
-        for (var j = 0; j < 9; j++) {
-          // console.log(t[count]);
-          if (t[count] == '.') {
-            this.tiles[i][j].setValue(-1, false);
-          } else {
-            this.tiles[i][j].setValue(parseInt(t[count]), true);
-          }
-          count++;
-        }
-      }
-
-      window.localStorage.setItem("timeElapsed", JSON.stringify(0));
-    }
-  }, {
-    key: 'getSolution',
-    value: function getSolution() {
-      // TODO: Fix. Does not give solution
-      this.qqwing.solve();
-      return this.qqwing.getSolutionString();
-    }
-  }, {
-    key: 'updateTileStyleStates',
-    value: function updateTileStyleStates() {
-      for (var i = 0; i < 9; i++) {
-        for (var j = 0; j < 9; j++) {
-          if (this.selectedTile.isEmpty()) {
-            this.tiles[i][j].setStyleState(this.tiles[i][j].STYLE_STATES.BASIC);
-          } else {
-            if (this.selectedTile.getValue() == this.tiles[i][j].getValue() && this.selectedTile.getRowIndex() != i && this.selectedTile.getColumnIndex() != j) {
-              this.tiles[i][j].setStyleState(this.tiles[i][j].STYLE_STATES.SAME_VALUE);
-            } else {
-              this.tiles[i][j].setStyleState(this.tiles[i][j].STYLE_STATES.BASIC);
-            }
-          }
-        }
-      }
-      this.checkForConflicts();
-      this.saveBoard();
-      if (this.selectionsBox) {
-        this.selectionsBox.update();
-      }
-    }
-  }, {
-    key: 'setSelectionsBox',
-    value: function setSelectionsBox(sbox) {
-      this.selectionsBox = sbox;
-    }
-  }, {
-    key: 'saveBoard',
-    value: function saveBoard() {
-      var tmpBoard = [];
-      for (var i = 0; i < 9; i++) {
-        for (var j = 0; j < 9; j++) {
-          tmpBoard.push({
-            "x": i,
-            "y": j,
-            "value": this.tiles[i][j].getValue(),
-            "isOriginal": this.tiles[i][j].isOriginal()
-          });
-        }
-      }
-      window.localStorage.setItem("gameboard", JSON.stringify(tmpBoard));
-
-      window.localStorage.setItem("selectedTile", JSON.stringify({
-        "x": this.selectedTile.getRowIndex(),
-        "y": this.selectedTile.getColumnIndex()
-      }));
-    }
-  }, {
-    key: 'checkForConflicts',
-    value: function checkForConflicts() {
-      // Block Conflicts
-      for (var i = 0; i < this.blocksTiles.length; i++) {
-        this.checkTilesForConflict(this.blocksTiles[i]);
-      }
-      // Row Conflicts
-      for (var i = 0; i < 9; i++) {
-        var tmp = [];
-        for (var j = 0; j < 9; j++) {
-          tmp.push(this.tiles[i][j]);
-        }
-        this.checkTilesForConflict(tmp);
-      }
-      // Column Conflicts
-      for (var i = 0; i < 9; i++) {
-        var tmp = [];
-        for (var j = 0; j < 9; j++) {
-          tmp.push(this.tiles[j][i]);
-        }
-        this.checkTilesForConflict(tmp);
-      }
-    }
-  }, {
-    key: 'checkTilesForConflict',
-    value: function checkTilesForConflict(blockTiles) {
-      var counts = [[], [], [], [], [], [], [], [], []];
-      for (var i = 0; i < 9; i++) {
-        if (!blockTiles[i].isEmpty()) {
-          counts[blockTiles[i].getValue() - 1].push(blockTiles[i]);
-        }
-      }
-      for (var i = 0; i < 9; i++) {
-        if (counts[i].length > 1) {
-          for (var j = 0; j < counts[i].length; j++) {
-            counts[i][j].setStyleState(counts[i][j].STYLE_STATES.CONFLICTING_VALUE);
-          }
-        }
-      }
-    }
-  }, {
-    key: 'setSelectedTileValue',
-    value: function setSelectedTileValue(val) {
-      if (this.selectedTile.isOriginal()) return false;
-      if (!this.selectedTile.isEmpty() && val != -1) return false;
-      this.selectedTile.setValue(val);
-      this.updateTileStyleStates();
-      var count = 0;
-      for (var i = 0; i < 9; i++) {
-        for (var j = 0; j < 9; j++) {
-          var v = this.tiles[i][j].getValue();
-          if (v == val) {
-            count++;
-          }
-        }
-      }
-      if (count == 9) {
-        return true;
-      } else {
-        return false;
-      }
-    }
-  }, {
-    key: 'getCompletedValues',
-    value: function getCompletedValues() {
-      var vals = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-      for (var i = 0; i < 9; i++) {
-        for (var j = 0; j < 9; j++) {
-          var v = this.tiles[i][j].getValue();
-          if (v != -1) {
-            vals[v - 1]++;
-          }
-        }
-      }
-      console.log(vals);
-      var doneValues = [];
-      for (var i = 0; i < 9; i++) {
-        if (vals[i] == 9) {
-          doneValues.push(i + 1);
-        }
-      }
-      return doneValues;
-    }
-  }]);
-
-  return GameBoard;
-}();
-},{"./game-board-tile":3,"./libs/qqwing-1.3.4/qqwing-1.3.4":9}],5:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-module.exports = function () {
-  function GameStatsBox(gameBoard) {
-    var _this = this;
-
-    _classCallCheck(this, GameStatsBox);
-
-    this.gameBoard = gameBoard;
-    console.log('Creating Game Stats Box');
-    this.containerElem = document.createElement('div');
-    this.containerElem.classList.add('game-stats-box');
-
-    this.menuButtonElem = document.createElement('div');
-    this.menuButtonElem.classList.add('left');
-    this.menuButtonElem.textContent = "X";
-    this.containerElem.appendChild(this.menuButtonElem);
-
-    this.titleElem = document.createElement('div');
-    this.titleElem.classList.add('timer');
-    this.titleElem.textContent = "00:00:00";
-    this.containerElem.appendChild(this.titleElem);
-
-    this.resetBtnElem = document.createElement('div');
-    this.resetBtnElem.classList.add('right');
-    this.resetBtnElem.textContent = "X";
-    this.containerElem.appendChild(this.resetBtnElem);
-
-    setInterval(function () {
-      var timeElapsed = JSON.parse(window.localStorage.getItem("timeElapsed"));
-      if (timeElapsed) {
-        _this.setTime(timeElapsed);
-      } else {
-        _this.setTime(0);
-      }
-    }, 1000);
-  }
-
-  _createClass(GameStatsBox, [{
-    key: 'getElement',
-    value: function getElement() {
-      return this.containerElem;
-    }
-  }, {
-    key: 'setTime',
-    value: function setTime(t) {
-      var SECONDS = 1000;
-      var MINUTES = SECONDS * 60;
-      var HOURS = MINUTES * 60;
-      var DAYS = HOURS * 24;
-      var YEARS = DAYS * 365;
-
-      t = t / SECONDS;
-      var seconds = Math.round(t % 60);
-      var minutes = Math.round(t / 60 % 60);
-      var hours = Math.round(t / (60 * 60) % 24);
-
-      var secStr = "" + seconds;
-      if (seconds < 10) {
-        secStr = "0" + seconds;
-      }
-      var minStr = "" + minutes;
-      if (minutes < 10) {
-        minStr = "0" + minutes;
-      }
-      var hourStr = "" + hours;
-      if (hours < 10) {
-        hourStr = "0" + hours;
-      }
-
-      this.titleElem.textContent = hourStr + ":" + minStr + ":" + secStr;
-    }
-  }]);
-
-  return GameStatsBox;
-}();
-},{}],6:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-module.exports = function () {
-  function GameTopBox(gameBoard) {
-    var _this = this;
-
-    _classCallCheck(this, GameTopBox);
-
-    this.gameBoard = gameBoard;
-    console.log('Creating Game Top Box');
-    this.containerElem = document.createElement('div');
-    this.containerElem.classList.add('game-top-box');
-
-    this.menuButtonElem = document.createElement('div');
-    this.menuButtonElem.classList.add('menu-btn');
-    this.menuButtonElem.textContent = "X";
-    this.containerElem.appendChild(this.menuButtonElem);
-    this.menuButtonElem.addEventListener('mousedown', function (e) {
-      // this.gameBoard.newGame();
-      // let solution = this.gameBoard.getSolution();
-      // console.log(solution);
-      app.showView(VIEW_ID.MAIN_MENU);
-    });
-
-    this.titleElem = document.createElement('div');
-    this.titleElem.classList.add('title');
-    this.titleElem.textContent = "MB Sudoku";
-    this.containerElem.appendChild(this.titleElem);
-
-    this.resetBtnElem = document.createElement('div');
-    this.resetBtnElem.classList.add('reset-btn');
-    this.resetBtnElem.textContent = "X";
-    this.containerElem.appendChild(this.resetBtnElem);
-    this.resetBtnElem.addEventListener('mousedown', function (e) {
-      _this.gameBoard.newGame();
-    });
-  }
-
-  _createClass(GameTopBox, [{
-    key: 'getElement',
-    value: function getElement() {
-      return this.containerElem;
-    }
-  }]);
-
-  return GameTopBox;
-}();
-},{}],7:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var GameTopBox = require('./game-top-box');
-var GameStatsBox = require('./game-stats-box');
-var GameBoard = require('./game-board');
-var SelectionsBox = require('./selections-box');
-var View = require('./view');
-
-module.exports = function (_View) {
-  _inherits(Game, _View);
-
-  function Game() {
-    _classCallCheck(this, Game);
-
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Game).call(this, VIEW_ID.GAME));
-
-    console.log("Starting Game");
-    // this.containerElem = document.getElementById('app-container');
-    _this.containerElem = document.createElement('div');
-    _this.containerElem.classList.add('game-container');
-    _this.addElement(_this.getElement());
-
-    _this.gameBoard = new GameBoard();
-    _this.gameTopBox = new GameTopBox(_this.gameBoard);
-    _this.gameStatsBox = new GameStatsBox(_this.gameBoard);
-    _this.selectionsBox = new SelectionsBox(_this.gameBoard);
-    _this.gameBoard.setSelectionsBox(_this.selectionsBox);
-
-    _this.containerElem.appendChild(_this.gameTopBox.getElement());
-    _this.containerElem.appendChild(_this.gameStatsBox.getElement());
-    _this.containerElem.appendChild(_this.gameBoard.getElement());
-    _this.containerElem.appendChild(_this.selectionsBox.getElement());
-
-    return _this;
-  }
-
-  _createClass(Game, [{
-    key: 'getElement',
-    value: function getElement() {
-      return this.containerElem;
-    }
-  }]);
-
-  return Game;
-}(View);
-},{"./game-board":4,"./game-stats-box":5,"./game-top-box":6,"./selections-box":11,"./view":12}],8:[function(require,module,exports){
-/**
- * @preserve FastClick: polyfill to remove click delays on browsers with touch UIs.
- *
- * @version 1.0.1
- * @codingstandard ftlabs-jsv2
- * @copyright The Financial Times Limited [All Rights Reserved]
- * @license MIT License (see LICENSE.txt)
- */
-
-/*jslint browser:true, node:true*/
-/*global define, Event, Node*/
-
-
-/**
- * Instantiate fast-clicking listeners on the specified layer.
- *
- * @constructor
- * @param {Element} layer The layer to listen on
- * @param {Object} options The options to override the defaults
- */
-function FastClick(layer, options) {
-	'use strict';
-	var oldOnClick;
-
-	options = options || {};
-
-	/**
-	 * Whether a click is currently being tracked.
-	 *
-	 * @type boolean
-	 */
-	this.trackingClick = false;
-
-
-	/**
-	 * Timestamp for when click tracking started.
-	 *
-	 * @type number
-	 */
-	this.trackingClickStart = 0;
-
-
-	/**
-	 * The element being tracked for a click.
-	 *
-	 * @type EventTarget
-	 */
-	this.targetElement = null;
-
-
-	/**
-	 * X-coordinate of touch start event.
-	 *
-	 * @type number
-	 */
-	this.touchStartX = 0;
-
-
-	/**
-	 * Y-coordinate of touch start event.
-	 *
-	 * @type number
-	 */
-	this.touchStartY = 0;
-
-
-	/**
-	 * ID of the last touch, retrieved from Touch.identifier.
-	 *
-	 * @type number
-	 */
-	this.lastTouchIdentifier = 0;
-
-
-	/**
-	 * Touchmove boundary, beyond which a click will be cancelled.
-	 *
-	 * @type number
-	 */
-	this.touchBoundary = options.touchBoundary || 10;
-
-
-	/**
-	 * The FastClick layer.
-	 *
-	 * @type Element
-	 */
-	this.layer = layer;
-
-	/**
-	 * The minimum time between tap(touchstart and touchend) events
-	 *
-	 * @type number
-	 */
-	this.tapDelay = options.tapDelay || 200;
-
-	if (FastClick.notNeeded(layer)) {
-		return;
-	}
-
-	// Some old versions of Android don't have Function.prototype.bind
-	function bind(method, context) {
-		return function() { return method.apply(context, arguments); };
-	}
-
-
-	var methods = ['onMouse', 'onClick', 'onTouchStart', 'onTouchMove', 'onTouchEnd', 'onTouchCancel'];
-	var context = this;
-	for (var i = 0, l = methods.length; i < l; i++) {
-		context[methods[i]] = bind(context[methods[i]], context);
-	}
-
-	// Set up event handlers as required
-	if (deviceIsAndroid) {
-		layer.addEventListener('mouseover', this.onMouse, true);
-		layer.addEventListener('mousedown', this.onMouse, true);
-		layer.addEventListener('mouseup', this.onMouse, true);
-	}
-
-	layer.addEventListener('click', this.onClick, true);
-	layer.addEventListener('touchstart', this.onTouchStart, false);
-	layer.addEventListener('touchmove', this.onTouchMove, false);
-	layer.addEventListener('touchend', this.onTouchEnd, false);
-	layer.addEventListener('touchcancel', this.onTouchCancel, false);
-
-	// Hack is required for browsers that don't support Event#stopImmediatePropagation (e.g. Android 2)
-	// which is how FastClick normally stops click events bubbling to callbacks registered on the FastClick
-	// layer when they are cancelled.
-	if (!Event.prototype.stopImmediatePropagation) {
-		layer.removeEventListener = function(type, callback, capture) {
-			var rmv = Node.prototype.removeEventListener;
-			if (type === 'click') {
-				rmv.call(layer, type, callback.hijacked || callback, capture);
-			} else {
-				rmv.call(layer, type, callback, capture);
-			}
-		};
-
-		layer.addEventListener = function(type, callback, capture) {
-			var adv = Node.prototype.addEventListener;
-			if (type === 'click') {
-				adv.call(layer, type, callback.hijacked || (callback.hijacked = function(event) {
-					if (!event.propagationStopped) {
-						callback(event);
-					}
-				}), capture);
-			} else {
-				adv.call(layer, type, callback, capture);
-			}
-		};
-	}
-
-	// If a handler is already declared in the element's onclick attribute, it will be fired before
-	// FastClick's onClick handler. Fix this by pulling out the user-defined handler function and
-	// adding it as listener.
-	if (typeof layer.onclick === 'function') {
-
-		// Android browser on at least 3.2 requires a new reference to the function in layer.onclick
-		// - the old one won't work if passed to addEventListener directly.
-		oldOnClick = layer.onclick;
-		layer.addEventListener('click', function(event) {
-			oldOnClick(event);
-		}, false);
-		layer.onclick = null;
-	}
-}
-
-
-/**
- * Android requires exceptions.
- *
- * @type boolean
- */
-var deviceIsAndroid = navigator.userAgent.indexOf('Android') > 0;
-
-
-/**
- * iOS requires exceptions.
- *
- * @type boolean
- */
-var deviceIsIOS = /iP(ad|hone|od)/.test(navigator.userAgent);
-
-
-/**
- * iOS 4 requires an exception for select elements.
- *
- * @type boolean
- */
-var deviceIsIOS4 = deviceIsIOS && (/OS 4_\d(_\d)?/).test(navigator.userAgent);
-
-
-/**
- * iOS 6.0(+?) requires the target element to be manually derived
- *
- * @type boolean
- */
-var deviceIsIOSWithBadTarget = deviceIsIOS && (/OS ([6-9]|\d{2})_\d/).test(navigator.userAgent);
-
-
-/**
- * Determine whether a given element requires a native click.
- *
- * @param {EventTarget|Element} target Target DOM element
- * @returns {boolean} Returns true if the element needs a native click
- */
-FastClick.prototype.needsClick = function(target) {
-	'use strict';
-	switch (target.nodeName.toLowerCase()) {
-
-	// Don't send a synthetic click to disabled inputs (issue #62)
-	case 'button':
-	case 'select':
-	case 'textarea':
-		if (target.disabled) {
-			return true;
-		}
-
-		break;
-	case 'input':
-
-		// File inputs need real clicks on iOS 6 due to a browser bug (issue #68)
-		if ((deviceIsIOS && target.type === 'file') || target.disabled) {
-			return true;
-		}
-
-		break;
-	case 'label':
-	case 'video':
-		return true;
-	}
-
-	return (/\bneedsclick\b/).test(target.className);
-};
-
-
-/**
- * Determine whether a given element requires a call to focus to simulate click into element.
- *
- * @param {EventTarget|Element} target Target DOM element
- * @returns {boolean} Returns true if the element requires a call to focus to simulate native click.
- */
-FastClick.prototype.needsFocus = function(target) {
-	'use strict';
-	switch (target.nodeName.toLowerCase()) {
-	case 'textarea':
-		return true;
-	case 'select':
-		return !deviceIsAndroid;
-	case 'input':
-		switch (target.type) {
-		case 'button':
-		case 'checkbox':
-		case 'file':
-		case 'image':
-		case 'radio':
-		case 'submit':
-			return false;
-		}
-
-		// No point in attempting to focus disabled inputs
-		return !target.disabled && !target.readOnly;
-	default:
-		return (/\bneedsfocus\b/).test(target.className);
-	}
-};
-
-
-/**
- * Send a click event to the specified element.
- *
- * @param {EventTarget|Element} targetElement
- * @param {Event} event
- */
-FastClick.prototype.sendClick = function(targetElement, event) {
-	'use strict';
-	var clickEvent, touch;
-
-	// On some Android devices activeElement needs to be blurred otherwise the synthetic click will have no effect (#24)
-	if (document.activeElement && document.activeElement !== targetElement) {
-		document.activeElement.blur();
-	}
-
-	touch = event.changedTouches[0];
-
-	// Synthesise a click event, with an extra attribute so it can be tracked
-	clickEvent = document.createEvent('MouseEvents');
-	clickEvent.initMouseEvent(this.determineEventType(targetElement), true, true, window, 1, touch.screenX, touch.screenY, touch.clientX, touch.clientY, false, false, false, false, 0, null);
-	clickEvent.forwardedTouchEvent = true;
-	targetElement.dispatchEvent(clickEvent);
-};
-
-FastClick.prototype.determineEventType = function(targetElement) {
-	'use strict';
-
-	//Issue #159: Android Chrome Select Box does not open with a synthetic click event
-	if (deviceIsAndroid && targetElement.tagName.toLowerCase() === 'select') {
-		return 'mousedown';
-	}
-
-	return 'click';
-};
-
-
-/**
- * @param {EventTarget|Element} targetElement
- */
-FastClick.prototype.focus = function(targetElement) {
-	'use strict';
-	var length;
-
-	// Issue #160: on iOS 7, some input elements (e.g. date datetime) throw a vague TypeError on setSelectionRange. These elements don't have an integer value for the selectionStart and selectionEnd properties, but unfortunately that can't be used for detection because accessing the properties also throws a TypeError. Just check the type instead. Filed as Apple bug #15122724.
-	if (deviceIsIOS && targetElement.setSelectionRange && targetElement.type.indexOf('date') !== 0 && targetElement.type !== 'time') {
-		length = targetElement.value.length;
-		targetElement.setSelectionRange(length, length);
-	} else {
-		targetElement.focus();
-	}
-};
-
-
-/**
- * Check whether the given target element is a child of a scrollable layer and if so, set a flag on it.
- *
- * @param {EventTarget|Element} targetElement
- */
-FastClick.prototype.updateScrollParent = function(targetElement) {
-	'use strict';
-	var scrollParent, parentElement;
-
-	scrollParent = targetElement.fastClickScrollParent;
-
-	// Attempt to discover whether the target element is contained within a scrollable layer. Re-check if the
-	// target element was moved to another parent.
-	if (!scrollParent || !scrollParent.contains(targetElement)) {
-		parentElement = targetElement;
-		do {
-			if (parentElement.scrollHeight > parentElement.offsetHeight) {
-				scrollParent = parentElement;
-				targetElement.fastClickScrollParent = parentElement;
-				break;
-			}
-
-			parentElement = parentElement.parentElement;
-		} while (parentElement);
-	}
-
-	// Always update the scroll top tracker if possible.
-	if (scrollParent) {
-		scrollParent.fastClickLastScrollTop = scrollParent.scrollTop;
-	}
-};
-
-
-/**
- * @param {EventTarget} targetElement
- * @returns {Element|EventTarget}
- */
-FastClick.prototype.getTargetElementFromEventTarget = function(eventTarget) {
-	'use strict';
-
-	// On some older browsers (notably Safari on iOS 4.1 - see issue #56) the event target may be a text node.
-	if (eventTarget.nodeType === Node.TEXT_NODE) {
-		return eventTarget.parentNode;
-	}
-
-	return eventTarget;
-};
-
-
-/**
- * On touch start, record the position and scroll offset.
- *
- * @param {Event} event
- * @returns {boolean}
- */
-FastClick.prototype.onTouchStart = function(event) {
-	'use strict';
-	var targetElement, touch, selection;
-
-	// Ignore multiple touches, otherwise pinch-to-zoom is prevented if both fingers are on the FastClick element (issue #111).
-	if (event.targetTouches.length > 1) {
-		return true;
-	}
-
-	targetElement = this.getTargetElementFromEventTarget(event.target);
-	touch = event.targetTouches[0];
-
-	if (deviceIsIOS) {
-
-		// Only trusted events will deselect text on iOS (issue #49)
-		selection = window.getSelection();
-		if (selection.rangeCount && !selection.isCollapsed) {
-			return true;
-		}
-
-		if (!deviceIsIOS4) {
-
-			// Weird things happen on iOS when an alert or confirm dialog is opened from a click event callback (issue #23):
-			// when the user next taps anywhere else on the page, new touchstart and touchend events are dispatched
-			// with the same identifier as the touch event that previously triggered the click that triggered the alert.
-			// Sadly, there is an issue on iOS 4 that causes some normal touch events to have the same identifier as an
-			// immediately preceeding touch event (issue #52), so this fix is unavailable on that platform.
-			if (touch.identifier === this.lastTouchIdentifier) {
-				event.preventDefault();
-				return false;
-			}
-
-			this.lastTouchIdentifier = touch.identifier;
-
-			// If the target element is a child of a scrollable layer (using -webkit-overflow-scrolling: touch) and:
-			// 1) the user does a fling scroll on the scrollable layer
-			// 2) the user stops the fling scroll with another tap
-			// then the event.target of the last 'touchend' event will be the element that was under the user's finger
-			// when the fling scroll was started, causing FastClick to send a click event to that layer - unless a check
-			// is made to ensure that a parent layer was not scrolled before sending a synthetic click (issue #42).
-			this.updateScrollParent(targetElement);
-		}
-	}
-
-	this.trackingClick = true;
-	this.trackingClickStart = event.timeStamp;
-	this.targetElement = targetElement;
-
-	this.touchStartX = touch.pageX;
-	this.touchStartY = touch.pageY;
-
-	// Prevent phantom clicks on fast double-tap (issue #36)
-	if ((event.timeStamp - this.lastClickTime) < this.tapDelay) {
-		event.preventDefault();
-	}
-
-	return true;
-};
-
-
-/**
- * Based on a touchmove event object, check whether the touch has moved past a boundary since it started.
- *
- * @param {Event} event
- * @returns {boolean}
- */
-FastClick.prototype.touchHasMoved = function(event) {
-	'use strict';
-	var touch = event.changedTouches[0], boundary = this.touchBoundary;
-
-	if (Math.abs(touch.pageX - this.touchStartX) > boundary || Math.abs(touch.pageY - this.touchStartY) > boundary) {
-		return true;
-	}
-
-	return false;
-};
-
-
-/**
- * Update the last position.
- *
- * @param {Event} event
- * @returns {boolean}
- */
-FastClick.prototype.onTouchMove = function(event) {
-	'use strict';
-	if (!this.trackingClick) {
-		return true;
-	}
-
-	// If the touch has moved, cancel the click tracking
-	if (this.targetElement !== this.getTargetElementFromEventTarget(event.target) || this.touchHasMoved(event)) {
-		this.trackingClick = false;
-		this.targetElement = null;
-	}
-
-	return true;
-};
-
-
-/**
- * Attempt to find the labelled control for the given label element.
- *
- * @param {EventTarget|HTMLLabelElement} labelElement
- * @returns {Element|null}
- */
-FastClick.prototype.findControl = function(labelElement) {
-	'use strict';
-
-	// Fast path for newer browsers supporting the HTML5 control attribute
-	if (labelElement.control !== undefined) {
-		return labelElement.control;
-	}
-
-	// All browsers under test that support touch events also support the HTML5 htmlFor attribute
-	if (labelElement.htmlFor) {
-		return document.getElementById(labelElement.htmlFor);
-	}
-
-	// If no for attribute exists, attempt to retrieve the first labellable descendant element
-	// the list of which is defined here: http://www.w3.org/TR/html5/forms.html#category-label
-	return labelElement.querySelector('button, input:not([type=hidden]), keygen, meter, output, progress, select, textarea');
-};
-
-
-/**
- * On touch end, determine whether to send a click event at once.
- *
- * @param {Event} event
- * @returns {boolean}
- */
-FastClick.prototype.onTouchEnd = function(event) {
-	'use strict';
-	var forElement, trackingClickStart, targetTagName, scrollParent, touch, targetElement = this.targetElement;
-
-	if (!this.trackingClick) {
-		return true;
-	}
-
-	// Prevent phantom clicks on fast double-tap (issue #36)
-	if ((event.timeStamp - this.lastClickTime) < this.tapDelay) {
-		this.cancelNextClick = true;
-		return true;
-	}
-
-	// Reset to prevent wrong click cancel on input (issue #156).
-	this.cancelNextClick = false;
-
-	this.lastClickTime = event.timeStamp;
-
-	trackingClickStart = this.trackingClickStart;
-	this.trackingClick = false;
-	this.trackingClickStart = 0;
-
-	// On some iOS devices, the targetElement supplied with the event is invalid if the layer
-	// is performing a transition or scroll, and has to be re-detected manually. Note that
-	// for this to function correctly, it must be called *after* the event target is checked!
-	// See issue #57; also filed as rdar://13048589 .
-	if (deviceIsIOSWithBadTarget) {
-		touch = event.changedTouches[0];
-
-		// In certain cases arguments of elementFromPoint can be negative, so prevent setting targetElement to null
-		targetElement = document.elementFromPoint(touch.pageX - window.pageXOffset, touch.pageY - window.pageYOffset) || targetElement;
-		targetElement.fastClickScrollParent = this.targetElement.fastClickScrollParent;
-	}
-
-	targetTagName = targetElement.tagName.toLowerCase();
-	if (targetTagName === 'label') {
-		forElement = this.findControl(targetElement);
-		if (forElement) {
-			this.focus(targetElement);
-			if (deviceIsAndroid) {
-				return false;
-			}
-
-			targetElement = forElement;
-		}
-	} else if (this.needsFocus(targetElement)) {
-
-		// Case 1: If the touch started a while ago (best guess is 100ms based on tests for issue #36) then focus will be triggered anyway. Return early and unset the target element reference so that the subsequent click will be allowed through.
-		// Case 2: Without this exception for input elements tapped when the document is contained in an iframe, then any inputted text won't be visible even though the value attribute is updated as the user types (issue #37).
-		if ((event.timeStamp - trackingClickStart) > 100 || (deviceIsIOS && window.top !== window && targetTagName === 'input')) {
-			this.targetElement = null;
-			return false;
-		}
-
-		this.focus(targetElement);
-		this.sendClick(targetElement, event);
-
-		// Select elements need the event to go through on iOS 4, otherwise the selector menu won't open.
-		// Also this breaks opening selects when VoiceOver is active on iOS6, iOS7 (and possibly others)
-		if (!deviceIsIOS || targetTagName !== 'select') {
-			this.targetElement = null;
-			event.preventDefault();
-		}
-
-		return false;
-	}
-
-	if (deviceIsIOS && !deviceIsIOS4) {
-
-		// Don't send a synthetic click event if the target element is contained within a parent layer that was scrolled
-		// and this tap is being used to stop the scrolling (usually initiated by a fling - issue #42).
-		scrollParent = targetElement.fastClickScrollParent;
-		if (scrollParent && scrollParent.fastClickLastScrollTop !== scrollParent.scrollTop) {
-			return true;
-		}
-	}
-
-	// Prevent the actual click from going though - unless the target node is marked as requiring
-	// real clicks or if it is in the whitelist in which case only non-programmatic clicks are permitted.
-	if (!this.needsClick(targetElement)) {
-		event.preventDefault();
-		this.sendClick(targetElement, event);
-	}
-
-	return false;
-};
-
-
-/**
- * On touch cancel, stop tracking the click.
- *
- * @returns {void}
- */
-FastClick.prototype.onTouchCancel = function() {
-	'use strict';
-	this.trackingClick = false;
-	this.targetElement = null;
-};
-
-
-/**
- * Determine mouse events which should be permitted.
- *
- * @param {Event} event
- * @returns {boolean}
- */
-FastClick.prototype.onMouse = function(event) {
-	'use strict';
-
-	// If a target element was never set (because a touch event was never fired) allow the event
-	if (!this.targetElement) {
-		return true;
-	}
-
-	if (event.forwardedTouchEvent) {
-		return true;
-	}
-
-	// Programmatically generated events targeting a specific element should be permitted
-	if (!event.cancelable) {
-		return true;
-	}
-
-	// Derive and check the target element to see whether the mouse event needs to be permitted;
-	// unless explicitly enabled, prevent non-touch click events from triggering actions,
-	// to prevent ghost/doubleclicks.
-	if (!this.needsClick(this.targetElement) || this.cancelNextClick) {
-
-		// Prevent any user-added listeners declared on FastClick element from being fired.
-		if (event.stopImmediatePropagation) {
-			event.stopImmediatePropagation();
-		} else {
-
-			// Part of the hack for browsers that don't support Event#stopImmediatePropagation (e.g. Android 2)
-			event.propagationStopped = true;
-		}
-
-		// Cancel the event
-		event.stopPropagation();
-		event.preventDefault();
-
-		return false;
-	}
-
-	// If the mouse event is permitted, return true for the action to go through.
-	return true;
-};
-
-
-/**
- * On actual clicks, determine whether this is a touch-generated click, a click action occurring
- * naturally after a delay after a touch (which needs to be cancelled to avoid duplication), or
- * an actual click which should be permitted.
- *
- * @param {Event} event
- * @returns {boolean}
- */
-FastClick.prototype.onClick = function(event) {
-	'use strict';
-	var permitted;
-
-	// It's possible for another FastClick-like library delivered with third-party code to fire a click event before FastClick does (issue #44). In that case, set the click-tracking flag back to false and return early. This will cause onTouchEnd to return early.
-	if (this.trackingClick) {
-		this.targetElement = null;
-		this.trackingClick = false;
-		return true;
-	}
-
-	// Very odd behaviour on iOS (issue #18): if a submit element is present inside a form and the user hits enter in the iOS simulator or clicks the Go button on the pop-up OS keyboard the a kind of 'fake' click event will be triggered with the submit-type input element as the target.
-	if (event.target.type === 'submit' && event.detail === 0) {
-		return true;
-	}
-
-	permitted = this.onMouse(event);
-
-	// Only unset targetElement if the click is not permitted. This will ensure that the check for !targetElement in onMouse fails and the browser's click doesn't go through.
-	if (!permitted) {
-		this.targetElement = null;
-	}
-
-	// If clicks are permitted, return true for the action to go through.
-	return permitted;
-};
-
-
-/**
- * Remove all FastClick's event listeners.
- *
- * @returns {void}
- */
-FastClick.prototype.destroy = function() {
-	'use strict';
-	var layer = this.layer;
-
-	if (deviceIsAndroid) {
-		layer.removeEventListener('mouseover', this.onMouse, true);
-		layer.removeEventListener('mousedown', this.onMouse, true);
-		layer.removeEventListener('mouseup', this.onMouse, true);
-	}
-
-	layer.removeEventListener('click', this.onClick, true);
-	layer.removeEventListener('touchstart', this.onTouchStart, false);
-	layer.removeEventListener('touchmove', this.onTouchMove, false);
-	layer.removeEventListener('touchend', this.onTouchEnd, false);
-	layer.removeEventListener('touchcancel', this.onTouchCancel, false);
-};
-
-
-/**
- * Check whether FastClick is needed.
- *
- * @param {Element} layer The layer to listen on
- */
-FastClick.notNeeded = function(layer) {
-	'use strict';
-	var metaViewport;
-	var chromeVersion;
-
-	// Devices that don't support touch don't need FastClick
-	if (typeof window.ontouchstart === 'undefined') {
-		return true;
-	}
-
-	// Chrome version - zero for other browsers
-	chromeVersion = +(/Chrome\/([0-9]+)/.exec(navigator.userAgent) || [,0])[1];
-
-	if (chromeVersion) {
-
-		if (deviceIsAndroid) {
-			metaViewport = document.querySelector('meta[name=viewport]');
-
-			if (metaViewport) {
-				// Chrome on Android with user-scalable="no" doesn't need FastClick (issue #89)
-				if (metaViewport.content.indexOf('user-scalable=no') !== -1) {
-					return true;
-				}
-				// Chrome 32 and above with width=device-width or less don't need FastClick
-				if (chromeVersion > 31 && document.documentElement.scrollWidth <= window.outerWidth) {
-					return true;
-				}
-			}
-
-		// Chrome desktop doesn't need FastClick (issue #15)
-		} else {
-			return true;
-		}
-	}
-
-	// IE10 with -ms-touch-action: none, which disables double-tap-to-zoom (issue #97)
-	if (layer.style.msTouchAction === 'none') {
-		return true;
-	}
-
-	return false;
-};
-
-
-/**
- * Factory method for creating a FastClick object
- *
- * @param {Element} layer The layer to listen on
- * @param {Object} options The options to override the defaults
- */
-FastClick.attach = function(layer, options) {
-	'use strict';
-	return new FastClick(layer, options);
-};
-
-
-if (typeof define !== 'undefined' && define.amd) {
-
-	// AMD. Register as an anonymous module.
-	define(function() {
-		'use strict';
-		return FastClick;
-	});
-} else if (typeof module !== 'undefined' && module.exports) {
-	module.exports = FastClick.attach;
-	module.exports.FastClick = FastClick;
-} else {
-	window.FastClick = FastClick;
-}
-
-},{}],9:[function(require,module,exports){
 (function (process){
 /*!
  * qqwing - Sudoku solver and generator
@@ -3595,7 +1905,191 @@ qqwing.POSSIBILITY_SIZE = qqwing.BOARD_SIZE*qqwing.ROW_COL_SEC_SIZE;
 module.exports = qqwing;
 
 }).call(this,require('_process'))
-},{"_process":1}],10:[function(require,module,exports){
+},{"_process":1}],5:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Debug = require('../debug');
+
+var DEBUG = new Debug('CustomElement');
+
+//------------------------------------------------------------------------------
+// CSS Classes used by class View.
+//------------------------------------------------------------------------------
+var CSS_CLASSES = {
+  CUSTOM_ELEMENT: 'custom-element'
+};
+
+//------------------------------------------------------------------------------
+// CustomElement is a class to standardize this apps div elements.
+// The way dom elements are being handled currently in this app there is a lot
+// of repetition of code for dom elements, because it currently just uses div's
+// for all the dom elements.
+//------------------------------------------------------------------------------
+module.exports = function () {
+  function CustomElement(cssClass) {
+    _classCallCheck(this, CustomElement);
+
+    this.element = document.createElement('div');
+    if (cssClass !== undefined) {
+      this.getElement().classList.add(cssClass);
+    }
+  }
+
+  /*
+   * Return the dom element.
+   */
+
+  _createClass(CustomElement, [{
+    key: 'getElement',
+    value: function getElement() {
+      return this.element;
+    }
+
+    /*
+     * Updates the manually set element styles
+     */
+
+  }, {
+    key: 'updateElementStyle',
+    value: function updateElementStyle() {
+      var style = 'position:absolute;' + 'left:' + this.getX() + 'px;' + 'top:' + this.getY() + 'px;' + 'width:' + this.getWidth() + 'px;' + 'height:' + this.getHeight() + 'px;';
+      this.getElement().setAttribute('style', style);
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'addClass',
+    value: function addClass(className) {
+      this.getElement().classList.add(className);
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'removeClass',
+    value: function removeClass(className) {
+      this.getElement().classList.remove(className);
+    }
+
+    /*
+     * Sets the X and Y coordinates.
+     */
+
+  }, {
+    key: 'setPosition',
+    value: function setPosition(x, y) {
+      this.setX(x);
+      this.setY(y);
+    }
+
+    /*
+     * Set position from the left.
+     */
+
+  }, {
+    key: 'setX',
+    value: function setX(x) {
+      this.x = x;
+      this.updateElementStyle();
+    }
+
+    /*
+     * Get the position from the left.
+     */
+
+  }, {
+    key: 'getX',
+    value: function getX() {
+      return this.x;
+    }
+
+    /*
+     * Set the position from the top.
+     */
+
+  }, {
+    key: 'setY',
+    value: function setY(y) {
+      this.y = y;
+      this.updateElementStyle();
+    }
+
+    /*
+     * Get the position from the top.
+     */
+
+  }, {
+    key: 'getY',
+    value: function getY() {
+      return this.y;
+    }
+
+    /*
+     * Set the width and height.
+     */
+
+  }, {
+    key: 'setSize',
+    value: function setSize(w, h) {
+      this.setWidth(w);
+      this.setHeight(h);
+    }
+
+    /*
+     * Set the width.
+     */
+
+  }, {
+    key: 'setWidth',
+    value: function setWidth(w) {
+      this.w = w;
+      this.updateElementStyle();
+    }
+
+    /*
+     * Get the width.
+     */
+
+  }, {
+    key: 'getWidth',
+    value: function getWidth() {
+      return this.w;
+    }
+
+    /*
+     * Set the height.
+     */
+
+  }, {
+    key: 'setHeight',
+    value: function setHeight(h) {
+      this.h = h;
+      this.updateElementStyle();
+    }
+
+    /*
+     * Get the height.
+     */
+
+  }, {
+    key: 'getHeight',
+    value: function getHeight() {
+      return this.h;
+    }
+  }]);
+
+  return CustomElement;
+}();
+},{"../debug":3}],6:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -3606,316 +2100,1842 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var View = require('./view');
+var Debug = require('../../../debug');
+var CustomElement = require('../../custom-element');
 
-var DEBUG_PREFIX = '[MainMenu]: ';
+var DEBUG = new Debug('Clock');
 
-module.exports = function (_View) {
-  _inherits(MainMenu, _View);
+var CSS_CLASSES = {
+  CLOCK: 'clock'
+};
 
-  function MainMenu() {
-    _classCallCheck(this, MainMenu);
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
+module.exports = function (_CustomElement) {
+  _inherits(CLOCK, _CustomElement);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(MainMenu).call(this, VIEW_ID.MAIN_MENU));
+  function CLOCK() {
+    _classCallCheck(this, CLOCK);
 
-    _this.containerElem = document.createElement('div');
-    _this.containerElem.classList.add('main-menu-container');
-    _this.addElement(_this.getElement());
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(CLOCK).call(this, CSS_CLASSES.CLOCK));
 
-    _this.mainMenuContainer = document.createElement('div');
-    _this.mainMenuContainer.classList.add('main-menu');
-    _this.getElement().appendChild(_this.mainMenuContainer);
-
-    _this.initTitle();
-    _this.initButtons();
+    DEBUG.log('Loading');
 
     return _this;
   }
 
-  _createClass(MainMenu, [{
-    key: 'getElement',
-    value: function getElement() {
-      return this.containerElem;
-    }
+  /*
+   *
+   */
 
-    /*
-     * Title
-     */
-
-  }, {
-    key: 'initTitle',
-    value: function initTitle() {
-      if (!this.titleElem) {
-        this.titleElem = document.createElement('div');
-        this.titleElem.classList.add('title');
-        this.mainMenuContainer.appendChild(this.getTitleElem());
-      }
-      this.setTitle('MB Sudoku');
-    }
-  }, {
-    key: 'getTitleElem',
-    value: function getTitleElem() {
-      return this.titleElem;
-    }
-  }, {
-    key: 'setTitle',
-    value: function setTitle(title) {
-      this.getTitleElem().innerHTML = title;
-    }
-
-    /*
-     * Buttons
-     */
-
-  }, {
-    key: 'initButtons',
-    value: function initButtons() {
-      if (this.buttons === undefined) {
-        this.buttons = [];
-        this.buttonsContainer = document.createElement('div');
-        this.buttonsContainer.classList.add('buttons-container');
-        this.mainMenuContainer.appendChild(this.buttonsContainer);
-      }
-      this.initPlayButton();
-      this.initStatsButton();
-    }
-  }, {
-    key: 'getButtonsContainer',
-    value: function getButtonsContainer() {
-      if (this.buttonsContainer === undefined) {
-        console.log(DEBUG_PREFIX + 'Buttons container undefined.');
-      }
-      return this.buttonsContainer;
-    }
-  }, {
-    key: 'addButton',
-    value: function addButton(btn) {
-      this.buttons.push(btn);
-      this.getButtonsContainer().appendChild(btn);
-    }
-  }, {
-    key: 'createButton',
-    value: function createButton(buttonName) {
-      var btn = document.createElement('div');
-      btn.classList.add('btn');
-      btn.innerHTML = buttonName;
-      return btn;
-    }
-
-    /*
-     * Play Button
-     */
-
-  }, {
-    key: 'initPlayButton',
-    value: function initPlayButton() {
-      if (this.startButton === undefined) {
-        this.startButton = this.createButton('Play');
-        this.addButton(this.startButton);
-        this.startButton.addEventListener('mousedown', function (e) {
-          app.showView(VIEW_ID.GAME);
-        });
-      }
-    }
-
-    /*
-     * Stats Button
-     */
-
-  }, {
-    key: 'initStatsButton',
-    value: function initStatsButton() {
-      if (this.statsButton === undefined) {
-        this.statsButton = this.createButton('Stats');
-        this.addButton(this.statsButton);
-      }
-    }
-  }]);
-
-  return MainMenu;
-}(View);
-},{"./view":12}],11:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-module.exports = function () {
-  function SelectionsBox(gameBoard) {
-    var _this = this;
-
-    _classCallCheck(this, SelectionsBox);
-
-    this.gameBoard = gameBoard;
-    console.log('Creating Selections Box');
-    this.containerElem = document.createElement('div');
-    this.containerElem.classList.add('selections-box');
-
-    //--------------------------------------------------------------------------
-    // Create the option buttons
-    //--------------------------------------------------------------------------
-    this.optionsContainerElem = document.createElement('div');
-    this.optionsContainerElem.classList.add('options-container');
-    this.containerElem.appendChild(this.optionsContainerElem);
-
-    this.spacerElem = document.createElement('div');
-    this.spacerElem.classList.add('spacer');
-    this.spacerElem.textContent = 'X';
-    this.optionsContainerElem.appendChild(this.spacerElem);
-
-    this.removeBtnElem = document.createElement('div');
-    this.removeBtnElem.classList.add('remove-btn');
-    this.removeBtnElem.textContent = 'X';
-    this.optionsContainerElem.appendChild(this.removeBtnElem);
-    this.removeBtnElem.addEventListener('mousedown', function (e) {
-      _this.gameBoard.setSelectedTileValue(-1);
-      _this.updateTileStyleStates();
-    });
-
-    this.STATE = {};
-    this.STATE.ENABLED = 0;
-    this.STATE.DISABLED = 1;
-
-    //--------------------------------------------------------------------------
-    // Create the selection tiles
-    //--------------------------------------------------------------------------
-    this.tilesContainerElem = document.createElement('div');
-    this.tilesContainerElem.classList.add('tiles-container');
-    this.containerElem.appendChild(this.tilesContainerElem);
-
-    this.selectionTiles = [];
-
-    var _loop = function _loop(i) {
-      var tmpTile = document.createElement('div');
-      tmpTile.classList.add('tile');
-      if ((i + 1) % 2 == 0) {
-        tmpTile.classList.add('even');
-      } else {
-        tmpTile.classList.add('odd');
-      }
-      tmpTile.numValue = i + 1;
-      tmpTile.textContent = '' + tmpTile.numValue;
-      _this.tilesContainerElem.appendChild(tmpTile);
-      tmpTile.addEventListener('mousedown', function (e) {
-        if (!tmpTile.classList.contains('done')) {
-          var isDone = _this.gameBoard.setSelectedTileValue(tmpTile.numValue);
-          if (isDone) {
-            tmpTile.classList.add('done');
-          }
-        }
-      });
-      _this.selectionTiles.push(tmpTile);
-    };
-
-    for (var i = 0; i < 9; i++) {
-      _loop(i);
-    }
-
-    this.updateTileStyleStates();
-  }
-
-  _createClass(SelectionsBox, [{
-    key: 'getElement',
-    value: function getElement() {
-      return this.containerElem;
-    }
-  }, {
+  _createClass(CLOCK, [{
     key: 'update',
     value: function update() {
-      this.updateTileStyleStates();
+      this.updateStyles();
     }
+
+    /*
+     *
+     */
+
   }, {
-    key: 'updateTileStyleStates',
-    value: function updateTileStyleStates() {
-      var doneVals = this.gameBoard.getCompletedValues();
-      for (var i = 0; i < 9; i++) {
-        var _tmpTile = this.selectionTiles[i];
-        var found = false;
-        for (var j = 0; j < doneVals.length; j++) {
-          if (doneVals[j] == _tmpTile.numValue) {
-            found = true;
-          }
-        }
-        if (found) {
-          this.setTileActiveState(_tmpTile.numValue, this.STATE.DISABLED);
-        } else {
-          this.setTileActiveState(_tmpTile.numValue, this.STATE.ENABLED);
-        }
-      }
+    key: 'updateStyles',
+    value: function updateStyles() {
+      this.getElement().style.fontSize = this.getHeight() * 0.8 + 'px';
     }
+
+    /*
+     *
+     */
+
   }, {
-    key: 'setTileActiveState',
-    value: function setTileActiveState(tileValue, state) {
-      if (state == this.STATE.ENABLED) {
-        if (this.selectionTiles[tileValue - 1].classList.contains('done')) {
-          this.selectionTiles[tileValue - 1].classList.remove('done');
-        }
-      } else if (state == this.STATE.DISABLED) {
-        if (!this.selectionTiles[tileValue - 1].classList.contains('done')) {
-          this.selectionTiles[tileValue - 1].classList.add('done');
-        }
+    key: 'setValue',
+    value: function setValue(v) {
+      this.value = v;
+      this.getElement().setAttribute('value', this.getValue());
+      this.getElement().innerHTML = '' + this.getValue();
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'getValue',
+    value: function getValue() {
+      return this.value;
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'setTime',
+    value: function setTime(t) {
+      var SECONDS = 1000;
+      var MINUTES = SECONDS * 60;
+      var HOURS = MINUTES * 60;
+      var DAYS = HOURS * 24;
+      var YEARS = DAYS * 365;
+
+      //  t = t/SECONDS;
+      //  let seconds = Math.round(t % 60);
+      //  let minutes = Math.round((t / 60) % 60);
+      //  let hours = Math.round((t / (60 * 60)) % 24);
+      var d = new Date(t);
+      var seconds = d.getSeconds();
+      var minutes = d.getMinutes();
+      // let hours = d.getHours();
+
+      var secStr = "" + seconds;
+      if (seconds < 10) {
+        secStr = "0" + seconds;
       }
+      var minStr = "" + minutes;
+      if (minutes < 10) {
+        minStr = "0" + minutes;
+      }
+      //  let hourStr = ""+hours;
+      //  if(hours<10){hourStr = "0"+hours;}
+
+      //  this.setValue(hourStr+":"+minStr+":"+secStr);
+      this.setValue(minStr + ":" + secStr);
     }
   }]);
 
-  return SelectionsBox;
-}();
-},{}],12:[function(require,module,exports){
+  return CLOCK;
+}(CustomElement);
+},{"../../../debug":3,"../../custom-element":5}],7:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Debug = require('../../../debug');
+var CustomElement = require('../../custom-element');
+
+var DEBUG = new Debug('EraseTileButton');
+
+var CSS_CLASSES = {
+  ERASE_TILE_BUTTON: 'erase-tile-button'
+};
+
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
+module.exports = function (_CustomElement) {
+  _inherits(EraseTileButton, _CustomElement);
+
+  function EraseTileButton(x, y) {
+    _classCallCheck(this, EraseTileButton);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(EraseTileButton).call(this, CSS_CLASSES.ERASE_TILE_BUTTON));
+
+    DEBUG.log('Loading');
+
+    return _this;
+  }
+
+  /*
+   *
+   */
+
+  _createClass(EraseTileButton, [{
+    key: 'update',
+    value: function update() {
+      this.updateStyles();
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'updateStyles',
+    value: function updateStyles() {
+      this.getElement().style.fontSize = this.getHeight() * 0.8 + 'px';
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'setValue',
+    value: function setValue(v) {
+      this.value = v;
+      this.getElement().setAttribute('value', this.getValue());
+      this.getElement().innerHTML = '' + this.getValue();
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'getValue',
+    value: function getValue() {
+      return this.value;
+    }
+  }]);
+
+  return EraseTileButton;
+}(CustomElement);
+},{"../../../debug":3,"../../custom-element":5}],8:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Debug = require('../../../debug');
+var CustomElement = require('../../custom-element');
+
+var DEBUG = new Debug('GameboardTile');
+
+var CSS_CLASSES = {
+  GAMEBOARD_TILE: 'gameboard-tile',
+  SELECTED: 'selected'
+};
+
+var TILE_IDS = [['A1', 'A2', 'A3', 'B1', 'B2', 'B3', 'C1', 'C2', 'C3'], // row 1
+['A4', 'A5', 'A6', 'B4', 'B5', 'B6', 'C4', 'C5', 'C6'], // row 2
+['A7', 'A8', 'A9', 'B7', 'B8', 'B9', 'C7', 'C8', 'C9'], // row 3
+['D1', 'D2', 'D3', 'E1', 'E2', 'E3', 'F1', 'F2', 'F3'], // row 4
+['D4', 'D5', 'D6', 'E4', 'E5', 'E6', 'F4', 'F5', 'F6'], // row 5
+['D7', 'D8', 'D9', 'E7', 'E8', 'E9', 'F7', 'F8', 'F9'], // row 6
+['G1', 'G2', 'G3', 'H1', 'H2', 'H3', 'I1', 'I2', 'I3'], // row 7
+['G4', 'G5', 'G6', 'H4', 'H5', 'H6', 'I4', 'I5', 'I6'], // row 8
+['G7', 'G8', 'G9', 'H7', 'H8', 'H9', 'I7', 'I8', 'I9']];
+
+//------------------------------------------------------------------------------
+// GameBoardTile is one of the tiles on the 9x9 gameboard grid.
+//------------------------------------------------------------------------------
+// row 9
+module.exports = function (_CustomElement) {
+  _inherits(GameboardTile, _CustomElement);
+
+  function GameboardTile(x, y) {
+    _classCallCheck(this, GameboardTile);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(GameboardTile).call(this, CSS_CLASSES.GAMEBOARD_TILE));
+
+    DEBUG.log('Loading');
+
+    //
+    _this.tileId = TILE_IDS[x][y];
+
+    //
+    _this.isSelectedBool = false;
+
+    //
+    _this.setValue(0);
+
+    //
+    _this.setIsOriginal(false);
+
+    //
+    _this.setIsSameValue(false);
+
+    //
+    _this.setHasConflict(false);
+
+    return _this;
+  }
+
+  /*
+   *
+   */
+
+  _createClass(GameboardTile, [{
+    key: 'update',
+    value: function update() {
+      this.updateStyles();
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'updateStyles',
+    value: function updateStyles() {
+      if (this.isSelected() === true) {
+        this.addClass(CSS_CLASSES.SELECTED);
+      } else {
+        this.removeClass(CSS_CLASSES.SELECTED);
+      }
+      this.getElement().style.fontSize = this.getHeight() * 0.8 + 'px';
+
+      //
+      // TODO: Organize this logic
+      if (this.isEmpty()) {
+        this.getElement().style.color = 'rgba(0,0,0,0)';
+        if (this.isSelected()) {
+          this.getElement().style.borderColor = 'rgba(0,200,100,1)';
+        } else {
+          this.getElement().style.borderColor = 'rgba(0,150,190,1)';
+        }
+      } else {
+        if (this.isOriginal()) {
+          this.getElement().style.color = 'rgba(0,120,190,1)';
+          if (this.isSelected()) {
+            if (this.hasConflict()) {
+              this.getElement().style.borderColor = 'rgba(200,50,50,1)';
+            } else {
+              this.getElement().style.borderColor = 'rgba(0,200,100,1)';
+            }
+          } else {
+            if (this.hasConflict()) {
+              this.getElement().style.borderColor = 'rgba(200,100,100,1)';
+            } else {
+              if (this.isSameValue()) {
+                this.getElement().style.borderColor = 'rgba(0,200,140,1)';
+              } else {
+                this.getElement().style.borderColor = 'rgba(0,150,190,1)';
+              }
+            }
+          }
+        } else {
+          this.getElement().style.color = 'rgba(0,150,190,1)';
+          if (this.isSelected()) {
+            if (this.hasConflict()) {
+              this.getElement().style.borderColor = 'rgba(200,50,50,1)';
+            } else {
+              this.getElement().style.borderColor = 'rgba(0,200,100,1)';
+            }
+          } else {
+            if (this.hasConflict()) {
+              this.getElement().style.borderColor = 'rgba(200,100,100,1)';
+            } else {
+              if (this.isSameValue()) {
+                this.getElement().style.borderColor = 'rgba(0,200,140,1)';
+              } else {
+                this.getElement().style.borderColor = 'rgba(0,150,190,1)';
+              }
+            }
+          }
+        }
+      }
+    }
+
+    /*
+     * Returns a unique identifier for the tile based on its position in the grid.
+     */
+
+  }, {
+    key: 'getTileId',
+    value: function getTileId() {
+      return this.tileId;
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'setSelected',
+    value: function setSelected(b) {
+      this.isSelectedBool = b;
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'isSelected',
+    value: function isSelected() {
+      return this.isSelectedBool;
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'setValue',
+    value: function setValue(v) {
+      this.value = v + '';
+      this.getElement().setAttribute('value', this.getValue());
+      this.getElement().innerHTML = '' + this.getValue();
+      if (this._onValueChange !== undefined) {
+        this._onValueChange();
+      }
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'getValue',
+    value: function getValue() {
+      return this.value;
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'setIsOriginal',
+    value: function setIsOriginal(b) {
+      this.isOriginalBool = b;
+      this.getElement().setAttribute('original', b);
+    }
+
+    /*
+     * Returns true if this tile contains a value from the gameboard generation.
+     * Original values can't be changed.
+     */
+
+  }, {
+    key: 'isOriginal',
+    value: function isOriginal() {
+      return this.isOriginalBool;
+    }
+
+    /*
+     * Returns whether the tile has a value set.
+     * A value of 0 is used to represent an unset tile.
+     */
+
+  }, {
+    key: 'isEmpty',
+    value: function isEmpty() {
+      return this.value + '' === 0 + '';
+    }
+
+    /*
+     * Called when this tiles value is changed
+     * Note: This is not an actual event right now.
+     *       Its purpose currently is just a way to add a function to the
+     *       setValue function outside this class.
+     */
+
+  }, {
+    key: 'setOnValueChangeEvent',
+    value: function setOnValueChangeEvent(func) {
+      this._onValueChange = func;
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'setIsSameValue',
+    value: function setIsSameValue(b) {
+      this.isSameValueBool = b;
+      this.getElement().setAttribute('samevalue', this.isSameValue());
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'isSameValue',
+    value: function isSameValue() {
+      return this.isSameValueBool;
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'setHasConflict',
+    value: function setHasConflict(b) {
+      this.hasConflictBool = b;
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'hasConflict',
+    value: function hasConflict() {
+      return this.hasConflictBool;
+    }
+  }]);
+
+  return GameboardTile;
+}(CustomElement);
+},{"../../../debug":3,"../../custom-element":5}],9:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Debug = require('../../../debug');
+var CustomElement = require('../../custom-element');
+var GameboardTile = require('./gameboard-tile');
+
+var DEBUG = new Debug('Gameboard');
+
+var CSS_CLASSES = {
+  GAMEBOARD: 'gameboard'
+};
+
+var PADDING = {
+  LEFT: 4,
+  RIGHT: 4,
+  TOP: 4,
+  BOTTOM: 4,
+  INNER: 4
+};
+
+var BLOCK_BORDER_SIZE = 4;
+
+//------------------------------------------------------------------------------
+// GameBoard is the grid containing the played tiles.
+//------------------------------------------------------------------------------
+module.exports = function (_CustomElement) {
+  _inherits(Gameboard, _CustomElement);
+
+  function Gameboard(game) {
+    _classCallCheck(this, Gameboard);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Gameboard).call(this, CSS_CLASSES.GAMEBOARD));
+
+    DEBUG.log('Loading.');
+
+    // Array containing the tiles on the 9x9 grid
+    _this.tiles = [];
+
+    return _this;
+  }
+
+  /*
+   * Update anything dynamically handled by the gameboard.
+   */
+
+  _createClass(Gameboard, [{
+    key: 'update',
+    value: function update() {
+      this.updateTilePositions();
+      this.updateTileStyles();
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'updateTilePositions',
+    value: function updateTilePositions() {
+      var tileSize = (this.getWidth() - BLOCK_BORDER_SIZE * 2 - PADDING.LEFT - PADDING.RIGHT - 8 * PADDING.INNER - BLOCK_BORDER_SIZE * 2) / 9;
+
+      var i = 0;
+      for (var row = 0; row < 9; row++) {
+        for (var col = 0; col < 9; col++) {
+          //
+          var rowBlockOffset = 0;
+          if (row === 3 || row === 4 || row === 5) {
+            rowBlockOffset = BLOCK_BORDER_SIZE;
+          }
+          if (row === 6 || row === 7 || row === 8) {
+            rowBlockOffset = BLOCK_BORDER_SIZE * 2;
+          }
+          //
+          var colBlockOffset = 0;
+          if (col === 3 || col === 4 || col === 5) {
+            colBlockOffset = BLOCK_BORDER_SIZE;
+          }
+          if (col === 6 || col === 7 || col === 8) {
+            colBlockOffset = BLOCK_BORDER_SIZE * 2;
+          }
+          //
+          this.tiles[i].setPosition(this.getX() + BLOCK_BORDER_SIZE + PADDING.LEFT + row * tileSize + row * PADDING.INNER + rowBlockOffset, // X
+          this.getY() + BLOCK_BORDER_SIZE + PADDING.TOP + col * tileSize + col * PADDING.INNER + colBlockOffset // Y
+          );
+          //
+          this.tiles[i].setSize(tileSize, tileSize);
+          //
+          i++;
+        }
+      }
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'updateTileStyles',
+    value: function updateTileStyles() {
+      for (var i = 0; i < this.getTiles().length; i++) {
+        this.getTiles()[i].updateStyles();
+      }
+    }
+
+    /*
+     * Add a tile to the gameboard.
+     * A tile is one of the squares on the 9x9 gameboard.
+     */
+
+  }, {
+    key: 'addTile',
+    value: function addTile(tile) {
+      if (tile instanceof GameboardTile) {
+        // Check if the tile being added already exists
+        for (var i = 0; i < this.tiles.length; i++) {
+          if (this.tiles[i].getTileId() === tile.getTileId()) {
+            DEBUG.error('Tile: ' + tile.getTileId() + ' is already added.');
+            return;
+          }
+        }
+        // Add the tile to the tiles array.
+        this.tiles.push(tile);
+      } else {
+        DEBUG.error('tile is not of type GameboardTile.');
+      }
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'getTiles',
+    value: function getTiles() {
+      return this.tiles;
+    }
+  }]);
+
+  return Gameboard;
+}(CustomElement);
+},{"../../../debug":3,"../../custom-element":5,"./gameboard-tile":8}],10:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Debug = require('../../../debug');
+var CustomElement = require('../../custom-element');
+
+var DEBUG = new Debug('NewGameButton');
+
+var CSS_CLASSES = {
+  NEW_GAME_BUTTON: 'new-game-button'
+};
+
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
+module.exports = function (_CustomElement) {
+  _inherits(NewGameButton, _CustomElement);
+
+  function NewGameButton(x, y) {
+    _classCallCheck(this, NewGameButton);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(NewGameButton).call(this, CSS_CLASSES.NEW_GAME_BUTTON));
+
+    DEBUG.log('Loading');
+
+    return _this;
+  }
+
+  /*
+   *
+   */
+
+  _createClass(NewGameButton, [{
+    key: 'update',
+    value: function update() {
+      this.updateStyles();
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'updateStyles',
+    value: function updateStyles() {
+      this.getElement().style.fontSize = this.getHeight() * 0.8 + 'px';
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'setValue',
+    value: function setValue(v) {
+      this.value = v;
+      this.getElement().setAttribute('value', this.getValue());
+      this.getElement().innerHTML = '' + this.getValue();
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'getValue',
+    value: function getValue() {
+      return this.value;
+    }
+  }]);
+
+  return NewGameButton;
+}(CustomElement);
+},{"../../../debug":3,"../../custom-element":5}],11:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Debug = require('../../../debug');
+var CustomElement = require('../../custom-element');
+
+var DEBUG = new Debug('SelectionTile');
+
+var CSS_CLASSES = {
+  SELECTION_TILE: 'selection-tile'
+};
+
+//------------------------------------------------------------------------------
+// SelectionTile is one of the 9 tiles under the gameboard to add a tile to
+// the gameboard.
+//------------------------------------------------------------------------------
+module.exports = function (_CustomElement) {
+  _inherits(SelectionTile, _CustomElement);
+
+  function SelectionTile(x, y) {
+    _classCallCheck(this, SelectionTile);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(SelectionTile).call(this, CSS_CLASSES.SELECTION_TILE));
+
+    DEBUG.log('Loading');
+
+    _this.setDone(false);
+
+    return _this;
+  }
+
+  /*
+   *
+   */
+
+  _createClass(SelectionTile, [{
+    key: 'update',
+    value: function update() {
+      this.updateStyles();
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'updateStyles',
+    value: function updateStyles() {
+      this.getElement().style.fontSize = this.getHeight() * 0.8 + 'px';
+      if (this.isDone()) {
+        this.getElement().style.opacity = '0';
+      } else {
+        this.getElement().style.opacity = '1';
+      }
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'setValue',
+    value: function setValue(v) {
+      this.value = v + '';
+      this.getElement().setAttribute('value', this.getValue());
+      this.getElement().innerHTML = '' + this.getValue();
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'getValue',
+    value: function getValue() {
+      return this.value;
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'setDone',
+    value: function setDone(b) {
+      this.isDoneBool = b;
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'isDone',
+    value: function isDone() {
+      return this.isDoneBool;
+    }
+  }]);
+
+  return SelectionTile;
+}(CustomElement);
+},{"../../../debug":3,"../../custom-element":5}],12:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Debug = require('../../../debug');
+var CustomElement = require('../../custom-element');
+
+var DEBUG = new Debug('TopTitle');
+
+var CSS_CLASSES = {
+  TOP_TITLE: 'top-title'
+};
+
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
+module.exports = function (_CustomElement) {
+  _inherits(TopTitle, _CustomElement);
+
+  function TopTitle() {
+    _classCallCheck(this, TopTitle);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(TopTitle).call(this, CSS_CLASSES.TOP_TITLE));
+
+    DEBUG.log('Loading');
+
+    return _this;
+  }
+
+  /*
+   *
+   */
+
+  _createClass(TopTitle, [{
+    key: 'update',
+    value: function update() {
+      this.updateStyles();
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'updateStyles',
+    value: function updateStyles() {
+      this.getElement().style.fontSize = this.getHeight() * 0.8 + 'px';
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'setValue',
+    value: function setValue(v) {
+      this.value = v;
+      this.getElement().setAttribute('value', this.getValue());
+      this.getElement().innerHTML = '' + this.getValue();
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'getValue',
+    value: function getValue() {
+      return this.value;
+    }
+  }]);
+
+  return TopTitle;
+}(CustomElement);
+},{"../../../debug":3,"../../custom-element":5}],13:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Debug = require('../../debug');
+var View = require('../view');
+
+var Gameboard = require('./elements/gameboard');
+var GameboardTile = require('./elements/gameboard-tile');
+var SelectionTile = require('./elements/selection-tile');
+var EraseTileButton = require('./elements/erase-tile-button');
+var NewGameButton = require('./elements/new-game-button');
+var TopTitle = require('./elements/top-title');
+var Clock = require('./elements/clock');
+
+var DEBUG = new Debug('GameView');
+
+var CSS_CLASSES = {
+  GAME_VIEW: 'game-view'
+};
+
+module.exports = function (_View) {
+  _inherits(GameView, _View);
+
+  function GameView() {
+    _classCallCheck(this, GameView);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(GameView).call(this, VIEW_ID.GAME));
+
+    DEBUG.log('Loading');
+    _this.addClass(CSS_CLASSES.GAME_VIEW);
+
+    _this.initGameboard();
+    _this.initSelectionTiles();
+    _this.initEraseTileButton();
+    _this.initNewGameButton();
+    _this.initTopTitle();
+    _this.initClock();
+
+    return _this;
+  }
+
+  /*
+   *
+   */
+
+  _createClass(GameView, [{
+    key: 'initGameboard',
+    value: function initGameboard() {
+      // Initialize gameboard element
+      this.gameboard = new Gameboard();
+      // Add gameboard to the view
+      this.addElement(this.getGameboard().getElement());
+
+      // Set gameboard location
+      this.getGameboard().setPosition(5, // x
+      50);
+      // Set gameboard size
+      // y
+      var tmp = 0;
+      if (this.getWidth() > this.getHeight()) {
+        tmp = this.getHeight();
+      } else {
+        tmp = this.getWidth();
+      }
+      this.getGameboard().setSize(tmp - 10, // width
+      tmp - 10);
+
+      // height
+      this.initGameboardTiles();
+
+      // Update the gameboard to set the gameboard element positions
+      this.getGameboard().update();
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'initGameboardTiles',
+    value: function initGameboardTiles() {
+      for (var i = 0; i < 9; i++) {
+        for (var j = 0; j < 9; j++) {
+          var tmpTile = new GameboardTile(j, i);
+          // Add tile to the view
+          this.addElement(tmpTile.getElement());
+          // Add tile to the gameboard, so the gameboard can handle its position
+          this.getGameboard().addTile(tmpTile);
+        }
+      }
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'initSelectionTiles',
+    value: function initSelectionTiles() {
+      this.selectionTiles = [];
+      for (var i = 0; i < 9; i++) {
+        //
+        var tmpTile = new SelectionTile();
+        this.addElement(tmpTile.getElement());
+        //
+        var sPadding = 5;
+        var w = this.getWidth() - sPadding * 2;
+        var tileSize = (w - sPadding * 8) / 9;
+        //
+        tmpTile.setPosition(sPadding + i * sPadding + i * tileSize, this.getGameboard().getY() + this.getGameboard().getHeight() + tileSize + 10);
+        tmpTile.setSize(tileSize, tileSize);
+        //
+        tmpTile.setValue(i + 1);
+        //
+        tmpTile.update();
+        //
+        this.getSelectionTiles().push(tmpTile);
+      }
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'initEraseTileButton',
+    value: function initEraseTileButton() {
+      this.eraseTileButton = new EraseTileButton();
+      //
+      this.addElement(this.getEraseTileButton().getElement());
+      //
+      this.eraseTileButton.setPosition(this.getSelectionTiles()[8].getX(), this.getGameboard().getY() + this.getGameboard().getWidth() + 5);
+      //
+      this.eraseTileButton.setSize(this.getSelectionTiles()[0].getWidth(), this.getSelectionTiles()[0].getHeight());
+      // TODO: Remove placeholder value
+      this.getEraseTileButton().setValue('X');
+      //
+      this.getEraseTileButton().update();
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'initNewGameButton',
+    value: function initNewGameButton() {
+      this.newGameButton = new NewGameButton();
+      this.addElement(this.getNewGameButton().getElement());
+      this.getNewGameButton().setValue('Reset');
+      this.getNewGameButton().setSize(90, 30);
+      this.getNewGameButton().setPosition(this.getWidth() - this.getNewGameButton().getWidth() - 5, 5);
+      this.getNewGameButton().update();
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'initTopTitle',
+    value: function initTopTitle() {
+      this.topTitle = new TopTitle();
+      this.addElement(this.getTopTitle().getElement());
+      this.getTopTitle().setValue('MB Sudoku');
+      this.getTopTitle().setSize(130, 30);
+      this.getTopTitle().setPosition(5, 5);
+      this.getTopTitle().update();
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'getTopTitle',
+    value: function getTopTitle() {
+      return this.topTitle;
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'initClock',
+    value: function initClock() {
+      this.clock = new Clock();
+      this.addElement(this.getClock().getElement());
+      this.getClock().setValue('00:00:00');
+      this.getClock().setSize(130, 30);
+      this.getClock().setPosition(this.getTopTitle().getX() + this.getTopTitle().getWidth() + 5, 5);
+      this.getClock().update();
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'getClock',
+    value: function getClock() {
+      return this.clock;
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'getNewGameButton',
+    value: function getNewGameButton() {
+      return this.newGameButton;
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'getEraseTileButton',
+    value: function getEraseTileButton() {
+      return this.eraseTileButton;
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'getSelectionTiles',
+    value: function getSelectionTiles() {
+      return this.selectionTiles;
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'getGameboard',
+    value: function getGameboard() {
+      return this.gameboard;
+    }
+  }]);
+
+  return GameView;
+}(View);
+},{"../../debug":3,"../view":16,"./elements/clock":6,"./elements/erase-tile-button":7,"./elements/gameboard":9,"./elements/gameboard-tile":8,"./elements/new-game-button":10,"./elements/selection-tile":11,"./elements/top-title":12}],14:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Debug = require('../../debug');
+var ViewController = require('../view-controller');
+var GameView = require('./game-view');
+var QQWING = require('../../libs/qqwing-1.3.4/qqwing-1.3.4');
+
+var DEBUG = new Debug('Game');
+
+module.exports = function (_ViewController) {
+  _inherits(Game, _ViewController);
+
+  function Game() {
+    _classCallCheck(this, Game);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Game).call(this, new GameView()));
+
+    DEBUG.log('Loading.');
+
+    _this.qqwing = new QQWING();
+
+    // Selected tile will be highlighted. When a selection tile is pressed it
+    // will attempt to place that value on the selected tile.
+    _this.selectedTile = null;
+    _this.randomlySetSelectedTile();
+
+    //
+    _this.initGamboardTileEvents();
+
+    //
+    _this.initSelectionTileEvents();
+
+    //
+    _this.initEraseTileButtonEvents();
+
+    //
+    _this.initNewGameButtonEvents();
+
+    //
+    _this.loadGame();
+    _this.startTimer();
+    document.addEventListener("pause", function (e) {
+      _this.stopTimer();
+    }, false);
+
+    document.addEventListener("resume", function (e) {
+      _this.startTimer();
+    }, false);
+    return _this;
+  }
+
+  /*
+   *
+   */
+
+  _createClass(Game, [{
+    key: 'initGamboardTileEvents',
+    value: function initGamboardTileEvents() {
+      var _this2 = this;
+
+      var tmpTiles = this.getView().getGameboard().getTiles();
+
+      var _loop = function _loop(i) {
+        //
+        tmpTiles[i].getElement().addEventListener(TOUCH_START_EVENT, function () {
+          _this2.setSelectedTile(i);
+        });
+        //
+        tmpTiles[i].setOnValueChangeEvent(function () {
+          if (tmpTiles[i].getTileId() === _this2.getSelectedTile().getTileId()) {
+            _this2.checkTilesForSameAsSelectedValue();
+            _this2.checkTilesForConflicts();
+            _this2.getView().getGameboard().updateTileStyles();
+          }
+          _this2.saveGame();
+        });
+      };
+
+      for (var i = 0; i < tmpTiles.length; i++) {
+        _loop(i);
+      }
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'initSelectionTileEvents',
+    value: function initSelectionTileEvents() {
+      var _this3 = this;
+
+      var tmpSelectionTiles = this.getView().getSelectionTiles();
+
+      var _loop2 = function _loop2(i) {
+        tmpSelectionTiles[i].getElement().addEventListener(TOUCH_START_EVENT, function () {
+          _this3.setSelectedTileValue(tmpSelectionTiles[i].getValue());
+          // Check if this value is done
+          _this3.checkIfSelectionTileIsDone(tmpSelectionTiles[i]);
+          _this3.saveGame();
+        });
+      };
+
+      for (var i = 0; i < tmpSelectionTiles.length; i++) {
+        _loop2(i);
+      }
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'initEraseTileButtonEvents',
+    value: function initEraseTileButtonEvents() {
+      var _this4 = this;
+
+      this.getView().getEraseTileButton().getElement().addEventListener(TOUCH_START_EVENT, function () {
+        if (_this4.getSelectedTile().isOriginal() === false) {
+          var valueBefore = _this4.getSelectedTile().getValue();
+          _this4.getSelectedTile().setValue('0');
+          _this4.checkTilesForSameAsSelectedValue();
+          _this4.checkTilesForConflicts();
+          _this4.getView().getGameboard().updateTileStyles();
+          // Check of the selection tiles are done.
+          // By unsetting a tile it could make a tile available again
+          var tmpSelectionTiles = _this4.getView().getSelectionTiles();
+          for (var i = 0; i < tmpSelectionTiles.length; i++) {
+            if (tmpSelectionTiles[i].getValue() === valueBefore) {
+              _this4.checkIfSelectionTileIsDone(tmpSelectionTiles[i]);
+              i = tmpSelectionTiles.length + 1;
+            }
+          }
+        }
+        _this4.saveGame();
+      });
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'initNewGameButtonEvents',
+    value: function initNewGameButtonEvents() {
+      var _this5 = this;
+
+      this.getView().getNewGameButton().getElement().addEventListener(TOUCH_START_EVENT, function () {
+        _this5.resetGame();
+      });
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'checkIfSelectionTileIsDone',
+    value: function checkIfSelectionTileIsDone(selectionTile) {
+      var tmpGameboardTiles = this.getView().getGameboard().getTiles();
+      var count = 0;
+      for (var i = 0; i < tmpGameboardTiles.length; i++) {
+        if (tmpGameboardTiles[i].getValue() === selectionTile.getValue()) {
+          count++;
+        }
+      }
+      DEBUG.log(count);
+      if (count >= 9) {
+        selectionTile.setDone(true);
+        selectionTile.update();
+      } else {
+        selectionTile.setDone(false);
+        selectionTile.update();
+      }
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'getSelectedTile',
+    value: function getSelectedTile() {
+      return this.selectedTile;
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'setSelectedTile',
+    value: function setSelectedTile(tile_i) {
+      // If a tile is already selected unselect it
+      if (this.getSelectedTile() !== undefined && this.getSelectedTile() !== null) {
+        // Check if the tile is already selected
+        if (this.getView().getGameboard().getTiles()[tile_i].getTileId() === this.getSelectedTile().getTileId()) {
+          // If the tile being selected is already selected then do nothing.
+          return;
+        }
+        this.getSelectedTile().setSelected(false);
+      }
+
+      // Set the tile to selected
+      this.selectedTile = this.getView().getGameboard().getTiles()[tile_i];
+      this.getSelectedTile().setSelected(true);
+
+      // Update the gameboard tiles based on the newly selected tile
+      this.checkTilesForSameAsSelectedValue();
+      this.getView().getGameboard().updateTileStyles();
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'setSelectedTileValue',
+    value: function setSelectedTileValue(v) {
+      //
+      if (this.getSelectedTile().isOriginal() === false && this.getSelectedTile().isEmpty() === true) {
+        //
+        this.getSelectedTile().setValue(v);
+        this.saveGame();
+      }
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'randomlySetSelectedTile',
+    value: function randomlySetSelectedTile() {
+      this.setSelectedTile(Math.floor(Math.random() * this.getView().getGameboard().getTiles().length));
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'resetGame',
+    value: function resetGame() {
+      this.qqwing.generatePuzzle();
+      this.qqwing.setPrintStyle(QQWING.PrintStyle.ONE_LINE);
+      var t = this.qqwing.getSolutionString();
+      for (var i = 0; i < this.getView().getGameboard().getTiles().length; i++) {
+        if (t[i] === '.') {
+          this.getView().getGameboard().getTiles()[i].setValue('0');
+          this.getView().getGameboard().getTiles()[i].setIsOriginal(false);
+        } else {
+          this.getView().getGameboard().getTiles()[i].setValue(t[i]);
+          this.getView().getGameboard().getTiles()[i].setIsOriginal(true);
+        }
+      }
+      this.checkTilesForSameAsSelectedValue();
+      this.checkTilesForConflicts();
+      this.getView().getGameboard().update();
+      window.localStorage.setItem("timeElapsed", JSON.stringify(0));
+      this.saveGame();
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'checkTilesForSameAsSelectedValue',
+    value: function checkTilesForSameAsSelectedValue() {
+      var tmpTiles = this.getView().getGameboard().getTiles();
+      for (var i = 0; i < tmpTiles.length; i++) {
+        if (this.getSelectedTile().getTileId() !== tmpTiles[i].getTileId() && tmpTiles[i].getValue() === this.getSelectedTile().getValue()) {
+          //
+          tmpTiles[i].setIsSameValue(true);
+        } else {
+          //
+          tmpTiles[i].setIsSameValue(false);
+        }
+      }
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'checkTilesForConflicts',
+    value: function checkTilesForConflicts() {
+      // TODO: Fix this horrible performance mess of a method
+      var tmpTiles = this.getView().getGameboard().getTiles();
+      // Clear the conflicts
+      for (var i = 0; i < tmpTiles.length; i++) {
+        tmpTiles[i].setHasConflict(false);
+      }
+      // Check the tiles in the same block
+      var blockTilesByValue = {
+        'A': [[], [], [], [], [], [], [], [], []], // Top Left block
+        'B': [[], [], [], [], [], [], [], [], []], // Top middle block
+        'C': [[], [], [], [], [], [], [], [], []], // Top might Block
+        'D': [[], [], [], [], [], [], [], [], []], // Middle left block
+        'E': [[], [], [], [], [], [], [], [], []], // Middle middle block
+        'F': [[], [], [], [], [], [], [], [], []], // Middle right block
+        'G': [[], [], [], [], [], [], [], [], []], // Bottom left block
+        'H': [[], [], [], [], [], [], [], [], []], // Bottom middle block
+        'I': [[], [], [], [], [], [], [], [], []] // Bottom right block
+      };
+      var blockChar = null;
+      var blockNum = null;
+      var tileValue = null;
+      for (var i = 0; i < tmpTiles.length; i++) {
+        if (tmpTiles[i].isEmpty() === false) {
+          blockChar = tmpTiles[i].getTileId().charAt(0);
+          tileValue = parseInt(tmpTiles[i].getValue());
+          blockTilesByValue[blockChar][tileValue - 1].push(tmpTiles[i]);
+        }
+      }
+      //
+      var blockChars = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
+      for (var i = 0; i < blockChars.length; i++) {
+        for (var j = 0; j < blockTilesByValue[blockChars[i]].length; j++) {
+          if (blockTilesByValue[blockChars[i]][j].length > 1) {
+            for (var k = 0; k < blockTilesByValue[blockChars[i]][j].length; k++) {
+              blockTilesByValue[blockChars[i]][j][k].setHasConflict(true);
+            }
+          }
+        }
+      }
+      // Check for row conflicts
+      for (var i = 0; i < tmpTiles.length; i++) {
+        if (tmpTiles[i].isEmpty() === false) {
+          blockChar = tmpTiles[i].getTileId().charAt(0);
+          blockNum = parseInt(tmpTiles[i].getTileId().charAt(1));
+          // Row 1
+          this.checkLineForConflict(tmpTiles, i, 'A', 'B', 'C', 1, 2, 3);
+          // Row 2
+          this.checkLineForConflict(tmpTiles, i, 'A', 'B', 'C', 4, 5, 6);
+          // Row 3
+          this.checkLineForConflict(tmpTiles, i, 'A', 'B', 'C', 7, 8, 9);
+          // Row 4
+          this.checkLineForConflict(tmpTiles, i, 'D', 'E', 'F', 1, 2, 3);
+          // Row 5
+          this.checkLineForConflict(tmpTiles, i, 'D', 'E', 'F', 4, 5, 6);
+          // Row 6
+          this.checkLineForConflict(tmpTiles, i, 'D', 'E', 'F', 7, 8, 9);
+          // Row 7
+          this.checkLineForConflict(tmpTiles, i, 'G', 'H', 'I', 1, 2, 3);
+          // Row 8
+          this.checkLineForConflict(tmpTiles, i, 'G', 'H', 'I', 4, 5, 6);
+          // Row 9
+          this.checkLineForConflict(tmpTiles, i, 'G', 'H', 'I', 7, 8, 9);
+        }
+      }
+      // Check for column conflicts
+      for (var i = 0; i < tmpTiles.length; i++) {
+        if (tmpTiles[i].isEmpty() === false) {
+          blockChar = tmpTiles[i].getTileId().charAt(0);
+          blockNum = parseInt(tmpTiles[i].getTileId().charAt(1));
+          // Row 1
+          this.checkLineForConflict(tmpTiles, i, 'A', 'D', 'G', 1, 4, 7);
+          // Row 2
+          this.checkLineForConflict(tmpTiles, i, 'A', 'D', 'G', 2, 5, 8);
+          // Row 3
+          this.checkLineForConflict(tmpTiles, i, 'A', 'D', 'G', 3, 6, 9);
+          // Row 4
+          this.checkLineForConflict(tmpTiles, i, 'B', 'E', 'H', 1, 4, 7);
+          // Row 5
+          this.checkLineForConflict(tmpTiles, i, 'B', 'E', 'H', 2, 5, 8);
+          // Row 6
+          this.checkLineForConflict(tmpTiles, i, 'B', 'E', 'H', 3, 6, 9);
+          // Row 7
+          this.checkLineForConflict(tmpTiles, i, 'C', 'F', 'I', 1, 4, 7);
+          // Row 8
+          this.checkLineForConflict(tmpTiles, i, 'C', 'F', 'I', 2, 5, 8);
+          // Row 9
+          this.checkLineForConflict(tmpTiles, i, 'C', 'F', 'I', 3, 6, 9);
+        }
+      }
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'checkLineForConflict',
+    value: function checkLineForConflict(tmpTiles, i, char1, char2, char3, num1, num2, num3) {
+      var blockChar = tmpTiles[i].getTileId().charAt(0);
+      var blockNum = parseInt(tmpTiles[i].getTileId().charAt(1));
+      if (blockChar === char1 || blockChar === char2 || blockChar === char3) {
+        if (blockNum === num1 || blockNum === num2 || blockNum === num3) {
+          for (var j = 0; j < tmpTiles.length; j++) {
+            var blockChar2 = tmpTiles[j].getTileId().charAt(0);
+            var blockNum2 = parseInt(tmpTiles[j].getTileId().charAt(1));
+            var tileValue2 = parseInt(tmpTiles[j].getValue());
+            if (blockChar2 === char1 || blockChar2 === char2 || blockChar2 === char3) {
+              if (blockNum2 === num1 || blockNum2 === num2 || blockNum2 === num3) {
+                if (tmpTiles[i].getTileId() !== tmpTiles[j].getTileId() && tmpTiles[i].getValue() === tmpTiles[j].getValue()) {
+                  tmpTiles[i].setHasConflict(true);
+                  tmpTiles[j].setHasConflict(true);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'gameboardToJSONString',
+    value: function gameboardToJSONString() {
+      var json = [];
+      var tmpTiles = this.getView().getGameboard().getTiles();
+      for (var i = 0; i < tmpTiles.length; i++) {
+        var item = {
+          value: tmpTiles[i].getValue(),
+          original: tmpTiles[i].isOriginal()
+        };
+        json.push(item);
+      }
+      return JSON.stringify(json);
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'loadGame',
+    value: function loadGame() {
+      // this.resetGame();
+      // Check if version changed
+      var storedVersion = JSON.parse(window.localStorage.getItem('version'));
+      if (storedVersion) {
+        if (storedVersion !== VERSION) {
+          this.resetGame();
+          return;
+        }
+      } else {
+        window.localStorage.setItem("version", VERSION);
+      }
+      // Check if there is a stored gameboard
+      var storedGameboard = JSON.parse(window.localStorage.getItem('gameboard'));
+      if (!storedGameboard) {
+        this.resetGame();
+        return;
+      } else {
+        // console.log(storedGameboard);
+        for (var i = 0; i < this.getView().getGameboard().getTiles().length; i++) {
+          this.getView().getGameboard().getTiles()[i].setValue(storedGameboard[i].value);
+          this.getView().getGameboard().getTiles()[i].setIsOriginal(storedGameboard[i].original);
+        }
+        this.checkTilesForSameAsSelectedValue();
+        this.checkTilesForConflicts();
+        this.getView().getGameboard().update();
+        var tmpSelectionTiles = this.getView().getSelectionTiles();
+        for (var i = 0; i < tmpSelectionTiles.length; i++) {
+          this.checkIfSelectionTileIsDone(tmpSelectionTiles[i]);
+        }
+      }
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'saveGame',
+    value: function saveGame() {
+      window.localStorage.setItem("gameboard", this.gameboardToJSONString());
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'startTimer',
+    value: function startTimer() {
+      var _this6 = this;
+
+      this.startTime = Date.now();
+      this.timerInterval = setInterval(function () {
+        _this6.timerIntervalFunc();
+      }, 1000);
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'stopTimer',
+    value: function stopTimer() {
+      clearInterval(this.timerInterval);
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'timerIntervalFunc',
+    value: function timerIntervalFunc() {
+      var endTime = Date.now();
+      var elapsed = endTime - this.startTime;
+      this.startTime = endTime;
+
+      var tmpTimeElapsed = JSON.parse(window.localStorage.getItem("timeElapsed"));
+      if (tmpTimeElapsed) {
+        elapsed = elapsed + tmpTimeElapsed;
+      }
+      DEBUG.log(elapsed);
+      window.localStorage.setItem("timeElapsed", JSON.stringify(elapsed));
+      this.getView().getClock().setTime(elapsed);
+    }
+  }]);
+
+  return Game;
+}(ViewController);
+},{"../../debug":3,"../../libs/qqwing-1.3.4/qqwing-1.3.4":4,"../view-controller":15,"./game-view":13}],15:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Debug = require('../debug');
+
+var DEBUG = new Debug('ViewController');
+
+//------------------------------------------------------------------------------
+// Handles the actions of a view.
+//------------------------------------------------------------------------------
+module.exports = function () {
+  function ViewController(view) {
+    _classCallCheck(this, ViewController);
+
+    this.view = view;
+  }
+
+  _createClass(ViewController, [{
+    key: 'getView',
+    value: function getView() {
+      return this.view;
+    }
+  }]);
+
+  return ViewController;
+}();
+},{"../debug":3}],16:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Debug = require('../debug');
+
+var DEBUG = new Debug('View');
+
+//------------------------------------------------------------------------------
+// CSS Classes used by class View.
+//------------------------------------------------------------------------------
 var CSS_CLASSES = {
   VIEW: 'view',
   HIDDEN: 'hidden'
 };
 
+//------------------------------------------------------------------------------
+// A View takes up the entire screen.
+// Only one view is visible at a time.
+// Anything seen has to be added to a View.
+//------------------------------------------------------------------------------
 module.exports = function () {
-  function View(viewName) {
+  function View(viewId) {
     _classCallCheck(this, View);
 
-    this.viewElement = document.createElement('div');
-    this.getViewElement().classList.add(CSS_CLASSES.VIEW);
-    this.getViewElement().classList.add(CSS_CLASSES.HIDDEN);
+    DEBUG.log('Loading: ' + viewId);
+    this.setViewId(viewId);
 
-    this.setViewName(viewName);
+    this.initElement();
+    this.initBounds();
+
+    this.updateElement();
   }
 
   _createClass(View, [{
-    key: 'setViewName',
-    value: function setViewName(name) {
-      this.viewName = name;
+    key: 'initBounds',
+    value: function initBounds() {
+      this.bounds = {
+        x: 0,
+        y: 0,
+        w: window.innerWidth,
+        h: window.innerHeight
+      };
     }
   }, {
-    key: 'getViewName',
-    value: function getViewName() {
-      return this.viewName;
+    key: 'getBounds',
+    value: function getBounds() {
+      return this.bounds;
     }
   }, {
-    key: 'getViewElement',
-    value: function getViewElement() {
-      return this.viewElement;
+    key: 'getX',
+    value: function getX() {
+      return this.getBounds().x;
+    }
+  }, {
+    key: 'getY',
+    value: function getY() {
+      return this.getBounds().y;
+    }
+  }, {
+    key: 'getWidth',
+    value: function getWidth() {
+      return this.getBounds().w;
+    }
+  }, {
+    key: 'getHeight',
+    value: function getHeight() {
+      return this.getBounds().h;
+    }
+  }, {
+    key: 'setViewId',
+    value: function setViewId(id) {
+      this.viewId = id;
+    }
+  }, {
+    key: 'getViewId',
+    value: function getViewId() {
+      return this.viewId;
+    }
+  }, {
+    key: 'initElement',
+    value: function initElement() {
+      this.element = document.createElement('div');
+      this.getElement().classList.add(CSS_CLASSES.VIEW);
+      this.getElement().classList.add(CSS_CLASSES.HIDDEN);
+    }
+  }, {
+    key: 'getElement',
+    value: function getElement() {
+      return this.element;
+    }
+  }, {
+    key: 'updateElement',
+    value: function updateElement() {
+      var style = 'left:' + this.getX() + 'px;' + 'top:' + this.getY() + 'px;' + 'width:' + this.getWidth() + 'px;' + 'height:' + this.getHeight() + 'px;';
+      this.getElement().setAttribute('style', style);
     }
   }, {
     key: 'addElement',
     value: function addElement(elem) {
-      this.getViewElement().appendChild(elem);
+      this.getElement().appendChild(elem);
+    }
+  }, {
+    key: 'addClass',
+    value: function addClass(className) {
+      this.getElement().classList.add(className);
     }
   }, {
     key: 'show',
     value: function show() {
-      this.getViewElement().classList.remove(CSS_CLASSES.HIDDEN);
+      this.getElement().classList.remove(CSS_CLASSES.HIDDEN);
     }
   }, {
     key: 'hide',
     value: function hide() {
-      this.getViewElement().classList.add(CSS_CLASSES.HIDDEN);
+      this.getElement().classList.add(CSS_CLASSES.HIDDEN);
     }
   }]);
 
   return View;
 }();
-},{}]},{},[2]);
+},{"../debug":3}]},{},[2]);
