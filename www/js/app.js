@@ -27,8 +27,8 @@ global.VIEW_ID = {
   GAME: 'GAME_VIEW'
 };
 
-global.TOUCH_START_EVENT = 'mousedown';
-// global.TOUCH_START_EVENT = 'touchstart';
+// global.TOUCH_START_EVENT = 'mousedown';
+global.TOUCH_START_EVENT = 'touchstart';
 
 global.VERSION = '0';
 
