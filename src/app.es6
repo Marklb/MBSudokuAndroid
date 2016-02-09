@@ -1,7 +1,6 @@
 let Debug = require('./debug');
-// let MainMenu = require('./main-menu');
-// let Game = require('./game');
 let Game = require('./views/game/game');
+let MainMenu = require('./views/main-menu/main-menu');
 // var attachFastClick = require('./libs/fastclick');
 
 let DEBUG = new Debug('App');
@@ -10,11 +9,17 @@ let DEBUG = new Debug('App');
 // TODO: Undo
 // TODO: Hint
 // TODO: Stats collector
+// TODO: Game scoring
 // TODO: Difficulty selector
 // TODO: New game conformation
 // TODO: Win screen
 // IDEA: Victory picture
 // TODO: Error notification
+// IDEA: Multiple games available, this way you can start a new game and come
+//       back if you are stuck. The indivitual games should keep track of
+//       their own win streak.
+// TODO: On view loaded function
+// TODO: On view unloaded function
 
 
 global.VIEW_ID = {
@@ -33,23 +38,30 @@ class App {
 
     this.containerElem = document.getElementById('app-container');
 
+    // Initialize MainMenu
+    this.mainMenuView = new MainMenu();
+    this.addView(this.mainMenuView.getView());
 
-    // this.mainMenu = new MainMenu();
-    // this.addView(this.mainMenu);
-    //
-    // this.game = new Game();
-    // this.addView(this.game);
-    //
-    //
-    //
-    // this.showView(this.mainMenu.getViewName());
+    // Initialize Settings
+    // TODO: Implement
 
+    // Initialize Stats
+    // TODO: Implement
 
+    // Initialize GameSelection
+    // TODO: Implement
+
+    // Initialize Game
     this.gameView = new Game();
     this.addView(this.gameView.getView());
 
+    // Initialize GameOver
+    // TODO: Implement
 
-    this.showView(VIEW_ID.GAME);
+
+
+    // this.showView(VIEW_ID.GAME);
+    this.showView(VIEW_ID.MAIN_MENU);
 
   }
 

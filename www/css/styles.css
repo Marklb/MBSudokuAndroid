@@ -87,9 +87,46 @@
   overflow: hidden;
   box-sizing: border-box; }
 
+.main-menu-title {
+  display: block;
+  box-sizing: border-box;
+  border: 2px solid #0096be;
+  background-color: black;
+  color: #0096be;
+  justify-content: center;
+  /* align horizontal */
+  align-items: center;
+  /* align vertical */
+  text-align: center;
+  cursor: default; }
+
+.main-menu-button {
+  display: block;
+  box-sizing: border-box;
+  border: 2px solid #0096be;
+  background-color: black;
+  color: #0096be;
+  justify-content: center;
+  /* align horizontal */
+  align-items: center;
+  /* align vertical */
+  text-align: center;
+  cursor: default; }
+
+.main-menu-view {
+  display: block;
+  background-color: black;
+  overflow: hidden;
+  box-sizing: border-box; }
+
 .view {
   position: absolute;
   overflow: hidden; }
+
+.view.hidden {
+  height: 0 !important;
+  width: 0 !important;
+  border: 0 !important; }
 
 * {
   -webkit-tap-highlight-color: transparent;

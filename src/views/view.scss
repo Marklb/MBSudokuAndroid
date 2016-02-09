@@ -1,10 +1,13 @@
 @import "./custom-element.scss";
 @import "./game/game-view.scss";
+@import "./main-menu/main-menu-view.scss";
 
 .view {
-    position: absolute;
-    overflow: hidden;
+  position: absolute;
+  overflow: hidden;
 }
 .view.hidden {
-
+  height: 0 !important;
+  width: 0 !important;
+  border: 0 !important;
 }
