@@ -100,9 +100,8 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Debug = require('./debug');
-// let MainMenu = require('./main-menu');
-// let Game = require('./game');
 var Game = require('./views/game/game');
+var MainMenu = require('./views/main-menu/main-menu');
 // var attachFastClick = require('./libs/fastclick');
 
 var DEBUG = new Debug('App');
@@ -111,11 +110,17 @@ var DEBUG = new Debug('App');
 // TODO: Undo
 // TODO: Hint
 // TODO: Stats collector
+// TODO: Game scoring
 // TODO: Difficulty selector
 // TODO: New game conformation
 // TODO: Win screen
 // IDEA: Victory picture
 // TODO: Error notification
+// IDEA: Multiple games available, this way you can start a new game and come
+//       back if you are stuck. The indivitual games should keep track of
+//       their own win streak.
+// TODO: On view loaded function
+// TODO: On view unloaded function
 
 global.VIEW_ID = {
   MAIN_MENU: 'MAIN_MENU_VIEW',
@@ -135,20 +140,28 @@ var App = function () {
 
     this.containerElem = document.getElementById('app-container');
 
-    // this.mainMenu = new MainMenu();
-    // this.addView(this.mainMenu);
-    //
-    // this.game = new Game();
-    // this.addView(this.game);
-    //
-    //
-    //
-    // this.showView(this.mainMenu.getViewName());
+    // Initialize MainMenu
+    this.mainMenuView = new MainMenu();
+    this.addView(this.mainMenuView.getView());
 
+    // Initialize Settings
+    // TODO: Implement
+
+    // Initialize Stats
+    // TODO: Implement
+
+    // Initialize GameSelection
+    // TODO: Implement
+
+    // Initialize Game
     this.gameView = new Game();
     this.addView(this.gameView.getView());
 
-    this.showView(VIEW_ID.GAME);
+    // Initialize GameOver
+    // TODO: Implement
+
+    // this.showView(VIEW_ID.GAME);
+    this.showView(VIEW_ID.MAIN_MENU);
   }
 
   _createClass(App, [{
@@ -192,7 +205,7 @@ global.app = new App();
 
 // module.exports = new App();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./debug":3,"./views/game/game":14}],3:[function(require,module,exports){
+},{"./debug":3,"./views/game/game":14,"./views/main-menu/main-menu":18}],3:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -3251,7 +3264,7 @@ module.exports = function (_View) {
 
   return GameView;
 }(View);
-},{"../../debug":3,"../view":16,"./elements/clock":6,"./elements/erase-tile-button":7,"./elements/gameboard":9,"./elements/gameboard-tile":8,"./elements/new-game-button":10,"./elements/selection-tile":11,"./elements/top-title":12}],14:[function(require,module,exports){
+},{"../../debug":3,"../view":20,"./elements/clock":6,"./elements/erase-tile-button":7,"./elements/gameboard":9,"./elements/gameboard-tile":8,"./elements/new-game-button":10,"./elements/selection-tile":11,"./elements/top-title":12}],14:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -3300,14 +3313,10 @@ module.exports = function (_ViewController) {
 
     //
     _this.loadGame();
-    _this.startTimer();
-    document.addEventListener("pause", function (e) {
-      _this.stopTimer();
-    }, false);
 
-    document.addEventListener("resume", function (e) {
-      _this.startTimer();
-    }, false);
+    //
+    _this.initTimer();
+
     return _this;
   }
 
@@ -3417,6 +3426,39 @@ module.exports = function (_ViewController) {
      */
 
   }, {
+    key: 'initTimer',
+    value: function initTimer() {
+      var _this6 = this;
+
+      this.startTimer();
+
+      document.addEventListener("pause", function (e) {
+        _this6.stopTimer();
+      }, false);
+
+      document.addEventListener("resume", function (e) {
+        _this6.startTimer();
+      }, false);
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'checkIfSelectionTilesAreDone',
+    value: function checkIfSelectionTilesAreDone() {
+      var tmpSelectionTiles = this.getView().getSelectionTiles();
+      for (var i = 0; i < tmpSelectionTiles.length; i++) {
+        this.checkIfSelectionTileIsDone(tmpSelectionTiles[i]);
+      }
+    }
+
+    /*
+     *
+     */
+
+  }, {
     key: 'checkIfSelectionTileIsDone',
     value: function checkIfSelectionTileIsDone(selectionTile) {
       var tmpGameboardTiles = this.getView().getGameboard().getTiles();
@@ -3479,13 +3521,39 @@ module.exports = function (_ViewController) {
   }, {
     key: 'setSelectedTileValue',
     value: function setSelectedTileValue(v) {
+      var _this7 = this;
+
       //
       if (this.getSelectedTile().isOriginal() === false && this.getSelectedTile().isEmpty() === true) {
-        //
-        this.getSelectedTile().setValue(v);
-        this.saveGame();
+        (function () {
+          //
+          _this7.getSelectedTile().setValue(v);
+          // Temporary way to handle spin on set
+          _this7.getSelectedTile().addClass('rotate');
+          var t = setInterval(function () {
+            _this7.getSelectedTile().removeClass('rotate');
+            _this7.getSelectedTile().addClass('unrotate');
+            _this7.getSelectedTile().removeClass('unrotate');
+            clearInterval(t);
+          }, 2000);
+          _this7.saveGame();
+        })();
       }
     }
+
+    // startTimer(){
+    //   this.startTime = Date.now();
+    //   this.timerInterval = setInterval(() => {
+    //     this.timerIntervalFunc();
+    //   },1000);
+    // }
+    //
+    // /*
+    //  *
+    //  */
+    // stopTimer(){
+    //   clearInterval(this.timerInterval);
+    // }
 
     /*
      *
@@ -3519,43 +3587,64 @@ module.exports = function (_ViewController) {
       this.checkTilesForSameAsSelectedValue();
       this.checkTilesForConflicts();
       this.getView().getGameboard().update();
+      this.checkIfSelectionTilesAreDone();
       window.localStorage.setItem("timeElapsed", JSON.stringify(0));
       this.saveGame();
     }
 
     /*
-     *
+     * Compares the currently selected tile against each other tile on the
+     * gameboard. Each tile that has the same value as the selected tile will
+     * have its same value state set.
+     * Used to highlight the other tiles with the same value as the selected tile.
      */
 
   }, {
     key: 'checkTilesForSameAsSelectedValue',
     value: function checkTilesForSameAsSelectedValue() {
+      // Get each tile on the gameboard.
       var tmpTiles = this.getView().getGameboard().getTiles();
+      // Loop through each tile on the gameboard.
       for (var i = 0; i < tmpTiles.length; i++) {
+        // If the tile is not itself and it has the same value, then its same
+        // value state will be set.
         if (this.getSelectedTile().getTileId() !== tmpTiles[i].getTileId() && tmpTiles[i].getValue() === this.getSelectedTile().getValue()) {
-          //
+          // The tile is not the selected tile and it has the same value.
           tmpTiles[i].setIsSameValue(true);
         } else {
-          //
+          // The tile is either the selected tile or it doesn't have the same
+          // value as the selected tile.
           tmpTiles[i].setIsSameValue(false);
         }
       }
     }
 
     /*
-     *
+     * Checks each block for multiple tiles of the same value.
+     * Checks each row for multiple tiles of the same value on the row.
+     * Checks each column for multiple tiles of the same value on the column.
      */
 
   }, {
     key: 'checkTilesForConflicts',
     value: function checkTilesForConflicts() {
-      // TODO: Fix this horrible performance mess of a method
+      // TODO: Fix this horrible mess of a method
+      // Get all the tiles on the gameboard.
       var tmpTiles = this.getView().getGameboard().getTiles();
-      // Clear the conflicts
+      // Clear the conflicts. This method will set all conflicts, but not remove
+      // previous conflicts, so for now it is easiest to just rest them all to
+      // have no conflicts.
       for (var i = 0; i < tmpTiles.length; i++) {
         tmpTiles[i].setHasConflict(false);
       }
-      // Check the tiles in the same block
+
+      // Check the tiles in the same block.
+      // An empty array for each possible value 1-9 is initialized for each block.
+      // Each tile in the blocks will be added to its value array for its block.
+      // The index of the array that the tile will be added to is its value-1.
+      // If an array ends up having more than 1 tile, then that means there is
+      // more than one of the same value in the block. Each tile in that array
+      // will have its conflict state set.
       var blockTilesByValue = {
         'A': [[], [], [], [], [], [], [], [], []], // Top Left block
         'B': [[], [], [], [], [], [], [], [], []], // Top middle block
@@ -3571,28 +3660,42 @@ module.exports = function (_ViewController) {
       var blockNum = null;
       var tileValue = null;
       for (var i = 0; i < tmpTiles.length; i++) {
+        // If the tile has no value set, then there is no point in checking it
+        // for a conflict
         if (tmpTiles[i].isEmpty() === false) {
           blockChar = tmpTiles[i].getTileId().charAt(0);
           tileValue = parseInt(tmpTiles[i].getValue());
           blockTilesByValue[blockChar][tileValue - 1].push(tmpTiles[i]);
         }
       }
-      //
+      // Since there are not many blocks I just used this array to access the
+      // the array for each block instead of iterating all the values for testing
+      // simplicity. I may remove this and just iterate them if I decide to keep
+      // this algorithm for testing the blocks.
       var blockChars = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
       for (var i = 0; i < blockChars.length; i++) {
+        // Loop through each value array in the block value arrays.
         for (var j = 0; j < blockTilesByValue[blockChars[i]].length; j++) {
+          // Check if there is more than one of the same value tile
           if (blockTilesByValue[blockChars[i]][j].length > 1) {
+            // There is more than one tile of the same value, so loop through
+            // each of these tiles and set their conflict state.
             for (var k = 0; k < blockTilesByValue[blockChars[i]][j].length; k++) {
               blockTilesByValue[blockChars[i]][j][k].setHasConflict(true);
             }
           }
         }
       }
+
       // Check for row conflicts
       for (var i = 0; i < tmpTiles.length; i++) {
+        // Loop through each tile in the gameboard and check the row of each tile
+        // that has a value.
         if (tmpTiles[i].isEmpty() === false) {
-          blockChar = tmpTiles[i].getTileId().charAt(0);
-          blockNum = parseInt(tmpTiles[i].getTileId().charAt(1));
+          // Call the method to check for each row. The method to check the row
+          // will do the check for if the tile is on its row and just return if
+          // the tile is not on its row.
+
           // Row 1
           this.checkLineForConflict(tmpTiles, i, 'A', 'B', 'C', 1, 2, 3);
           // Row 2
@@ -3613,11 +3716,16 @@ module.exports = function (_ViewController) {
           this.checkLineForConflict(tmpTiles, i, 'G', 'H', 'I', 7, 8, 9);
         }
       }
+
       // Check for column conflicts
       for (var i = 0; i < tmpTiles.length; i++) {
+        // Loop through each tile in the gameboard and check the column of each
+        // tile that has a value.
         if (tmpTiles[i].isEmpty() === false) {
-          blockChar = tmpTiles[i].getTileId().charAt(0);
-          blockNum = parseInt(tmpTiles[i].getTileId().charAt(1));
+          // Call the method to check for each column. The method to check the
+          // column will do the check for if the tile is on its column and just
+          // return if the tile is not on its column.
+
           // Row 1
           this.checkLineForConflict(tmpTiles, i, 'A', 'D', 'G', 1, 4, 7);
           // Row 2
@@ -3641,23 +3749,48 @@ module.exports = function (_ViewController) {
     }
 
     /*
+     * Checks to see if there is a tile conflict in a row or column.
      *
+     * tmpTiles: List of tiles on the gameboard.
+     * i: Index of the tile to check for a conflict.
+     * char1-3: Characters representing the blocks to check.
+     * num1-3: Numbers of the tiles in the blocks to check
+     *
+     * Note: To check a tile in the 2nd row of the gameboard.
+     *       The first row contains the block ids:
+     *         A4,A5,A6,B4,B5,B6,C4,C5,C6
+     *       So, to check a tile in this row the char and num args would be:
+     *         char1: 'A', char2: 'B', char3: 'C',
+     *         num1: 4, num2: 5, num3: 6
      */
 
   }, {
     key: 'checkLineForConflict',
     value: function checkLineForConflict(tmpTiles, i, char1, char2, char3, num1, num2, num3) {
+      // Get character and number of the tileId, which represent which tile is
+      // being checked on the gameboard.
       var blockChar = tmpTiles[i].getTileId().charAt(0);
       var blockNum = parseInt(tmpTiles[i].getTileId().charAt(1));
+      // Check if this tile is on the row/column
       if (blockChar === char1 || blockChar === char2 || blockChar === char3) {
         if (blockNum === num1 || blockNum === num2 || blockNum === num3) {
+          // Loop through all the tiles to find another tile in this row/column
           for (var j = 0; j < tmpTiles.length; j++) {
+            // Get the character and number of the tileId
             var blockChar2 = tmpTiles[j].getTileId().charAt(0);
             var blockNum2 = parseInt(tmpTiles[j].getTileId().charAt(1));
-            var tileValue2 = parseInt(tmpTiles[j].getValue());
+            // Check of this tile is on the row/column
             if (blockChar2 === char1 || blockChar2 === char2 || blockChar2 === char3) {
               if (blockNum2 === num1 || blockNum2 === num2 || blockNum2 === num3) {
+                // Get the value of the tile
+                var tileValue2 = parseInt(tmpTiles[j].getValue());
+                // Make sure that the tile we are checking for conflicts for
+                // doesn't try to conflict with itself and if it isn't itself,
+                // check if the value of the other tile in the row/column has
+                // the same value which would cause a conflict
                 if (tmpTiles[i].getTileId() !== tmpTiles[j].getTileId() && tmpTiles[i].getValue() === tmpTiles[j].getValue()) {
+                  // There is a conflict, so set the conflict state to true for
+                  // both of the tiles that are conflicting with each other.
                   tmpTiles[i].setHasConflict(true);
                   tmpTiles[j].setHasConflict(true);
                 }
@@ -3669,32 +3802,37 @@ module.exports = function (_ViewController) {
     }
 
     /*
-     *
+     * Returns a string that contains enough information about the gamebaord to
+     * rebuild it when the game is reloaded.
      */
 
   }, {
     key: 'gameboardToJSONString',
     value: function gameboardToJSONString() {
-      var json = [];
+      var json = []; // This is the object that will get JSON stringified
+      // Get all the tiles on the gameboard
       var tmpTiles = this.getView().getGameboard().getTiles();
+      // For each tile on the gameboard, store the value and whether it is an
+      // original tile, since everything else currently stored on the tiles can
+      // be recalculated once the gameboard has this information.
       for (var i = 0; i < tmpTiles.length; i++) {
         var item = {
           value: tmpTiles[i].getValue(),
           original: tmpTiles[i].isOriginal()
         };
+        // Push this item into the tile list that will be stored
         json.push(item);
       }
       return JSON.stringify(json);
     }
 
     /*
-     *
+     * Loads the game stored in the localstorage or starts a new game.
      */
 
   }, {
     key: 'loadGame',
     value: function loadGame() {
-      // this.resetGame();
       // Check if version changed
       var storedVersion = JSON.parse(window.localStorage.getItem('version'));
       if (storedVersion) {
@@ -3708,21 +3846,23 @@ module.exports = function (_ViewController) {
       // Check if there is a stored gameboard
       var storedGameboard = JSON.parse(window.localStorage.getItem('gameboard'));
       if (!storedGameboard) {
+        // There is not a gameboard saved, so just initialize a new game
         this.resetGame();
         return;
       } else {
-        // console.log(storedGameboard);
+        // There was a stored game
+        // Fill the gameboard with the contents of the saved gameboard
         for (var i = 0; i < this.getView().getGameboard().getTiles().length; i++) {
           this.getView().getGameboard().getTiles()[i].setValue(storedGameboard[i].value);
           this.getView().getGameboard().getTiles()[i].setIsOriginal(storedGameboard[i].original);
         }
+        // Instead of having every thing stored in the localstorage just call all
+        // of the checks that could cause something the in the game to be changed
+        // based on the gameboard.
         this.checkTilesForSameAsSelectedValue();
         this.checkTilesForConflicts();
         this.getView().getGameboard().update();
-        var tmpSelectionTiles = this.getView().getSelectionTiles();
-        for (var i = 0; i < tmpSelectionTiles.length; i++) {
-          this.checkIfSelectionTileIsDone(tmpSelectionTiles[i]);
-        }
+        this.checkIfSelectionTilesAreDone();
       }
     }
 
@@ -3743,11 +3883,11 @@ module.exports = function (_ViewController) {
   }, {
     key: 'startTimer',
     value: function startTimer() {
-      var _this6 = this;
+      var _this8 = this;
 
       this.startTime = Date.now();
       this.timerInterval = setInterval(function () {
-        _this6.timerIntervalFunc();
+        _this8.timerIntervalFunc();
       }, 1000);
     }
 
@@ -3776,7 +3916,7 @@ module.exports = function (_ViewController) {
       if (tmpTimeElapsed) {
         elapsed = elapsed + tmpTimeElapsed;
       }
-      DEBUG.log(elapsed);
+      // DEBUG.log(elapsed);
       window.localStorage.setItem("timeElapsed", JSON.stringify(elapsed));
       this.getView().getClock().setTime(elapsed);
     }
@@ -3784,7 +3924,313 @@ module.exports = function (_ViewController) {
 
   return Game;
 }(ViewController);
-},{"../../debug":3,"../../libs/qqwing-1.3.4/qqwing-1.3.4":4,"../view-controller":15,"./game-view":13}],15:[function(require,module,exports){
+},{"../../debug":3,"../../libs/qqwing-1.3.4/qqwing-1.3.4":4,"../view-controller":19,"./game-view":13}],15:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Debug = require('../../../debug');
+var CustomElement = require('../../custom-element');
+
+var DEBUG = new Debug('MainMenuButton');
+
+var CSS_CLASSES = {
+  MAIN_MENU_BUTTON: 'main-menu-button'
+};
+
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
+module.exports = function (_CustomElement) {
+  _inherits(MainMenuButton, _CustomElement);
+
+  function MainMenuButton(x, y) {
+    _classCallCheck(this, MainMenuButton);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(MainMenuButton).call(this, CSS_CLASSES.MAIN_MENU_BUTTON));
+
+    DEBUG.log('Loading');
+
+    return _this;
+  }
+
+  /*
+   *
+   */
+
+  _createClass(MainMenuButton, [{
+    key: 'update',
+    value: function update() {
+      this.updateStyles();
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'updateStyles',
+    value: function updateStyles() {
+      this.getElement().style.fontSize = this.getHeight() * 0.8 + 'px';
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'setValue',
+    value: function setValue(v) {
+      this.value = v;
+      this.getElement().setAttribute('value', this.getValue());
+      this.getElement().innerHTML = '' + this.getValue();
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'getValue',
+    value: function getValue() {
+      return this.value;
+    }
+  }]);
+
+  return MainMenuButton;
+}(CustomElement);
+},{"../../../debug":3,"../../custom-element":5}],16:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Debug = require('../../../debug');
+var CustomElement = require('../../custom-element');
+
+var DEBUG = new Debug('MainMenuTitle');
+
+var CSS_CLASSES = {
+  MAIN_MENU_TITLE: 'main-menu-title'
+};
+
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
+module.exports = function (_CustomElement) {
+  _inherits(MainMenuTitle, _CustomElement);
+
+  function MainMenuTitle() {
+    _classCallCheck(this, MainMenuTitle);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(MainMenuTitle).call(this, CSS_CLASSES.MAIN_MENU_TITLE));
+
+    DEBUG.log('Loading');
+
+    return _this;
+  }
+
+  /*
+   *
+   */
+
+  _createClass(MainMenuTitle, [{
+    key: 'update',
+    value: function update() {
+      this.updateStyles();
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'updateStyles',
+    value: function updateStyles() {
+      this.getElement().style.fontSize = this.getHeight() * 0.8 + 'px';
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'setValue',
+    value: function setValue(v) {
+      this.value = v;
+      this.getElement().setAttribute('value', this.getValue());
+      this.getElement().innerHTML = '' + this.getValue();
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'getValue',
+    value: function getValue() {
+      return this.value;
+    }
+  }]);
+
+  return MainMenuTitle;
+}(CustomElement);
+},{"../../../debug":3,"../../custom-element":5}],17:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Debug = require('../../debug');
+var View = require('../view');
+
+var MainMenuTitle = require('./elements/main-menu-title');
+var MainMenuButton = require('./elements/main-menu-button');
+
+var DEBUG = new Debug('MainMenuView');
+
+var CSS_CLASSES = {
+  MAIN_MENU_VIEW: 'main-menu-view'
+};
+
+module.exports = function (_View) {
+  _inherits(GameView, _View);
+
+  function GameView() {
+    _classCallCheck(this, GameView);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(GameView).call(this, VIEW_ID.MAIN_MENU));
+
+    DEBUG.log('Loading');
+    _this.addClass(CSS_CLASSES.MAIN_MENU_VIEW);
+
+    _this.initMainMenuTitle();
+    _this.initPlayButton();
+
+    return _this;
+  }
+
+  /*
+   *
+   */
+
+  _createClass(GameView, [{
+    key: 'initMainMenuTitle',
+    value: function initMainMenuTitle() {
+      this.mainMenuTitle = new MainMenuTitle();
+      this.addElement(this.getMainMenuTitle().getElement());
+      this.getMainMenuTitle().setValue('MB Sudoku');
+      this.getMainMenuTitle().setSize(this.getWidth() - 10, 50);
+      this.getMainMenuTitle().setPosition(5, 5);
+      this.getMainMenuTitle().update();
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'getMainMenuTitle',
+    value: function getMainMenuTitle() {
+      return this.mainMenuTitle;
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'initPlayButton',
+    value: function initPlayButton() {
+      this.playButton = new MainMenuButton();
+      this.addElement(this.getPlayButton().getElement());
+      this.getPlayButton().setValue('Play');
+      this.getPlayButton().setSize(this.getWidth() - 30, 40);
+      this.getPlayButton().setPosition(15, this.getMainMenuTitle().getX() + this.getMainMenuTitle().getHeight() + 10);
+      this.getPlayButton().update();
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'getPlayButton',
+    value: function getPlayButton() {
+      return this.playButton;
+    }
+  }]);
+
+  return GameView;
+}(View);
+},{"../../debug":3,"../view":20,"./elements/main-menu-button":15,"./elements/main-menu-title":16}],18:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Debug = require('../../debug');
+var ViewController = require('../view-controller');
+var MainMenuView = require('./main-menu-view');
+
+var DEBUG = new Debug('MainMenu');
+
+module.exports = function (_ViewController) {
+  _inherits(MainMenu, _ViewController);
+
+  function MainMenu() {
+    _classCallCheck(this, MainMenu);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(MainMenu).call(this, new MainMenuView()));
+
+    DEBUG.log('Loading.');
+
+    _this.initPlayButtonEvents();
+
+    return _this;
+  }
+
+  /*
+   *
+   */
+
+  _createClass(MainMenu, [{
+    key: 'initPlayButtonEvents',
+    value: function initPlayButtonEvents() {
+      DEBUG.log('initPlayButtonEvents');
+      console.log(this.getView().getPlayButton().getElement());
+      this.getView().getPlayButton().getElement().addEventListener(TOUCH_START_EVENT, function () {
+        DEBUG.log('Clicked Play Button');
+        app.showView(VIEW_ID.GAME);
+      });
+      console.log(this.getView().getPlayButton().getElement());
+    }
+  }]);
+
+  return MainMenu;
+}(ViewController);
+},{"../../debug":3,"../view-controller":19,"./main-menu-view":17}],19:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -3814,7 +4260,7 @@ module.exports = function () {
 
   return ViewController;
 }();
-},{"../debug":3}],16:[function(require,module,exports){
+},{"../debug":3}],20:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();

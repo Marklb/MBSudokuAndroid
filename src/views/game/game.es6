@@ -1,17 +1,26 @@
 let Debug = require('../../debug');
 let ViewController = require('../view-controller');
 let GameView = require('./game-view');
-let QQWING = require('../../libs/qqwing-1.3.4/qqwing-1.3.4');
+let MbSudoku = require('../../mb_sudoku');
 
 let DEBUG = new Debug('Game');
+
+let LOCAL_STORAGE_KEYS = {
+  GAME_DIFFICULTY: 'game-difficulty',
+  ORIGINAL_GAMEBOARD: 'game-original-gameboard',
+  SOLUTION: 'game-solution',
+  GAMEBOARD: 'game-gameboard',
+  TIME_ELAPSED: 'game-time-elapsed'
+};
 
 module.exports =
 class Game extends ViewController {
   constructor() {
     super(new GameView());
-    DEBUG.log('Loading.');
+    // DEBUG.log('Loading.');
 
-    this.qqwing = new QQWING();
+    this.mbSudoku = new MbSudoku();
+    this.difficulty = MbSudoku.DIFFICULIES.EXPERT; // Default to expert
 
     // Selected tile will be highlighted. When a selection tile is pressed it
     // will attempt to place that value on the selected tile.
@@ -31,11 +40,21 @@ class Game extends ViewController {
     this.initNewGameButtonEvents();
 
     //
-    this.loadGame();
+    this.initHintButtonEvents();
 
     //
     this.initTimer();
 
+  }
+
+  /*
+   *
+   */
+  onShowView(){
+    super.onShowView();
+    DEBUG.log('OnShowView');
+    //
+    this.loadGame();
   }
 
   /*
@@ -68,6 +87,8 @@ class Game extends ViewController {
     for(let i = 0; i < tmpSelectionTiles.length; i++){
       tmpSelectionTiles[i].getElement().addEventListener(TOUCH_START_EVENT, () => {
         this.setSelectedTileValue(tmpSelectionTiles[i].getValue());
+        // Add this selection to the history
+        // TODO: Add history entry
         // Check if this value is done
         this.checkIfSelectionTileIsDone(tmpSelectionTiles[i]);
         this.saveGame();
@@ -107,7 +128,7 @@ class Game extends ViewController {
   initNewGameButtonEvents(){
     this.getView().getNewGameButton().getElement().addEventListener(
       TOUCH_START_EVENT, () => {
-        this.resetGame();
+        this.newGame();
       }
     );
   }
@@ -115,16 +136,55 @@ class Game extends ViewController {
   /*
    *
    */
-  initTimer(){
-    this.startTimer();
+  initHintButtonEvents(){
+    this.getView().getHintButton().getElement().addEventListener(
+      TOUCH_START_EVENT, () => {
+        DEBUG.log('Clicked Hint');
+        // Create tiles string
+        let hint = this.getPuzzleHint();
+        // DEBUG.log(hint);
+      }
+    );
+  }
 
-    document.addEventListener("pause", (e) => {
-      this.stopTimer();
-    }, false);
+  /*
+   *
+   */
+  getPuzzleHint(){
+    // Get the current puzzle as a string
+    let puzzle = this.getPuzzleString();
+    DEBUG.log(puzzle);
+    // Get the empty indexes
+    let emptyIndexes = [];
+    for(let i = 0; i < puzzle.length; i++){
+      if(puzzle[i] === '.'){
+        emptyIndexes.push(i);
+      }
+    }
+    DEBUG.log('Empty indexes');
+    console.log(emptyIndexes);
+    // Get a random empty tile index
+    let randInd = emptyIndexes[Math.floor(Math.random()*emptyIndexes.length)];
+    console.log(randInd);
+    console.log(this.getSolution());
+    console.log(this.getSolution()[randInd]);
+  }
 
-    document.addEventListener("resume", (e) => {
-      this.startTimer();
-    }, false);
+  /*
+   *
+   */
+  getPuzzleString(){
+    let s = '';
+    let tiles = this.getView().getGameboard().getTiles();
+    for(let i = 0; i < tiles.length; i++){
+      let val = tiles[i].getValue();
+      if(val === '0'){
+        s += '.';
+      }else{
+        s += val.toString();
+      }
+    }
+    return s;
   }
 
   /*
@@ -148,7 +208,6 @@ class Game extends ViewController {
         count++;
       }
     }
-    DEBUG.log(count);
     if(count >= 9){
       selectionTile.setDone(true);
       selectionTile.update();
@@ -199,9 +258,18 @@ class Game extends ViewController {
         && this.getSelectedTile().isEmpty() === true){
       //
       this.getSelectedTile().setValue(v);
+      // Temporary way to handle spin on set
+      this.getSelectedTile().addClass('rotate');
+      let t = setInterval(() => {
+        this.getSelectedTile().removeClass('rotate');
+        this.getSelectedTile().addClass('unrotate');
+        this.getSelectedTile().removeClass('unrotate');
+        clearInterval(t);
+      }, 2000);
       this.saveGame();
     }
   }
+
 
   /*
    *
@@ -215,26 +283,60 @@ class Game extends ViewController {
   /*
    *
    */
-  resetGame(){
-    this.qqwing.generatePuzzle();
-    this.qqwing.setPrintStyle(QQWING.PrintStyle.ONE_LINE);
-    let t = this.qqwing.getSolutionString();
-    for(let i = 0; i < this.getView().getGameboard().getTiles().length; i++){
-      if(t[i] === '.'){
-        this.getView().getGameboard().getTiles()[i].setValue('0');
-        this.getView().getGameboard().getTiles()[i].setIsOriginal(false);
-      }else{
-        this.getView().getGameboard().getTiles()[i].setValue(t[i]);
-        this.getView().getGameboard().getTiles()[i].setIsOriginal(true);
-      }
-    }
-    this.checkTilesForSameAsSelectedValue();
-    this.checkTilesForConflicts();
-    this.getView().getGameboard().update();
-    this.checkIfSelectionTilesAreDone();
-    window.localStorage.setItem("timeElapsed", JSON.stringify(0));
-    this.saveGame();
+  setDifficulty(diff){
+    this.difficulty = diff;
   }
+
+  /*
+   *
+   */
+  getDifficulty(){
+    return this.difficulty;
+  }
+
+  /*
+   *
+   */
+  setGameboardString(s){
+    this.gameboardString = s;
+  }
+
+  /*
+   *
+   */
+  getGameboardString(){
+    return this.gameboardString;
+  }
+
+  /*
+   *
+   */
+  setOriginalGameboard(s){
+    this.originalGameboard = s;
+  }
+
+  /*
+   *
+   */
+  getOriginalGameboard(){
+    return this.originalGameboard;
+  }
+
+  /*
+   *
+   */
+  setSolution(s){
+    this.solution = s;
+  }
+
+  /*
+   *
+   */
+  getSolution(){
+    return this.solution;
+  }
+
+
 
   /*
    * Compares the currently selected tile against each other tile on the
@@ -461,42 +563,119 @@ class Game extends ViewController {
     return JSON.stringify(json);
   }
 
+
+  /*
+   *
+   */
+  setTileStates(){
+    // TODO: Implement this
+  }
+
+  //===========================================================================
+  //
+  // History
+  //
+  //===========================================================================
+
+  /*
+   *
+   */
+  clearHistory(){
+    this.historyList = [];
+  }
+
+  /*
+   *
+   */
+  addToHistory(v){
+    this.historyList.push(v);
+  }
+
+  /*
+   *
+   */
+  getHistory(){
+    return this.historyList;
+  }
+
+  /*
+   *
+   */
+  popLastHistory(){
+    let hist = this.getHistory();
+    let v = hist[hist.length-1];
+    hist.splice(hist.length-1, 1);
+  }
+
+
+  //===========================================================================
+  //
+  // Storage Helpers
+  //
+  //===========================================================================
+
+  /*
+   * Returns the stored gameboard.
+   */
+  getStoredGameboard(){
+    // Get the stored gameboard
+    return JSON.parse(window.localStorage.getItem(
+      LOCAL_STORAGE_KEYS.GAMEBOARD));
+  }
+
+  /*
+   * Returns the stored solution.
+   */
+  getStoredSolution(){
+    // Get the stored solution
+    return JSON.parse(window.localStorage.getItem(
+      LOCAL_STORAGE_KEYS.SOLUTION));
+  }
+
+
+
+  //===========================================================================
+  //
+  // Saving/Loading
+  //
+  //===========================================================================
+
   /*
    * Loads the game stored in the localstorage or starts a new game.
    */
   loadGame(){
     // Check if version changed
-    let storedVersion = JSON.parse(window.localStorage.getItem('version'));
-    if(storedVersion){
-      if(storedVersion !== VERSION){
-        this.resetGame();
-        return;
-      }
-    }else{
-      window.localStorage.setItem("version", VERSION);
+    if(app.isNewVersion()){
+      this.newGame();
+      return;
     }
     // Check if there is a stored gameboard
-    let storedGameboard = JSON.parse(window.localStorage.getItem('gameboard'));
+    let storedGameboard = this.getStoredGameboard();
     if(!storedGameboard){
       // There is not a gameboard saved, so just initialize a new game
-      this.resetGame();
+      this.newGame();
       return;
     }else{
+      // this.clearHistory();
+      // Get the stored solution
+      this.setSolution(this.getStoredSolution());
+      // this.saveGame();
       // There was a stored game
       // Fill the gameboard with the contents of the saved gameboard
-      for(let i = 0; i < this.getView().getGameboard().getTiles().length; i++){
-        this.getView().getGameboard().getTiles()[i].setValue(
-          storedGameboard[i].value);
-        this.getView().getGameboard().getTiles()[i].setIsOriginal(
-          storedGameboard[i].original);
-      }
+      // for(let i = 0; i < this.getView().getGameboard().getTiles().length; i++){
+      //   this.getView().getGameboard().getTiles()[i].setValue(
+      //     storedGameboard[i].value);
+      //   this.getView().getGameboard().getTiles()[i].setIsOriginal(
+      //     storedGameboard[i].original);
+      // }
       // Instead of having every thing stored in the localstorage just call all
       // of the checks that could cause something the in the game to be changed
       // based on the gameboard.
-      this.checkTilesForSameAsSelectedValue();
-      this.checkTilesForConflicts();
-      this.getView().getGameboard().update();
-      this.checkIfSelectionTilesAreDone();
+      // this.checkTilesForSameAsSelectedValue();
+      // this.checkTilesForConflicts();
+      // this.getView().getGameboard().update();
+      // this.checkIfSelectionTilesAreDone();
+      // this.saveGame();
     }
 
   }
@@ -505,7 +684,76 @@ class Game extends ViewController {
    *
    */
   saveGame(){
-    window.localStorage.setItem("gameboard", this.gameboardToJSONString());
+    // Store the original gameboard
+    window.localStorage.setItem(LOCAL_STORAGE_KEYS.ORIGINAL_GAMEBOARD,
+      JSON.stringify(this.getOriginalGameboard()));
+
+    // Store the solution
+    window.localStorage.setItem(LOCAL_STORAGE_KEYS.SOLUTION,
+      JSON.stringify(this.getSolution()));
+
+    // Store the game difficulty
+    window.localStorage.setItem(LOCAL_STORAGE_KEYS.GAME_DIFFICULTY,
+      JSON.stringify(this.getDifficulty()));
+
+    // Store the gameboard
+    // window.localStorage.setItem(LOCAL_STORAGE_KEYS.GAMEBOARD,
+    //   this.gameboardToJSONString());
+    window.localStorage.setItem(LOCAL_STORAGE_KEYS.GAMEBOARD,
+      this.getGameboardString());
+
+  }
+
+  /*
+   *
+   */
+  newGame(){
+    DEBUG.log('newGame');
+    // Get a new puzzle
+    this.mbSudoku.setDifficulty(this.getDifficulty());
+    this.mbSudoku.reset();
+    // Initialize the new game values
+    this.setOriginalGameboard(this.mbSudoku.getPuzzle());
+    this.setSolution(this.mbSudoku.getSolution());
+
+    // let puzzle = this.getOriginalGameboard();
+    // let tiles = this.getView().getGameboard().getTiles();
+    // let ch = null;
+    // let tile = null;
+    // for(let i = 0; i < tiles.length; i++){
+    //   ch = puzzle[i];
+    //   tile = tiles[i];
+    //   tile.setValue((ch === '.')? '0' : ch);
+    //   tile.setIsOriginal((ch === '.')? false : true);
+    // }
+    //
+    // this.checkTilesForSameAsSelectedValue();
+    // this.checkTilesForConflicts();
+    // this.getView().getGameboard().update();
+    // this.checkIfSelectionTilesAreDone();
+    window.localStorage.setItem(LOCAL_STORAGE_KEYS.TIME_ELAPSED, JSON.stringify(0));
+    this.saveGame();
+  }
+
+  //===========================================================================
+  //
+  // Timer
+  //
+  //===========================================================================
+
+  /*
+   *
+   */
+  initTimer(){
+    this.startTimer();
+
+    document.addEventListener("pause", (e) => {
+      this.stopTimer();
+    }, false);
+
+    document.addEventListener("resume", (e) => {
+      this.startTimer();
+    }, false);
   }
 
   /*
@@ -533,14 +781,17 @@ class Game extends ViewController {
     let elapsed = (endTime - this.startTime);
     this.startTime = endTime;
 
-    let tmpTimeElapsed = JSON.parse(window.localStorage.getItem("timeElapsed"));
+    let tmpTimeElapsed = JSON.parse(window.localStorage.getItem(
+      LOCAL_STORAGE_KEYS.TIME_ELAPSED));
     if(tmpTimeElapsed){
       elapsed = elapsed + tmpTimeElapsed;
     }
-    // DEBUG.log(elapsed);
-    window.localStorage.setItem("timeElapsed", JSON.stringify(elapsed));
+
+    window.localStorage.setItem(LOCAL_STORAGE_KEYS.TIME_ELAPSED,
+      JSON.stringify(elapsed));
     this.getView().getClock().setTime(elapsed);
   };
+
 
 
 

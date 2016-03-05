@@ -1,0 +1,9 @@
+@import "elements/difficulty-selection-button.scss";
+
+.difficulty-selection-view {
+    display: block;
+    // border: 2px solid rgba(0,0,200,1);
+    background-color: rgba(0,0,0,1);
+    overflow: hidden;
+    box-sizing: border-box;
+}

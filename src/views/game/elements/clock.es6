@@ -15,7 +15,7 @@ module.exports =
 class CLOCK extends CustomElement {
   constructor() {
     super(CSS_CLASSES.CLOCK);
-    DEBUG.log('Loading');
+    // DEBUG.log('Loading');
 
 
 

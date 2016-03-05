@@ -26,11 +26,8 @@ module.exports = function (_CustomElement) {
   function CLOCK() {
     _classCallCheck(this, CLOCK);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(CLOCK).call(this, CSS_CLASSES.CLOCK));
-
-    DEBUG.log('Loading');
-
-    return _this;
+    return _possibleConstructorReturn(this, Object.getPrototypeOf(CLOCK).call(this, CSS_CLASSES.CLOCK));
+    // DEBUG.log('Loading');
   }
 
   /*

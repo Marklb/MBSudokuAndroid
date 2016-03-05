@@ -1,6 +1,7 @@
 let Debug = require('./debug');
 let Game = require('./views/game/game');
 let MainMenu = require('./views/main-menu/main-menu');
+let DifficultySelection = require('./views/difficulty-selection/difficulty-selection');
 // var attachFastClick = require('./libs/fastclick');
 
 let DEBUG = new Debug('App');
@@ -10,7 +11,6 @@ let DEBUG = new Debug('App');
 // TODO: Hint
 // TODO: Stats collector
 // TODO: Game scoring
-// TODO: Difficulty selector
 // TODO: New game conformation
 // TODO: Win screen
 // IDEA: Victory picture
@@ -18,23 +18,26 @@ let DEBUG = new Debug('App');
 // IDEA: Multiple games available, this way you can start a new game and come
 //       back if you are stuck. The indivitual games should keep track of
 //       their own win streak.
-// TODO: On view loaded function
 // TODO: On view unloaded function
 
+// window.localStorage.clear();
 
 global.VIEW_ID = {
   MAIN_MENU: 'MAIN_MENU_VIEW',
+  DIFFICULY_SELECTION: 'DIFFICULY_SELECTION_VIEW',
   GAME: 'GAME_VIEW'
 };
 
-// global.TOUCH_START_EVENT = 'mousedown';
-global.TOUCH_START_EVENT = 'touchstart';
+global.TOUCH_START_EVENT = 'mousedown';
+// global.TOUCH_START_EVENT = 'touchstart';
 
-global.VERSION = '0';
+global.VERSION = '31';
+
 
 class App {
   constructor() {
     DEBUG.log('Starting MB Sudoku');
+    this.checkVersion();
 
     this.containerElem = document.getElementById('app-container');
 
@@ -48,8 +51,9 @@ class App {
     // Initialize Stats
     // TODO: Implement
 
-    // Initialize GameSelection
-    // TODO: Implement
+    // Initialize DifficultySelection
+    this.difficultySelectionView = new DifficultySelection();
+    this.addView(this.difficultySelectionView.getView());
 
     // Initialize Game
     this.gameView = new Game();
@@ -63,6 +67,42 @@ class App {
     // this.showView(VIEW_ID.GAME);
     this.showView(VIEW_ID.MAIN_MENU);
 
+  }
+
+  /*
+   *
+   */
+  checkVersion(){
+    this.isNewVersionBool = false;
+    // Check if version changed
+    let storedVersion = JSON.parse(window.localStorage.getItem('version'));
+    if(storedVersion){
+      // There is a version stored
+      if(parseInt(storedVersion) !== parseInt(VERSION)){
+        // Stored version is different
+        this.isNewVersionBool = true;
+        // DEBUG.log('Version different');
+        // this.resetGame();
+        // window.localStorage.setItem("version", VERSION);
+        // return;
+      }
+    }else{
+      // There is not a version stored
+      // DEBUG.log('No version set');
+      this.isNewVersionBool = true;
+      // window.localStorage.setItem("version", VERSION);
+    }
+
+    if(this.isNewVersion()){
+      window.localStorage.setItem("version", VERSION);
+    }
+  }
+
+  /*
+   *
+   */
+  isNewVersion(){
+    return this.isNewVersionBool;
   }
 
   getElement(){

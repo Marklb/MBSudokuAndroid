@@ -38,11 +38,12 @@ module.exports = function (_CustomElement) {
   function GameboardTile(x, y) {
     _classCallCheck(this, GameboardTile);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(GameboardTile).call(this, CSS_CLASSES.GAMEBOARD_TILE));
-
-    DEBUG.log('Loading');
+    // DEBUG.log('Loading');
 
     //
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(GameboardTile).call(this, CSS_CLASSES.GAMEBOARD_TILE));
+
     _this.tileId = TILE_IDS[x][y];
 
     //
@@ -91,6 +92,7 @@ module.exports = function (_CustomElement) {
       // TODO: Organize this logic
       if (this.isEmpty()) {
         this.getElement().style.color = 'rgba(0,0,0,0)';
+        // this.getElement().style.color = 'rgba(255,255,255,1)';
         if (this.isSelected()) {
           this.getElement().style.borderColor = 'rgba(0,200,100,1)';
         } else {
@@ -176,12 +178,25 @@ module.exports = function (_CustomElement) {
   }, {
     key: 'setValue',
     value: function setValue(v) {
+      // DEBUG.log('Setting value: '+v);
+      // // let possibleTileValues = ['1','2','3','4','5','6','7','8','9'];
+      // let possibleTileValues = '123456789';
+      // if(possibleTileValues.indexOf(v) != -1){
+      //   DEBUG.log('Not a value value');
+      //   v = '0';
+      // }
+      // DEBUG.log('Done checking valid');
+      // if(v === '.'){
+      //   v = '0';
+      // }
+
       this.value = v + '';
       this.getElement().setAttribute('value', this.getValue());
       this.getElement().innerHTML = '' + this.getValue();
       if (this._onValueChange !== undefined) {
         this._onValueChange();
       }
+      // DEBUG.log('Done setting value');
     }
 
     /*

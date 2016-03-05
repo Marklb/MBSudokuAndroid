@@ -15,7 +15,7 @@ module.exports =
 class MainMenuTitle extends CustomElement {
   constructor() {
     super(CSS_CLASSES.MAIN_MENU_TITLE);
-    DEBUG.log('Loading');
+    // DEBUG.log('Loading');
 
 
 

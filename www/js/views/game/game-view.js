@@ -18,6 +18,9 @@ var EraseTileButton = require('./elements/erase-tile-button');
 var NewGameButton = require('./elements/new-game-button');
 var TopTitle = require('./elements/top-title');
 var Clock = require('./elements/clock');
+var HintButton = require('./elements/hint-button');
+var HistoryNextButton = require('./elements/history-next-button');
+var HistoryPrevButton = require('./elements/history-prev-button');
 
 var DEBUG = new Debug('GameView');
 
@@ -31,9 +34,10 @@ module.exports = function (_View) {
   function GameView() {
     _classCallCheck(this, GameView);
 
+    // DEBUG.log('Loading');
+
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(GameView).call(this, VIEW_ID.GAME));
 
-    DEBUG.log('Loading');
     _this.addClass(CSS_CLASSES.GAME_VIEW);
 
     _this.initGameboard();
@@ -42,6 +46,9 @@ module.exports = function (_View) {
     _this.initNewGameButton();
     _this.initTopTitle();
     _this.initClock();
+    _this.initHintButton();
+    _this.initHistoryPrevButton();
+    _this.initHistoryNextButton();
 
     return _this;
   }
@@ -198,6 +205,101 @@ module.exports = function (_View) {
       this.getClock().setSize(130, 30);
       this.getClock().setPosition(this.getTopTitle().getX() + this.getTopTitle().getWidth() + 5, 5);
       this.getClock().update();
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'initHintButton',
+    value: function initHintButton() {
+      this.hintButton = new HintButton();
+      //
+      this.addElement(this.getHintButton().getElement());
+      //
+      this.hintButton.setPosition(this.getSelectionTiles()[0].getX() + 10, this.getGameboard().getY() + this.getGameboard().getWidth() + 15);
+      //
+      this.hintButton.setSize(this.getSelectionTiles()[0].getWidth() + this.getSelectionTiles()[0].getWidth() / 2 - 40, this.getSelectionTiles()[0].getHeight() - 20);
+      // TODO: Remove placeholder value
+      this.getHintButton().setValue('H');
+      //
+      this.getHintButton().update();
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'getHintButton',
+    value: function getHintButton() {
+      return this.hintButton;
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'initHistoryPrevButton',
+    value: function initHistoryPrevButton() {
+      this.historyPrevButton = new HistoryPrevButton();
+      //
+      this.addElement(this.getHistoryPrevButton().getElement());
+      //
+      this.historyPrevButton.setPosition(
+      // this.getHistoryNextButton().getX()
+      //   +this.getHistoryNextButton().getWidth()+5,
+      this.getHintButton().getX() + this.getHintButton().getWidth() + 15, this.getGameboard().getY() + this.getGameboard().getWidth() + 15);
+      //
+      this.historyPrevButton.setSize(this.getSelectionTiles()[0].getWidth(), this.getSelectionTiles()[0].getHeight() - 20);
+      // TODO: Remove placeholder value
+      this.getHistoryPrevButton().setValue('<-');
+      //
+      this.getHistoryPrevButton().update();
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'getHistoryPrevButton',
+    value: function getHistoryPrevButton() {
+      return this.historyPrevButton;
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'initHistoryNextButton',
+    value: function initHistoryNextButton() {
+      this.historyNextButton = new HistoryNextButton();
+      //
+      this.addElement(this.getHistoryNextButton().getElement());
+      //
+      this.historyNextButton.setPosition(
+      // this.getHintButton().getX()+this.getHintButton().getWidth()+5,
+      this.getHistoryPrevButton().getX() + this.getHistoryPrevButton().getWidth() + 5, this.getGameboard().getY() + this.getGameboard().getWidth() + 15);
+      //
+      this.historyNextButton.setSize(this.getSelectionTiles()[0].getWidth(), this.getSelectionTiles()[0].getHeight() - 20);
+      // TODO: Remove placeholder value
+      this.getHistoryNextButton().setValue('->');
+      //
+      this.getHistoryNextButton().update();
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'getHistoryNextButton',
+    value: function getHistoryNextButton() {
+      return this.historyNextButton;
     }
 
     /*

@@ -37,11 +37,12 @@ module.exports = function (_CustomElement) {
   function Gameboard(game) {
     _classCallCheck(this, Gameboard);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Gameboard).call(this, CSS_CLASSES.GAMEBOARD));
-
-    DEBUG.log('Loading.');
+    // DEBUG.log('Loading.');
 
     // Array containing the tiles on the 9x9 grid
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Gameboard).call(this, CSS_CLASSES.GAMEBOARD));
+
     _this.tiles = [];
 
     return _this;
@@ -122,14 +123,14 @@ module.exports = function (_CustomElement) {
         // Check if the tile being added already exists
         for (var i = 0; i < this.tiles.length; i++) {
           if (this.tiles[i].getTileId() === tile.getTileId()) {
-            DEBUG.error('Tile: ' + tile.getTileId() + ' is already added.');
+            // DEBUG.error('Tile: '+tile.getTileId()+' is already added.');
             return;
           }
         }
         // Add the tile to the tiles array.
         this.tiles.push(tile);
       } else {
-        DEBUG.error('tile is not of type GameboardTile.');
+        // DEBUG.error('tile is not of type GameboardTile.');
       }
     }
 

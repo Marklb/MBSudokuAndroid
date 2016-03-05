@@ -15,7 +15,7 @@ module.exports =
 class TopTitle extends CustomElement {
   constructor() {
     super(CSS_CLASSES.TOP_TITLE);
-    DEBUG.log('Loading');
+    // DEBUG.log('Loading');
 
 
 

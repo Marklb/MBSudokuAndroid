@@ -26,11 +26,8 @@ module.exports = function (_CustomElement) {
   function TopTitle() {
     _classCallCheck(this, TopTitle);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(TopTitle).call(this, CSS_CLASSES.TOP_TITLE));
-
-    DEBUG.log('Loading');
-
-    return _this;
+    return _possibleConstructorReturn(this, Object.getPrototypeOf(TopTitle).call(this, CSS_CLASSES.TOP_TITLE));
+    // DEBUG.log('Loading');
   }
 
   /*

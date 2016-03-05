@@ -15,11 +15,13 @@ module.exports =
 class GameView extends View {
   constructor() {
     super(VIEW_ID.MAIN_MENU);
-    DEBUG.log('Loading');
+    // DEBUG.log('Loading');
     this.addClass(CSS_CLASSES.MAIN_MENU_VIEW);
 
     this.initMainMenuTitle();
     this.initPlayButton();
+    this.initStatsButton();
+    this.initOptionsButton();
 
   }
 
@@ -55,7 +57,7 @@ class GameView extends View {
     this.getPlayButton().setSize(this.getWidth()-30, 40);
     this.getPlayButton().setPosition(
       15,
-      this.getMainMenuTitle().getX()+this.getMainMenuTitle().getHeight()+10
+      this.getMainMenuTitle().getY()+this.getMainMenuTitle().getHeight()+10
     );
     this.getPlayButton().update();
   }
@@ -65,6 +67,50 @@ class GameView extends View {
    */
   getPlayButton(){
     return this.playButton;
+  }
+
+  /*
+   *
+   */
+  initStatsButton(){
+    this.statsButton = new MainMenuButton();
+    this.addElement(this.getStatsButton().getElement());
+    this.getStatsButton().setValue('Stats');
+    this.getStatsButton().setSize(this.getWidth()-30, 40);
+    this.getStatsButton().setPosition(
+      15,
+      this.getPlayButton().getY()+this.getPlayButton().getHeight()+10
+    );
+    this.getStatsButton().update();
+  }
+
+  /*
+   *
+   */
+  getStatsButton(){
+    return this.statsButton;
+  }
+
+  /*
+   *
+   */
+  initOptionsButton(){
+    this.optionsButton = new MainMenuButton();
+    this.addElement(this.getOptionsButton().getElement());
+    this.getOptionsButton().setValue('Options');
+    this.getOptionsButton().setSize(this.getWidth()-30, 40);
+    this.getOptionsButton().setPosition(
+      15,
+      this.getStatsButton().getY()+this.getStatsButton().getHeight()+10
+    );
+    this.getOptionsButton().update();
+  }
+
+  /*
+   *
+   */
+  getOptionsButton(){
+    return this.optionsButton;
   }
 
 

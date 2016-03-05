@@ -26,13 +26,16 @@ module.exports = function (_View) {
   function GameView() {
     _classCallCheck(this, GameView);
 
+    // DEBUG.log('Loading');
+
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(GameView).call(this, VIEW_ID.MAIN_MENU));
 
-    DEBUG.log('Loading');
     _this.addClass(CSS_CLASSES.MAIN_MENU_VIEW);
 
     _this.initMainMenuTitle();
     _this.initPlayButton();
+    _this.initStatsButton();
+    _this.initOptionsButton();
 
     return _this;
   }
@@ -73,7 +76,7 @@ module.exports = function (_View) {
       this.addElement(this.getPlayButton().getElement());
       this.getPlayButton().setValue('Play');
       this.getPlayButton().setSize(this.getWidth() - 30, 40);
-      this.getPlayButton().setPosition(15, this.getMainMenuTitle().getX() + this.getMainMenuTitle().getHeight() + 10);
+      this.getPlayButton().setPosition(15, this.getMainMenuTitle().getY() + this.getMainMenuTitle().getHeight() + 10);
       this.getPlayButton().update();
     }
 
@@ -85,6 +88,56 @@ module.exports = function (_View) {
     key: 'getPlayButton',
     value: function getPlayButton() {
       return this.playButton;
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'initStatsButton',
+    value: function initStatsButton() {
+      this.statsButton = new MainMenuButton();
+      this.addElement(this.getStatsButton().getElement());
+      this.getStatsButton().setValue('Stats');
+      this.getStatsButton().setSize(this.getWidth() - 30, 40);
+      this.getStatsButton().setPosition(15, this.getPlayButton().getY() + this.getPlayButton().getHeight() + 10);
+      this.getStatsButton().update();
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'getStatsButton',
+    value: function getStatsButton() {
+      return this.statsButton;
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'initOptionsButton',
+    value: function initOptionsButton() {
+      this.optionsButton = new MainMenuButton();
+      this.addElement(this.getOptionsButton().getElement());
+      this.getOptionsButton().setValue('Options');
+      this.getOptionsButton().setSize(this.getWidth() - 30, 40);
+      this.getOptionsButton().setPosition(15, this.getStatsButton().getY() + this.getStatsButton().getHeight() + 10);
+      this.getOptionsButton().update();
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'getOptionsButton',
+    value: function getOptionsButton() {
+      return this.optionsButton;
     }
   }]);
 

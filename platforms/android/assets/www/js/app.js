@@ -5,9 +5,8 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Debug = require('./debug');
-// let MainMenu = require('./main-menu');
-// let Game = require('./game');
 var Game = require('./views/game/game');
+var MainMenu = require('./views/main-menu/main-menu');
 // var attachFastClick = require('./libs/fastclick');
 
 var DEBUG = new Debug('App');
@@ -16,11 +15,17 @@ var DEBUG = new Debug('App');
 // TODO: Undo
 // TODO: Hint
 // TODO: Stats collector
+// TODO: Game scoring
 // TODO: Difficulty selector
 // TODO: New game conformation
 // TODO: Win screen
 // IDEA: Victory picture
 // TODO: Error notification
+// IDEA: Multiple games available, this way you can start a new game and come
+//       back if you are stuck. The indivitual games should keep track of
+//       their own win streak.
+// TODO: On view loaded function
+// TODO: On view unloaded function
 
 global.VIEW_ID = {
   MAIN_MENU: 'MAIN_MENU_VIEW',
@@ -40,20 +45,28 @@ var App = function () {
 
     this.containerElem = document.getElementById('app-container');
 
-    // this.mainMenu = new MainMenu();
-    // this.addView(this.mainMenu);
-    //
-    // this.game = new Game();
-    // this.addView(this.game);
-    //
-    //
-    //
-    // this.showView(this.mainMenu.getViewName());
+    // Initialize MainMenu
+    this.mainMenuView = new MainMenu();
+    this.addView(this.mainMenuView.getView());
 
+    // Initialize Settings
+    // TODO: Implement
+
+    // Initialize Stats
+    // TODO: Implement
+
+    // Initialize GameSelection
+    // TODO: Implement
+
+    // Initialize Game
     this.gameView = new Game();
     this.addView(this.gameView.getView());
 
-    this.showView(VIEW_ID.GAME);
+    // Initialize GameOver
+    // TODO: Implement
+
+    // this.showView(VIEW_ID.GAME);
+    this.showView(VIEW_ID.MAIN_MENU);
   }
 
   _createClass(App, [{

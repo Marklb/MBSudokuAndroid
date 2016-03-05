@@ -8,6 +8,7 @@
   align-items: center; /* align vertical */
   text-align: center;
   cursor: default;
+
 }
 
 // .gameboard-tile.selected {
@@ -29,3 +30,12 @@
 // .gameboard-tile[samevalue='true']{
 //   border-color: rgba(0,200,140,1);
 // }
+
+.gameboard-tile.rotate {
+  transition: transform 0.5s;
+  transform: rotate(360deg);
+}
+
+.gameboard-tile.unrotate {
+  transform: rotate(-300deg);
+}

@@ -26,11 +26,8 @@ module.exports = function (_CustomElement) {
   function MainMenuButton(x, y) {
     _classCallCheck(this, MainMenuButton);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(MainMenuButton).call(this, CSS_CLASSES.MAIN_MENU_BUTTON));
-
-    DEBUG.log('Loading');
-
-    return _this;
+    return _possibleConstructorReturn(this, Object.getPrototypeOf(MainMenuButton).call(this, CSS_CLASSES.MAIN_MENU_BUTTON));
+    // DEBUG.log('Loading');
   }
 
   /*

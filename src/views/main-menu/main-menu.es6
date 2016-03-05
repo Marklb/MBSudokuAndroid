@@ -8,7 +8,7 @@ module.exports =
 class MainMenu extends ViewController {
   constructor() {
     super(new MainMenuView());
-    DEBUG.log('Loading.');
+    // DEBUG.log('Loading.');
 
     this.initPlayButtonEvents();
 
@@ -18,15 +18,13 @@ class MainMenu extends ViewController {
    *
    */
   initPlayButtonEvents(){
-    DEBUG.log('initPlayButtonEvents');
-    console.log(this.getView().getPlayButton().getElement());
+    // DEBUG.log('initPlayButtonEvents');
     this.getView().getPlayButton().getElement().addEventListener(
       TOUCH_START_EVENT, () => {
         DEBUG.log('Clicked Play Button');
-        app.showView(VIEW_ID.GAME);
+        app.showView(VIEW_ID.DIFFICULY_SELECTION);
       }
     );
-    console.log(this.getView().getPlayButton().getElement());
   }
 
 

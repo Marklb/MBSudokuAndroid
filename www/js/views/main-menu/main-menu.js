@@ -20,9 +20,9 @@ module.exports = function (_ViewController) {
   function MainMenu() {
     _classCallCheck(this, MainMenu);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(MainMenu).call(this, new MainMenuView()));
+    // DEBUG.log('Loading.');
 
-    DEBUG.log('Loading.');
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(MainMenu).call(this, new MainMenuView()));
 
     _this.initPlayButtonEvents();
 
@@ -36,13 +36,11 @@ module.exports = function (_ViewController) {
   _createClass(MainMenu, [{
     key: 'initPlayButtonEvents',
     value: function initPlayButtonEvents() {
-      DEBUG.log('initPlayButtonEvents');
-      console.log(this.getView().getPlayButton().getElement());
+      // DEBUG.log('initPlayButtonEvents');
       this.getView().getPlayButton().getElement().addEventListener(TOUCH_START_EVENT, function () {
         DEBUG.log('Clicked Play Button');
-        app.showView(VIEW_ID.GAME);
+        app.showView(VIEW_ID.DIFFICULY_SELECTION);
       });
-      console.log(this.getView().getPlayButton().getElement());
     }
   }]);
 

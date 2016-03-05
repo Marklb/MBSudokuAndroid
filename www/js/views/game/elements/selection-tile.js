@@ -27,9 +27,9 @@ module.exports = function (_CustomElement) {
   function SelectionTile(x, y) {
     _classCallCheck(this, SelectionTile);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(SelectionTile).call(this, CSS_CLASSES.SELECTION_TILE));
+    // DEBUG.log('Loading');
 
-    DEBUG.log('Loading');
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(SelectionTile).call(this, CSS_CLASSES.SELECTION_TILE));
 
     _this.setDone(false);
 

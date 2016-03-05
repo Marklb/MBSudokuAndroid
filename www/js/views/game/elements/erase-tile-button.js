@@ -26,11 +26,8 @@ module.exports = function (_CustomElement) {
   function EraseTileButton(x, y) {
     _classCallCheck(this, EraseTileButton);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(EraseTileButton).call(this, CSS_CLASSES.ERASE_TILE_BUTTON));
-
-    DEBUG.log('Loading');
-
-    return _this;
+    return _possibleConstructorReturn(this, Object.getPrototypeOf(EraseTileButton).call(this, CSS_CLASSES.ERASE_TILE_BUTTON));
+    // DEBUG.log('Loading');
   }
 
   /*

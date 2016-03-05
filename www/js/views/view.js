@@ -25,7 +25,7 @@ module.exports = function () {
   function View(viewId) {
     _classCallCheck(this, View);
 
-    DEBUG.log('Loading: ' + viewId);
+    // DEBUG.log('Loading: '+viewId);
     this.setViewId(viewId);
 
     this.initElement();
@@ -110,6 +110,7 @@ module.exports = function () {
   }, {
     key: 'show',
     value: function show() {
+      this.getElement().classList.add('shown');
       this.getElement().classList.remove(CSS_CLASSES.HIDDEN);
     }
   }, {

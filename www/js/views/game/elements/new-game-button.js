@@ -26,11 +26,8 @@ module.exports = function (_CustomElement) {
   function NewGameButton(x, y) {
     _classCallCheck(this, NewGameButton);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(NewGameButton).call(this, CSS_CLASSES.NEW_GAME_BUTTON));
-
-    DEBUG.log('Loading');
-
-    return _this;
+    return _possibleConstructorReturn(this, Object.getPrototypeOf(NewGameButton).call(this, CSS_CLASSES.NEW_GAME_BUTTON));
+    // DEBUG.log('Loading');
   }
 
   /*

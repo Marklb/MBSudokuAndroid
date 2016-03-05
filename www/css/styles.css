@@ -10,6 +10,13 @@
   text-align: center;
   cursor: default; }
 
+.gameboard-tile.rotate {
+  transition: transform 0.5s;
+  transform: rotate(360deg); }
+
+.gameboard-tile.unrotate {
+  transform: rotate(-300deg); }
+
 .gameboard {
   display: block;
   box-sizing: border-box;
@@ -81,6 +88,45 @@
   text-align: center;
   cursor: default; }
 
+.hint-button {
+  display: block;
+  box-sizing: border-box;
+  border: 2px solid #0096be;
+  background-color: black;
+  color: #0096be;
+  justify-content: center;
+  /* align horizontal */
+  align-items: center;
+  /* align vertical */
+  text-align: center;
+  cursor: default; }
+
+.history-next-button {
+  display: block;
+  box-sizing: border-box;
+  border: 2px solid rgba(0, 150, 190, 0);
+  background-color: black;
+  color: #0096be;
+  justify-content: center;
+  /* align horizontal */
+  align-items: center;
+  /* align vertical */
+  text-align: center;
+  cursor: default; }
+
+.history-prev-button {
+  display: block;
+  box-sizing: border-box;
+  border: 2px solid rgba(0, 150, 190, 0);
+  background-color: black;
+  color: #0096be;
+  justify-content: center;
+  /* align horizontal */
+  align-items: center;
+  /* align vertical */
+  text-align: center;
+  cursor: default; }
+
 .game-view {
   display: block;
   background-color: black;
@@ -114,6 +160,25 @@
   cursor: default; }
 
 .main-menu-view {
+  display: block;
+  background-color: black;
+  overflow: hidden;
+  box-sizing: border-box; }
+
+.difficulty-selection-button {
+  display: block;
+  box-sizing: border-box;
+  border: 2px solid #0096be;
+  background-color: black;
+  color: #0096be;
+  justify-content: center;
+  /* align horizontal */
+  align-items: center;
+  /* align vertical */
+  text-align: center;
+  cursor: default; }
+
+.difficulty-selection-view {
   display: block;
   background-color: black;
   overflow: hidden;

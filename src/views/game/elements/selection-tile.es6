@@ -16,7 +16,7 @@ module.exports =
 class SelectionTile extends CustomElement {
   constructor(x, y) {
     super(CSS_CLASSES.SELECTION_TILE);
-    DEBUG.log('Loading');
+    // DEBUG.log('Loading');
 
     this.setDone(false);
 

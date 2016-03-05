@@ -15,9 +15,9 @@ module.exports =
 class EraseTileButton extends CustomElement {
   constructor(x, y) {
     super(CSS_CLASSES.ERASE_TILE_BUTTON);
-    DEBUG.log('Loading');
+    // DEBUG.log('Loading');
 
-    
+
 
   }
 

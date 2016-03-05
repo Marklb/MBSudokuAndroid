@@ -2,6 +2,8 @@
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -11,9 +13,17 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var Debug = require('../../debug');
 var ViewController = require('../view-controller');
 var GameView = require('./game-view');
-var QQWING = require('../../libs/qqwing-1.3.4/qqwing-1.3.4');
+var MbSudoku = require('../../mb_sudoku');
 
 var DEBUG = new Debug('Game');
+
+var LOCAL_STORAGE_KEYS = {
+  GAME_DIFFICULTY: 'game-difficulty',
+  ORIGINAL_GAMEBOARD: 'game-original-gameboard',
+  SOLUTION: 'game-solution',
+  GAMEBOARD: 'game-gameboard',
+  TIME_ELAPSED: 'game-time-elapsed'
+};
 
 module.exports = function (_ViewController) {
   _inherits(Game, _ViewController);
@@ -21,11 +31,12 @@ module.exports = function (_ViewController) {
   function Game() {
     _classCallCheck(this, Game);
 
+    // DEBUG.log('Loading.');
+
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Game).call(this, new GameView()));
 
-    DEBUG.log('Loading.');
-
-    _this.qqwing = new QQWING();
+    _this.mbSudoku = new MbSudoku();
+    _this.difficulty = MbSudoku.DIFFICULIES.EXPERT; // Default to expert
 
     // Selected tile will be highlighted. When a selection tile is pressed it
     // will attempt to place that value on the selected tile.
@@ -45,7 +56,7 @@ module.exports = function (_ViewController) {
     _this.initNewGameButtonEvents();
 
     //
-    _this.loadGame();
+    _this.initHintButtonEvents();
 
     //
     _this.initTimer();
@@ -58,6 +69,19 @@ module.exports = function (_ViewController) {
    */
 
   _createClass(Game, [{
+    key: 'onShowView',
+    value: function onShowView() {
+      _get(Object.getPrototypeOf(Game.prototype), 'onShowView', this).call(this);
+      DEBUG.log('OnShowView');
+      //
+      this.loadGame();
+    }
+
+    /*
+     *
+     */
+
+  }, {
     key: 'initGamboardTileEvents',
     value: function initGamboardTileEvents() {
       var _this2 = this;
@@ -99,6 +123,8 @@ module.exports = function (_ViewController) {
       var _loop2 = function _loop2(i) {
         tmpSelectionTiles[i].getElement().addEventListener(TOUCH_START_EVENT, function () {
           _this3.setSelectedTileValue(tmpSelectionTiles[i].getValue());
+          // Add this selection to the history
+          // TODO: Add history entry
           // Check if this value is done
           _this3.checkIfSelectionTileIsDone(tmpSelectionTiles[i]);
           _this3.saveGame();
@@ -150,7 +176,7 @@ module.exports = function (_ViewController) {
       var _this5 = this;
 
       this.getView().getNewGameButton().getElement().addEventListener(TOUCH_START_EVENT, function () {
-        _this5.resetGame();
+        _this5.newGame();
       });
     }
 
@@ -159,19 +185,62 @@ module.exports = function (_ViewController) {
      */
 
   }, {
-    key: 'initTimer',
-    value: function initTimer() {
+    key: 'initHintButtonEvents',
+    value: function initHintButtonEvents() {
       var _this6 = this;
 
-      this.startTimer();
+      this.getView().getHintButton().getElement().addEventListener(TOUCH_START_EVENT, function () {
+        DEBUG.log('Clicked Hint');
+        // Create tiles string
+        var hint = _this6.getPuzzleHint();
+        // DEBUG.log(hint);
+      });
+    }
 
-      document.addEventListener("pause", function (e) {
-        _this6.stopTimer();
-      }, false);
+    /*
+     *
+     */
 
-      document.addEventListener("resume", function (e) {
-        _this6.startTimer();
-      }, false);
+  }, {
+    key: 'getPuzzleHint',
+    value: function getPuzzleHint() {
+      // Get the current puzzle as a string
+      var puzzle = this.getPuzzleString();
+      DEBUG.log(puzzle);
+      // Get the empty indexes
+      var emptyIndexes = [];
+      for (var i = 0; i < puzzle.length; i++) {
+        if (puzzle[i] === '.') {
+          emptyIndexes.push(i);
+        }
+      }
+      DEBUG.log('Empty indexes');
+      console.log(emptyIndexes);
+      // Get a random empty tile index
+      var randInd = emptyIndexes[Math.floor(Math.random() * emptyIndexes.length)];
+      console.log(randInd);
+      console.log(this.getSolution());
+      console.log(this.getSolution()[randInd]);
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'getPuzzleString',
+    value: function getPuzzleString() {
+      var s = '';
+      var tiles = this.getView().getGameboard().getTiles();
+      for (var i = 0; i < tiles.length; i++) {
+        var val = tiles[i].getValue();
+        if (val === '0') {
+          s += '.';
+        } else {
+          s += val.toString();
+        }
+      }
+      return s;
     }
 
     /*
@@ -201,7 +270,6 @@ module.exports = function (_ViewController) {
           count++;
         }
       }
-      DEBUG.log(count);
       if (count >= 9) {
         selectionTile.setDone(true);
         selectionTile.update();
@@ -254,11 +322,23 @@ module.exports = function (_ViewController) {
   }, {
     key: 'setSelectedTileValue',
     value: function setSelectedTileValue(v) {
+      var _this7 = this;
+
       //
       if (this.getSelectedTile().isOriginal() === false && this.getSelectedTile().isEmpty() === true) {
-        //
-        this.getSelectedTile().setValue(v);
-        this.saveGame();
+        (function () {
+          //
+          _this7.getSelectedTile().setValue(v);
+          // Temporary way to handle spin on set
+          _this7.getSelectedTile().addClass('rotate');
+          var t = setInterval(function () {
+            _this7.getSelectedTile().removeClass('rotate');
+            _this7.getSelectedTile().addClass('unrotate');
+            _this7.getSelectedTile().removeClass('unrotate');
+            clearInterval(t);
+          }, 2000);
+          _this7.saveGame();
+        })();
       }
     }
 
@@ -277,26 +357,59 @@ module.exports = function (_ViewController) {
      */
 
   }, {
-    key: 'resetGame',
-    value: function resetGame() {
-      this.qqwing.generatePuzzle();
-      this.qqwing.setPrintStyle(QQWING.PrintStyle.ONE_LINE);
-      var t = this.qqwing.getSolutionString();
-      for (var i = 0; i < this.getView().getGameboard().getTiles().length; i++) {
-        if (t[i] === '.') {
-          this.getView().getGameboard().getTiles()[i].setValue('0');
-          this.getView().getGameboard().getTiles()[i].setIsOriginal(false);
-        } else {
-          this.getView().getGameboard().getTiles()[i].setValue(t[i]);
-          this.getView().getGameboard().getTiles()[i].setIsOriginal(true);
-        }
-      }
-      this.checkTilesForSameAsSelectedValue();
-      this.checkTilesForConflicts();
-      this.getView().getGameboard().update();
-      this.checkIfSelectionTilesAreDone();
-      window.localStorage.setItem("timeElapsed", JSON.stringify(0));
-      this.saveGame();
+    key: 'setDifficulty',
+    value: function setDifficulty(diff) {
+      this.difficulty = diff;
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'getDifficulty',
+    value: function getDifficulty() {
+      return this.difficulty;
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'setOriginalGameboard',
+    value: function setOriginalGameboard(s) {
+      this.originalGameboard = s;
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'getOriginalGameboard',
+    value: function getOriginalGameboard() {
+      return this.originalGameboard;
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'setSolution',
+    value: function setSolution(s) {
+      this.solution = s;
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'getSolution',
+    value: function getSolution() {
+      return this.solution;
     }
 
     /*
@@ -534,6 +647,97 @@ module.exports = function (_ViewController) {
     }
 
     /*
+     *
+     */
+
+  }, {
+    key: 'setTileStates',
+    value: function setTileStates() {}
+    // TODO: Implement this
+
+    //===========================================================================
+    //
+    // History
+    //
+    //===========================================================================
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'clearHistory',
+    value: function clearHistory() {
+      this.historyList = [];
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'addToHistory',
+    value: function addToHistory(v) {
+      this.historyList.push(v);
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'getHistory',
+    value: function getHistory() {
+      return this.historyList;
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'popLastHistory',
+    value: function popLastHistory() {
+      var hist = this.getHistory();
+      var v = hist[hist.length - 1];
+      hist.splice(hist.length - 1, 1);
+    }
+
+    //===========================================================================
+    //
+    // Storage Helpers
+    //
+    //===========================================================================
+
+    /*
+     * Returns the stored gameboard.
+     */
+
+  }, {
+    key: 'getStoredGameboard',
+    value: function getStoredGameboard() {
+      // Get the stored gameboard
+      return JSON.parse(window.localStorage.getItem(LOCAL_STORAGE_KEYS.GAMEBOARD));
+    }
+
+    /*
+     * Returns the stored solution.
+     */
+
+  }, {
+    key: 'getStoredSolution',
+    value: function getStoredSolution() {
+      // Get the stored solution
+      return JSON.parse(window.localStorage.getItem(LOCAL_STORAGE_KEYS.SOLUTION));
+    }
+
+    //===========================================================================
+    //
+    // Saving/Loading
+    //
+    //===========================================================================
+
+    /*
      * Loads the game stored in the localstorage or starts a new game.
      */
 
@@ -541,35 +745,37 @@ module.exports = function (_ViewController) {
     key: 'loadGame',
     value: function loadGame() {
       // Check if version changed
-      var storedVersion = JSON.parse(window.localStorage.getItem('version'));
-      if (storedVersion) {
-        if (storedVersion !== VERSION) {
-          this.resetGame();
-          return;
-        }
-      } else {
-        window.localStorage.setItem("version", VERSION);
+      if (app.isNewVersion()) {
+        this.newGame();
+        return;
       }
       // Check if there is a stored gameboard
-      var storedGameboard = JSON.parse(window.localStorage.getItem('gameboard'));
+      var storedGameboard = this.getStoredGameboard();
       if (!storedGameboard) {
         // There is not a gameboard saved, so just initialize a new game
-        this.resetGame();
+        this.newGame();
         return;
       } else {
+        // this.clearHistory();
+        // Get the stored solution
+        this.setSolution(this.getStoredSolution());
+        // this.saveGame();
         // There was a stored game
         // Fill the gameboard with the contents of the saved gameboard
-        for (var i = 0; i < this.getView().getGameboard().getTiles().length; i++) {
-          this.getView().getGameboard().getTiles()[i].setValue(storedGameboard[i].value);
-          this.getView().getGameboard().getTiles()[i].setIsOriginal(storedGameboard[i].original);
-        }
+        // for(let i = 0; i < this.getView().getGameboard().getTiles().length; i++){
+        //   this.getView().getGameboard().getTiles()[i].setValue(
+        //     storedGameboard[i].value);
+        //   this.getView().getGameboard().getTiles()[i].setIsOriginal(
+        //     storedGameboard[i].original);
+        // }
         // Instead of having every thing stored in the localstorage just call all
         // of the checks that could cause something the in the game to be changed
         // based on the gameboard.
-        this.checkTilesForSameAsSelectedValue();
-        this.checkTilesForConflicts();
-        this.getView().getGameboard().update();
-        this.checkIfSelectionTilesAreDone();
+        // this.checkTilesForSameAsSelectedValue();
+        // this.checkTilesForConflicts();
+        // this.getView().getGameboard().update();
+        // this.checkIfSelectionTilesAreDone();
+        // this.saveGame();
       }
     }
 
@@ -580,7 +786,77 @@ module.exports = function (_ViewController) {
   }, {
     key: 'saveGame',
     value: function saveGame() {
-      window.localStorage.setItem("gameboard", this.gameboardToJSONString());
+      // Store the original gameboard
+      window.localStorage.setItem(LOCAL_STORAGE_KEYS.ORIGINAL_GAMEBOARD, JSON.stringify(this.getOriginalGameboard()));
+
+      // Store the solution
+      window.localStorage.setItem(LOCAL_STORAGE_KEYS.SOLUTION, JSON.stringify(this.getSolution()));
+
+      // Store the game difficulty
+      window.localStorage.setItem(LOCAL_STORAGE_KEYS.GAME_DIFFICULTY, JSON.stringify(this.getDifficulty()));
+
+      // Store the gameboard
+      window.localStorage.setItem(LOCAL_STORAGE_KEYS.GAMEBOARD, this.gameboardToJSONString());
+    }
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'newGame',
+    value: function newGame() {
+      DEBUG.log('newGame');
+      // Get a new puzzle
+      this.mbSudoku.setDifficulty(this.getDifficulty());
+      this.mbSudoku.reset();
+      // Initialize the new game values
+      this.setOriginalGameboard(this.mbSudoku.getPuzzle());
+      this.setSolution(this.mbSudoku.getSolution());
+
+      // let puzzle = this.getOriginalGameboard();
+      // let tiles = this.getView().getGameboard().getTiles();
+      // let ch = null;
+      // let tile = null;
+      // for(let i = 0; i < tiles.length; i++){
+      //   ch = puzzle[i];
+      //   tile = tiles[i];
+      //   tile.setValue((ch === '.')? '0' : ch);
+      //   tile.setIsOriginal((ch === '.')? false : true);
+      // }
+      //
+      // this.checkTilesForSameAsSelectedValue();
+      // this.checkTilesForConflicts();
+      // this.getView().getGameboard().update();
+      // this.checkIfSelectionTilesAreDone();
+      window.localStorage.setItem(LOCAL_STORAGE_KEYS.TIME_ELAPSED, JSON.stringify(0));
+      this.saveGame();
+    }
+
+    //===========================================================================
+    //
+    // Timer
+    //
+    //===========================================================================
+
+    /*
+     *
+     */
+
+  }, {
+    key: 'initTimer',
+    value: function initTimer() {
+      var _this8 = this;
+
+      this.startTimer();
+
+      document.addEventListener("pause", function (e) {
+        _this8.stopTimer();
+      }, false);
+
+      document.addEventListener("resume", function (e) {
+        _this8.startTimer();
+      }, false);
     }
 
     /*
@@ -590,11 +866,11 @@ module.exports = function (_ViewController) {
   }, {
     key: 'startTimer',
     value: function startTimer() {
-      var _this7 = this;
+      var _this9 = this;
 
       this.startTime = Date.now();
       this.timerInterval = setInterval(function () {
-        _this7.timerIntervalFunc();
+        _this9.timerIntervalFunc();
       }, 1000);
     }
 
@@ -619,12 +895,12 @@ module.exports = function (_ViewController) {
       var elapsed = endTime - this.startTime;
       this.startTime = endTime;
 
-      var tmpTimeElapsed = JSON.parse(window.localStorage.getItem("timeElapsed"));
+      var tmpTimeElapsed = JSON.parse(window.localStorage.getItem(LOCAL_STORAGE_KEYS.TIME_ELAPSED));
       if (tmpTimeElapsed) {
         elapsed = elapsed + tmpTimeElapsed;
       }
-      // DEBUG.log(elapsed);
-      window.localStorage.setItem("timeElapsed", JSON.stringify(elapsed));
+
+      window.localStorage.setItem(LOCAL_STORAGE_KEYS.TIME_ELAPSED, JSON.stringify(elapsed));
       this.getView().getClock().setTime(elapsed);
     }
   }]);

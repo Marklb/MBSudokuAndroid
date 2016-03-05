@@ -15,7 +15,7 @@ module.exports =
 class NewGameButton extends CustomElement {
   constructor(x, y) {
     super(CSS_CLASSES.NEW_GAME_BUTTON);
-    DEBUG.log('Loading');
+    // DEBUG.log('Loading');
 
 
 

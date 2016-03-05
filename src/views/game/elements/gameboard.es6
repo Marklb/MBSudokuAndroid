@@ -25,7 +25,7 @@ module.exports =
 class Gameboard extends CustomElement {
   constructor(game) {
     super(CSS_CLASSES.GAMEBOARD);
-    DEBUG.log('Loading.');
+    // DEBUG.log('Loading.');
 
     // Array containing the tiles on the 9x9 grid
     this.tiles = [];
@@ -99,14 +99,14 @@ class Gameboard extends CustomElement {
         // Check if the tile being added already exists
         for(let i = 0; i < this.tiles.length; i++){
           if(this.tiles[i].getTileId() === tile.getTileId()){
-            DEBUG.error('Tile: '+tile.getTileId()+' is already added.');
+            // DEBUG.error('Tile: '+tile.getTileId()+' is already added.');
             return;
           }
         }
         // Add the tile to the tiles array.
         this.tiles.push(tile);
     }else{
-      DEBUG.error('tile is not of type GameboardTile.');
+      // DEBUG.error('tile is not of type GameboardTile.');
     }
   }
 

@@ -15,7 +15,7 @@ module.exports =
 class MainMenuButton extends CustomElement {
   constructor(x, y) {
     super(CSS_CLASSES.MAIN_MENU_BUTTON);
-    DEBUG.log('Loading');
+    // DEBUG.log('Loading');
 
 
 

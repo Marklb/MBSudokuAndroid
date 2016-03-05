@@ -19,7 +19,7 @@ const CSS_CLASSES = {
 module.exports =
 class View {
   constructor(viewId) {
-    DEBUG.log('Loading: '+viewId);
+    // DEBUG.log('Loading: '+viewId);
     this.setViewId(viewId);
 
     this.initElement();
@@ -92,6 +92,7 @@ class View {
   }
 
   show(){
+    this.getElement().classList.add('shown');
     this.getElement().classList.remove(CSS_CLASSES.HIDDEN);
   }
 
